@@ -11,9 +11,9 @@ library(bipartite)
 # loading data 
 pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
 
-
+# excluding non-identified pollinators for now
 sc_pollinator <- pollinator %>%
-  filter(!pollinator_species %in% c("Milesia sp.", "Exoprosopa sp.", "", " ")) # excluding non-identified pollinators for now
+  filter(!pollinator_species %in% c("Milesia sp.", "Exoprosopa sp.", "", " ")) 
 
 # getting plant-pollinator data into correct format for sampling completeness estimation
 sc_pollinator <- sc_pollinator %>%
@@ -22,7 +22,7 @@ sc_pollinator <- sc_pollinator %>%
   count(unique_ID, interaction) %>% # counting # of each interaction per patch
   pivot_wider(names_from = unique_ID, values_from = n, values_fill = 0) # pivoting into wider format for interaction by patch matrix
 
-# excluding patch from matrix
+# excluding patch from interaction matrix
 sc_nosite_pollinator <- as.data.frame(sc_pollinator[, 2:15])
 
 # estimating sampling completeness
