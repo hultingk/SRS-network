@@ -36,3 +36,9 @@ pollinator %>%
   count(pollinator_species)
 
 
+# --------------------------- #
+#### writing cleaned file ####
+# --------------------------- #
+write.csv(pollinator, file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
+
+
