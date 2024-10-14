@@ -11,7 +11,7 @@ pollinator <- read.csv(file = file.path("data", "2024-SRS-plant-pollinator.csv")
 
 # removing wasps, lost insects, unknowns, no observations
 pollinator <- pollinator %>%
-  filter(!pollinator_common %in% c("Wasp", "unknown butterfly", "unknown skipper", "No associated insect", "0", "WASP", "LOST", "NOT A POLLINATOR"))
+  filter(!pollinator_common %in% c("Wasp", "unknown butterfly", "unknown skipper", "No associated insect", "0", "WASP", "LOST", "beetle", "NOT A POLLINATOR"))
 
 
 # --------------------------- #
