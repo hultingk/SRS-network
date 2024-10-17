@@ -8,3 +8,6 @@ Script for data cleaning, including removing non-pollinators, string cleaning, s
 
 #### 02-sampling-completeness.R
 Script for estimating sampling completeness of plant-pollinator network. Requires 01-data-cleaning.R to be run. 
+
+#### 03-network-analysis.R
+Script for network analysis. Requires 01-data-cleaning.R to be run.
