@@ -35,3 +35,4 @@ mean(out[["DataInfo"]][["SC"]])
 ggiNEXT(out, type=1, facet.var="Order.q") # Sample-size-based R/E curve
 ggiNEXT(out, type=2, facet.var="Order.q") # Sample completeness curve
 ggiNEXT(out, type=3, facet.var="Order.q") # Coverage-based R/E curve
+
