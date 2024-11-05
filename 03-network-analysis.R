@@ -30,7 +30,7 @@ plotweb(pollinator_wider)
 #### Interaction abundance ####
 # calculate abundance of interactions per patch and sampling round
 abundance <- pollinator %>%
-  count(block, patch)
+  count(block, patch, flower_species)
 
 # how does connectivity affect the abundance of plant-pollinator interactions? 
 m1 <- glmmTMB(n ~ patch + (1|block), # block is random effect
@@ -68,12 +68,13 @@ dev.off()
 
 #### Floral diversity ####
 floral_wider <- pollinator %>% # converting floral interaction data into a community matrix
+  filter(!pollinator_species %in% c("Apis mellifera")) %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
   count(unique_ID, flower_species) %>%
   pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID in order to rarefy
 
-fl.diversity <- diversity(floral_wider) # calculating diversity of flowers that are interacted with
+fl.diversity <- diversity(floral_wider, "simpson") # calculating diversity of flowers that are interacted with
 summarize_pollinator <- pollinator %>%
   count(block, patch)
 summarize_pollinator$fl.diversity <- fl.diversity
@@ -102,7 +103,7 @@ m2_plot <- m2.predict %>%
     m2.stat.test, 
     size = 9,# size of letters
     bracket.size = 1.5,
-    y.position = 3.2, step.increase = 0.12, # position of brakets
+    y.position = 1.3, step.increase = 0.12, # position of brakets
     label = "p.adj"
   ) +
   labs(title = NULL, # no title
@@ -112,7 +113,7 @@ m2_plot <- m2.predict %>%
   theme(axis.text = element_text(size = 26)) + # axis tick mark size
   theme(axis.title = element_text(size = 30)) #+ # axis label size
 # ylim(2.5, 12) # manually setting y axis limits to include p-value brackets
-fl_div_mod_plot
+m2_plot
 
 # alternative plots
 # model predictions for plotting
@@ -130,6 +131,7 @@ fl.div.pred <- m2.df %>%
     scale_color_manual(values=c("#506D8F","#E2A03C")) +
     xlab("Patch Type") +
     ylab(expression(paste("Floral Foraging Diversity"))) +
+  ylim(0.72, 0.95) +
     theme_classic() +
     theme(legend.position = "none") +
     theme(axis.text = element_text(size = 26)) + # axis tick mark size
