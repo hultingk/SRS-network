@@ -20,6 +20,13 @@ pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.cs
 pollinator %>%
   count(pollinator_species)
 
+pollinator_wider <- pollinator %>%
+  filter(!pollinator_species == "") %>%
+  filter(patch == "B") %>%
+  count(pollinator_species, flower_species) %>%
+  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
+  column_to_rownames(var="flower_species")
+plotweb(pollinator_wider)
 #### Interaction abundance ####
 # calculate abundance of interactions per patch and sampling round
 abundance <- pollinator %>%
