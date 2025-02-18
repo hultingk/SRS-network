@@ -143,3 +143,109 @@ fl.div.pred
 dev.off()
 
 
+
+
+##### butterfly diversity ####
+butterfly_wider <- pollinator %>%
+  filter(order == "Lepidoptera") %>%
+  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
+  count(unique_ID, pollinator_species) %>%
+  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
+  # filter(unique_ID != "57.W") %>%
+  select(!unique_ID) # removing unique ID in order to rarefy
+
+butterfly_data <- pollinator %>% # adding rarefied floral data to block/patches
+  count(block, patch) %>%
+  mutate(unique_ID = paste(block, patch, sep = ".")) #%>% # creating a unique ID for each patch
+butterfly.div <- diversity(butterfly_wider)
+butterfly_data$butterfly.div <- butterfly.div
+
+m3 <- glmmTMB(butterfly.div ~ patch + (1|block), # block is random effect
+              data = butterfly_data, 
+              family = "gaussian") # gaussian family for non-integer continuous data
+summary(m3) # model summary
+plot(simulateResiduals(m3)) # looks good
+
+
+
+
+#### butterfly interaction diversity ####
+interaction.div <- pollinator %>% # converting floral interaction data into a community matrix
+  filter(order == "Lepidoptera") %>%
+  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
+  mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>%
+  count(unique_ID, interaction) %>%
+  pivot_wider(names_from = interaction, values_from = n, values_fill = 0) %>%
+  #filter(unique_ID != "57.W") %>%
+  select(!unique_ID) # removing unique ID in order to rarefy
+
+interaction.div <- diversity(interaction.div)
+butterfly_data$interaction.div <- interaction.div
+m4 <- glmmTMB(interaction.div ~ patch + (1|block), # block is random effect
+              data = butterfly_data, 
+              family = "gaussian") # gaussian family for non-integer continuous data
+summary(m4) # model summary
+plot(simulateResiduals(m4)) # looks good
+
+
+
+
+
+
+
+#filter(unique_ID != "57.W")
+rare.data$rare <- sRare # adding rarefied floral data to block/patches
+butterfly.div <- diversity(butterfly.div)
+rare.data$butterfly.div <- butterfly.div
+# diversity of butterfly interactions
+interaction.div <- butterfly %>% # converting floral interaction data into a community matrix
+  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
+  mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>%
+  count(unique_ID, interaction) %>%
+  pivot_wider(names_from = interaction, values_from = n, values_fill = 0) %>%
+  #filter(unique_ID != "57.W") %>%
+  select(!unique_ID) # removing unique ID in order to rarefy
+spAbund <- rowSums(interaction.div) # calculating minimum # of observation 
+min(spAbund) # 7 is the fewest interactions observed per patch
+sRare <- rarefy(interaction.div, 9) # now use function rarefy
+rare.data <- butterfly %>% # adding rarefied floral data to block/patches
+  count(block, patch) %>%
+  mutate(unique_ID = paste(block, patch, sep = ".")) #%>% # creating a unique ID for each patch
+#filter(unique_ID != "57.W")
+rare.data$rare <- sRare # adding rarefied floral data to block/patches
+interaction.div <- diversity(interaction.div)
+rare.data$interaction.div <- interaction.div
+m2 <- glmmTMB(interaction.div ~ patch + (1|block), # block is random effect
+              data = rare.data, 
+              family = "gaussian") # gaussian family for non-integer continuous data
+summary(m2) # model summary
+plot(simulateResiduals(m2)) # looks good
+
+
+# diversity of butterflies
+butterfly.div <- butterfly %>% # converting floral interaction data into a community matrix
+  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
+  count(unique_ID, pollinator_species) %>%
+  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
+  # filter(unique_ID != "57.W") %>%
+  select(!unique_ID) # removing unique ID in order to rarefy
+spAbund <- rowSums(butterfly.div) # calculating minimum # of observation 
+min(spAbund) # 7 is the fewest interactions observed per patch
+sRare <- rarefy(butterfly.div, 9) # now use function rarefy
+rare.data <- butterfly %>% # adding rarefied floral data to block/patches
+  count(block, patch) %>%
+  mutate(unique_ID = paste(block, patch, sep = ".")) #%>% # creating a unique ID for each patch
+#filter(unique_ID != "57.W")
+rare.data$rare <- sRare # adding rarefied floral data to block/patches
+butterfly.div <- diversity(butterfly.div)
+rare.data$butterfly.div <- butterfly.div
+m3 <- glmmTMB(butterfly.div ~ patch + (1|block), # block is random effect
+              data = rare.data, 
+              family = "gaussian") # gaussian family for non-integer continuous data
+summary(m3) # model summary
+plot(simulateResiduals(m3)) # looks good
+
+
+
+
+
