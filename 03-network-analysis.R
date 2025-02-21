@@ -30,7 +30,7 @@ plotweb(pollinator_wider)
 #### Interaction abundance ####
 # calculate abundance of interactions per patch and sampling round
 abundance <- pollinator %>%
-  count(block, patch, flower_species)
+  count(block, patch)
 
 # how does connectivity affect the abundance of plant-pollinator interactions? 
 m1 <- glmmTMB(n ~ patch + (1|block), # block is random effect
@@ -50,8 +50,8 @@ m1.df$patch <- factor(m1.df$patch, levels = c("B", "W"))
 interaction.abun.pred <- m1.df %>%
     ggplot() +
     geom_point(aes(x = patch, y = n, color = patch), size = 7, alpha = 0.7) + 
-    geom_line(aes(x = patch, y = n, group = block), size = 1.5, color = "black", alpha = 0.2) +
-    geom_line(aes(x = patch, y = abund_pred, group = block), size = 2) +
+    geom_line(aes(x = patch, y = n, group = block), linewidth = 1.5, color = "black", alpha = 0.2) +
+    geom_line(aes(x = patch, y = abund_pred, group = block), linewidth = 2) +
     scale_x_discrete(labels = c('Connected', 'Winged')) +
     scale_color_manual(values=c("#506D8F","#E2A03C")) +
     xlab("Patch Type") +
@@ -88,7 +88,7 @@ plot(simulateResiduals(m2)) # looks good
 
 
 # plotting richness model predictions
-m2.predict <- ggpredict(m2, terms=c("patch [all]"), back.transform = T, allow.new.levels=TRUE)
+m2.predict <- ggpredict(m2, terms=c("patch [all]"), back_transform = T)
 m2.stat.test <- tibble::tribble( # creating tibble of p-values for plotting
   ~group1, ~group2,   ~p.adj,
   "B",     "W", "0.01"
