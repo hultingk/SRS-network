@@ -21,6 +21,7 @@ pollinator %>%
   count(pollinator_species)
 
 pollinator <- pollinator %>%
+  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
   filter(!pollinator_species == "") %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
   dplyr::select(c("unique_ID", "pollinator_analysis", "flower_species")) 
@@ -33,12 +34,6 @@ pollinator_split <- pollinator %>%
   group_by(unique_ID) %>%
   group_split() 
   
-
-pivot_wider(names_from = "interaction", values_from = "n", values_fill = 0)
-  
-df_list <- lapply(1:length(pollinator_split), 
-                  function(x) (pivot_wider(pollinator_split[[x]], names_from = pollinator_analysis, values_from = n)))
-
 
 prepare_matrix <- function(df) {
   df_wide <- df %>% 
@@ -58,7 +53,7 @@ names(webs) <- webs.names
 # Calculate network metric nestedness for all plant-pollinator sites
 net.metrics.nest <- lapply(webs, networklevel, index = 'nestedness') 
 # Calculate network metric links per species for all plant-pollinator sites
-net.metrics.links <- lapply(webs, networklevel, index = 'links per species') 
+net.metrics.h2 <- lapply(webs, networklevel, index = 'H2') 
 
 
 # Make null models for all sites using the r2dtable null
@@ -81,18 +76,77 @@ net.null.nest = function(nulls){
 }
 
 # Null distribution function for links per species - calculates the network links per species metric for each null (using a particular null method) for each site 
-net.null.links = function(nulls){
+net.null.h2 = function(nulls){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
     net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'links per species'))
+                                   lapply(nulls[[i]], networklevel, index = 'H2'))
   }
   names(net.null.metric) <- webs.names
   return(net.null.metric)
 }
-names(net.null.metric)
+
 vaz.nest <- net.null.nest(net.nulls.vaz)
-vaz.links <- net.null.links(net.nulls.vaz)
+vaz.h2 <- net.null.h2(net.nulls.vaz)
+
+# Z-score function for comparing different networks
+net.zscore = function(obsval, nullval) {
+  (obsval - mean(nullval))/sd(nullval)  
+} 
+
+# Function that perform z-score calculation of nestedness using the observed and null networks
+nest.zscore = function(nulltype){
+  net.nest.zscore <- list() 
+  for(i in 1:length(net.metrics.nest)){
+    net.nest.zscore[[i]] = net.zscore(net.metrics.nest[[i]]['nestedness'], 
+                                      nulltype[[i]][ ,'nestedness'])
+  }
+  names(net.nest.zscore) <- webs.names
+  return(net.nest.zscore)
+}
+
+# Function that perform z-score calculation of links per species using the observed and null networks
+h2.zscore = function(nulltype){
+  net.h2.zscore <- list() 
+  for(i in 1:length(net.metrics.h2)){
+    net.h2.zscore[[i]] = net.zscore(net.metrics.h2[[i]]['H2'], 
+                                       nulltype[[i]][ ,'H2'])
+  }
+  names(net.h2.zscore) <- webs.names
+  return(net.h2.zscore)
+}
+
+
+vaz.nest.zscore <- nest.zscore(vaz.nest)
+vaz.h2.zscore <- h2.zscore(vaz.h2)
+
+nestedness <- as.data.frame(do.call('rbind', vaz.nest.zscore) )
+nestedness <- nestedness %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into columns
+  
+h2 <- as.data.frame(do.call('rbind', vaz.h2.zscore) )
+h2 <- h2 %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
+
+network_metrics <- nestedness %>%
+  left_join(h2, by = c("block", "patch"))
+
+m.nested <- glmmTMB(nestedness ~ patch,
+                    data = network_metrics, 
+                    family = "gaussian")
+summary(m.nested)
+plot(simulateResiduals(m.nested))
+check_model(m.nested)
+
+m.h2 <- glmmTMB(H2 ~ patch + (1|block),
+                    data = network_metrics, 
+                    family = "gaussian")
+summary(m.h2)
+plot(simulateResiduals(m.h2))
+check_model(m.h2)
+
 
 
 
