@@ -20,13 +20,89 @@ pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.cs
 pollinator %>%
   count(pollinator_species)
 
-pollinator_wider <- pollinator %>%
+pollinator <- pollinator %>%
   filter(!pollinator_species == "") %>%
-  filter(patch == "B") %>%
-  count(pollinator_species, flower_species) %>%
-  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
-  column_to_rownames(var="flower_species")
-plotweb(pollinator_wider)
+  mutate(unique_ID = paste(block, patch, sep = ".")) %>%
+  dplyr::select(c("unique_ID", "pollinator_analysis", "flower_species")) 
+
+
+
+#### network analysis ####
+pollinator_split <- pollinator %>%
+  count(unique_ID, pollinator_analysis, flower_species) %>%
+  group_by(unique_ID) %>%
+  group_split() 
+  
+
+pivot_wider(names_from = "interaction", values_from = "n", values_fill = 0)
+  
+df_list <- lapply(1:length(pollinator_split), 
+                  function(x) (pivot_wider(pollinator_split[[x]], names_from = pollinator_analysis, values_from = n)))
+
+
+prepare_matrix <- function(df) {
+  df_wide <- df %>% 
+    pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>% # wide format
+    dplyr::select(!c("unique_ID")) %>% # remove unique ID column
+    column_to_rownames("flower_species") #convert years to rownames
+}
+
+webs <- pollinator_split %>%
+  lapply(prepare_matrix)
+  
+webs.names <- c("10.B","10.W","52.B","52.W", "53N.B", "53N.W",
+                "53S.B", "53S.W", "54S.B", "54S.W", "57.B", "57.W", "8.B", "8.W")
+names(webs) <- webs.names
+
+
+# Calculate network metric nestedness for all plant-pollinator sites
+net.metrics.nest <- lapply(webs, networklevel, index = 'nestedness') 
+# Calculate network metric links per species for all plant-pollinator sites
+net.metrics.links <- lapply(webs, networklevel, index = 'links per species') 
+
+
+# Make null models for all sites using the r2dtable null
+#net.nulls.r2d <- lapply(webs, nullmodel, method = "r2dtable", N = 500) 
+# Make null models for all sites using the vaznull null
+net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 500) 
+# Make null models for all sites using the swap.web null
+#net.nulls.swap <- lapply(webs, nullmodel, method = "swap.web", N = 500)
+
+
+# Null distribution function for nestedness - calculates the network nestedness for each null (using a particular null method) for each site 
+net.null.nest = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'nestedness'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
+# Null distribution function for links per species - calculates the network links per species metric for each null (using a particular null method) for each site 
+net.null.links = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'links per species'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+names(net.null.metric)
+vaz.nest <- net.null.nest(net.nulls.vaz)
+vaz.links <- net.null.links(net.nulls.vaz)
+
+
+
+#pollinator_wider <- pollinator %>%
+#  filter(!pollinator_species == "") %>%
+#  filter(patch == "B") %>%
+#  count(pollinator_species, flower_species) %>%
+#  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
+ # column_to_rownames(var="flower_species")
+#plotweb(pollinator_wider)
 #### Interaction abundance ####
 # calculate abundance of interactions per patch and sampling round
 abundance <- pollinator %>%
@@ -131,7 +207,7 @@ fl.div.pred <- m2.df %>%
     scale_color_manual(values=c("#506D8F","#E2A03C")) +
     xlab("Patch Type") +
     ylab(expression(paste("Floral Foraging Diversity"))) +
-  ylim(0.72, 0.95) +
+ # ylim(0.72, 0.95) +
     theme_classic() +
     theme(legend.position = "none") +
     theme(axis.text = element_text(size = 26)) + # axis tick mark size

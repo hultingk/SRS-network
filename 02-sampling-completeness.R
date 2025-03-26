@@ -13,7 +13,7 @@ pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.cs
 
 # excluding non-identified pollinators for now
 sc_pollinator <- pollinator %>%
-  filter(!pollinator_species %in% c(" ")) 
+  filter(!pollinator_species %in% c(" ", "")) 
 
 # getting plant-pollinator data into correct format for sampling completeness estimation
 sc_pollinator <- sc_pollinator %>%

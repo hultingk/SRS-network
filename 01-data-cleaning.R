@@ -11,7 +11,7 @@ pollinator <- read.csv(file = file.path("data", "2024-SRS-plant-pollinator.csv")
 
 # removing wasps, lost insects, unknowns, no observations
 pollinator <- pollinator %>%
-  filter(!pollinator_common %in% c("Wasp", "unknown butterfly", "unknown skipper", "No associated insect", "0", "WASP", "LOST", "beetle", "NOT A POLLINATOR"))
+  filter(!pollinator_common %in% c("Wasp", "unknown butterfly", "unknown skipper", "No associated insect", "0", "WASP", "LOST", "beetle", "NOT A POLLINATOR", "Butterfly"))
 
 
 pollinator <- pollinator %>%
@@ -82,6 +82,13 @@ pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Ery
 pollinator %>%
   count(pollinator_species)
 
+pollinator <- pollinator %>%
+  mutate(pollinator_analysis = case_when(
+    pollinator_species %in% c("Megachile albitarsis", "Megachile deflexa", "Megachile georgica",
+                              "Megachile mendica", "Megachile petulans", "Megachile texana", "Megachile xylocopoides") ~ "Megachile sp.",
+    pollinator_species %in% c("Melissodes bimaculatus", "Melissodes boltoniae", "Melissodes communis") ~ "Melissodes sp.",
+    .default = pollinator_species
+  ))
 
 # --------------------------- #
 #### writing cleaned file ####
