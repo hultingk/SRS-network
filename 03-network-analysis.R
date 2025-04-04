@@ -7,21 +7,15 @@
 library(tidyverse)
 library(bipartite)
 library(vegan)
-library(glmmTMB)
-library(DHARMa)
-library(performance)
-library(ggeffects)
-library(ggpubr)
+
 
 
 # loading data 
 pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
 
-pollinator %>%
-  count(pollinator_species)
-
+# removing non-IDed species, creating unique ID
 pollinator <- pollinator %>%
-  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  #filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
   filter(!pollinator_species == "") %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
   dplyr::select(c("unique_ID", "pollinator_analysis", "flower_species")) 
@@ -34,7 +28,7 @@ pollinator_split <- pollinator %>%
   group_by(unique_ID) %>%
   group_split() 
   
-
+# function to get data into correct format
 prepare_matrix <- function(df) {
   df_wide <- df %>% 
     pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>% # wide format
@@ -42,9 +36,11 @@ prepare_matrix <- function(df) {
     column_to_rownames("flower_species") #convert years to rownames
 }
 
+# getting each network into correct format
 webs <- pollinator_split %>%
   lapply(prepare_matrix)
   
+# adding patch names to each network
 webs.names <- c("10.B","10.W","52.B","52.W", "53N.B", "53N.W",
                 "53S.B", "53S.W", "54S.B", "54S.W", "57.B", "57.W", "8.B", "8.W")
 names(webs) <- webs.names
@@ -52,19 +48,20 @@ names(webs) <- webs.names
 
 # Calculate network metric nestedness for all plant-pollinator sites
 net.metrics.nest <- lapply(webs, networklevel, index = 'nestedness') 
-# Calculate network metric links per species for all plant-pollinator sites
+# Calculate network specialization for all plant-pollinator sites
 net.metrics.h2 <- lapply(webs, networklevel, index = 'H2') 
+# Calculate network interaction diversity for all plant-pollinator sites
+net.metrics.diversity <- lapply(webs, networklevel, index = 'Shannon diversity') 
+# Calculate links per pollinator species for all plant-pollinator sites
+net.metrics.links <- lapply(webs, networklevel, index = 'links per species', level = "higher") 
 
 
-# Make null models for all sites using the r2dtable null
-#net.nulls.r2d <- lapply(webs, nullmodel, method = "r2dtable", N = 500) 
+
 # Make null models for all sites using the vaznull null
 net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 500) 
-# Make null models for all sites using the swap.web null
-#net.nulls.swap <- lapply(webs, nullmodel, method = "swap.web", N = 500)
 
 
-# Null distribution function for nestedness - calculates the network nestedness for each null (using a particular null method) for each site 
+# Null distribution function for nestedness 
 net.null.nest = function(nulls){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
@@ -75,7 +72,7 @@ net.null.nest = function(nulls){
   return(net.null.metric)
 }
 
-# Null distribution function for links per species - calculates the network links per species metric for each null (using a particular null method) for each site 
+# Null distribution function for specialization 
 net.null.h2 = function(nulls){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
@@ -86,8 +83,33 @@ net.null.h2 = function(nulls){
   return(net.null.metric)
 }
 
+# Null distribution function for interaction diversity 
+net.null.diversity = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'Shannon diversity'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
+# Null distribution function for links per species 
+net.null.links = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'links per species', level = "higher"))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
+
 vaz.nest <- net.null.nest(net.nulls.vaz)
 vaz.h2 <- net.null.h2(net.nulls.vaz)
+vaz.diversity <- net.null.diversity(net.nulls.vaz)
+vaz.links <- net.null.links(net.nulls.vaz)
 
 # Z-score function for comparing different networks
 net.zscore = function(obsval, nullval) {
@@ -105,7 +127,7 @@ nest.zscore = function(nulltype){
   return(net.nest.zscore)
 }
 
-# Function that perform z-score calculation of links per species using the observed and null networks
+# Function that perform z-score calculation of specialization using the observed and null networks
 h2.zscore = function(nulltype){
   net.h2.zscore <- list() 
   for(i in 1:length(net.metrics.h2)){
@@ -116,10 +138,35 @@ h2.zscore = function(nulltype){
   return(net.h2.zscore)
 }
 
+# Function that perform z-score calculation of interaction diversity using the observed and null networks
+diversity.zscore = function(nulltype){
+  net.diversity.zscore <- list() 
+  for(i in 1:length(net.metrics.diversity)){
+    net.diversity.zscore[[i]] = net.zscore(net.metrics.diversity[[i]]['Shannon diversity'], 
+                                    nulltype[[i]][ ,'Shannon diversity'])
+  }
+  names(net.diversity.zscore) <- webs.names
+  return(net.diversity.zscore)
+}
+
+# Function that perform z-score calculation of interaction diversity using the observed and null networks
+links.zscore = function(nulltype){
+  net.links.zscore <- list() 
+  for(i in 1:length(net.metrics.links)){
+    net.links.zscore[[i]] = net.zscore(net.metrics.links[[i]]['links per species'], 
+                                           nulltype[[i]][ ,'links per species'])
+  }
+  names(net.links.zscore) <- webs.names
+  return(net.links.zscore)
+}
+
 
 vaz.nest.zscore <- nest.zscore(vaz.nest)
 vaz.h2.zscore <- h2.zscore(vaz.h2)
+vaz.diversity.zscore <- diversity.zscore(vaz.diversity)
+vaz.links.zscore <- links.zscore(vaz.links) # CAN'T USE - NO SD FOR NULL MODEL, USE REAL VALUES IN ANALYSIS
 
+# creating dataframes
 nestedness <- as.data.frame(do.call('rbind', vaz.nest.zscore) )
 nestedness <- nestedness %>%
   rownames_to_column(var = "unique_ID") %>%
@@ -130,378 +177,72 @@ h2 <- h2 %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
 
-network_metrics <- nestedness %>%
-  left_join(h2, by = c("block", "patch"))
+shannon <- as.data.frame(do.call('rbind', vaz.diversity.zscore) )
+shannon <- shannon %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
 
-m.nested <- glmmTMB(nestedness ~ patch,
-                    data = network_metrics, 
-                    family = "gaussian")
-summary(m.nested)
-plot(simulateResiduals(m.nested))
-check_model(m.nested)
-
-m.h2 <- glmmTMB(H2 ~ patch + (1|block),
-                    data = network_metrics, 
-                    family = "gaussian")
-summary(m.h2)
-plot(simulateResiduals(m.h2))
-check_model(m.h2)
+links <- as.data.frame(do.call('rbind', net.metrics.links))
+links <- links %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
 
 
 
 
-#pollinator_wider <- pollinator %>%
-#  filter(!pollinator_species == "") %>%
-#  filter(patch == "B") %>%
-#  count(pollinator_species, flower_species) %>%
-#  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
- # column_to_rownames(var="flower_species")
-#plotweb(pollinator_wider)
-#### Interaction abundance ####
-# calculate abundance of interactions per patch and sampling round
+
+#### Abundance ####
 abundance <- pollinator %>%
-  count(block, patch)
+  count(unique_ID) %>%
+  mutate(abundance = n) %>%
+  separate(unique_ID, into = c("block", "patch")) %>%
+  dplyr::select(!c("n"))
 
-# how does connectivity affect the abundance of plant-pollinator interactions? 
-m1 <- glmmTMB(n ~ patch + (1|block), # block is random effect
-              data = abundance,
-              family = nbinom2) # negative binomial family for overdispersed count data
-summary(m1) # model output
-plot(simulateResiduals(m1)) # looks good
-check_overdispersion(m1) # no overdispersion for nbinom, overdispersed when family = poisson
-
-
-# model predictions for plotting
-m1.df <- abundance %>%
-  dplyr::select(c("block", "patch", "n"))
-m1.df$abund_pred <- exp(predict(m1, re.form = NA))
-m1.df$patch <- factor(m1.df$patch, levels = c("B", "W"))
-# plotting
-interaction.abun.pred <- m1.df %>%
-    ggplot() +
-    geom_point(aes(x = patch, y = n, color = patch), size = 7, alpha = 0.7) + 
-    geom_line(aes(x = patch, y = n, group = block), linewidth = 1.5, color = "black", alpha = 0.2) +
-    geom_line(aes(x = patch, y = abund_pred, group = block), linewidth = 2) +
-    scale_x_discrete(labels = c('Connected', 'Winged')) +
-    scale_color_manual(values=c("#506D8F","#E2A03C")) +
-    xlab("Patch Type") +
-    ylab(expression(paste("Interaction Abundance"))) +
-    theme_classic() +
-    theme(legend.position = "none") +
-    theme(axis.text = element_text(size = 26)) + # axis tick mark size
-    theme(axis.title = element_text(size = 30)) #+ # axis label size
-interaction.abun.pred
-pdf(file = file.path("plots", "interaction-abund.pdf"), width = 10, height = 8)
-interaction.abun.pred
-dev.off()
-
-
-#### Floral diversity ####
-floral_wider <- pollinator %>% # converting floral interaction data into a community matrix
-  filter(!pollinator_species %in% c("Apis mellifera")) %>%
-  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
+#### Flower and pollinator species diversity ####
+## flower diversity
+floral_wider <- pollinator %>%
   count(unique_ID, flower_species) %>%
   pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
-  select(!unique_ID) # removing unique ID in order to rarefy
+  select(!unique_ID) # removing unique ID for diversity measure
+floral_diversity <- diversity(floral_wider, "shannon") # calculating diversity of flowers that are interacted with
 
-fl.diversity <- diversity(floral_wider, "simpson") # calculating diversity of flowers that are interacted with
-summarize_pollinator <- pollinator %>%
-  count(block, patch)
-summarize_pollinator$fl.diversity <- fl.diversity
-
-# how does connectivity affect the diversity of flowers that pollinators forage on?
-m2 <- glmmTMB(fl.diversity ~ patch + (1|block), # block is random effect
-              data = summarize_pollinator, 
-              family = "gaussian") # gaussian family for non-integer continuous data
-summary(m2) # model summary
-plot(simulateResiduals(m2)) # looks good
+floral_wider_noApis <- pollinator %>%
+  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  count(unique_ID, flower_species) %>%
+  pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
+  select(!unique_ID) # removing unique ID for diversity measure
+floral_div_noApis <- diversity(floral_wider_noApis, "shannon") # calculating diversity of flowers that are interacted with
 
 
-# plotting richness model predictions
-m2.predict <- ggpredict(m2, terms=c("patch [all]"), back_transform = T)
-m2.stat.test <- tibble::tribble( # creating tibble of p-values for plotting
-  ~group1, ~group2,   ~p.adj,
-  "B",     "W", "0.01"
-)
-m2_plot <- m2.predict %>%
-  ggplot(aes(x = x, y = predicted)) + # plotting predicted values
-  geom_jitter(aes(x = patch, y = fl.diversity), data = summarize_pollinator, alpha = 0.2, width = 0.1, height = 0.1, size = 5)+ # adding raw data points
-  geom_point(size = 5)+  # size of center prediction point
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.15, linewidth = 2.5) + # adding error bars of predicted confidence intervals
-  theme_classic() + # choosing simplest ggplot theme
-  stat_pvalue_manual( # adding p-values to plot
-    m2.stat.test, 
-    size = 9,# size of letters
-    bracket.size = 1.5,
-    y.position = 1.3, step.increase = 0.12, # position of brakets
-    label = "p.adj"
-  ) +
-  labs(title = NULL, # no title
-       x = "Patch Type", # changing axis labels
-       y = "Floral Foraging Richness") +
-  scale_x_discrete(labels= c("Connected", "Winged")) + # replacing "B" and "W" with connected and winged
-  theme(axis.text = element_text(size = 26)) + # axis tick mark size
-  theme(axis.title = element_text(size = 30)) #+ # axis label size
-# ylim(2.5, 12) # manually setting y axis limits to include p-value brackets
-m2_plot
-
-# alternative plots
-# model predictions for plotting
-m2.df <- summarize_pollinator %>%
-  dplyr::select(c("block", "patch", "fl.diversity"))
-m2.df$div_pred <- predict(m2, re.form = NA)
-m2.df$patch <- factor(m2.df$patch, levels = c("B", "W"))
-# plotting
-fl.div.pred <- m2.df %>%
-    ggplot() +
-    geom_point(aes(x = patch, y = fl.diversity, color = patch), size = 7, alpha = 0.7) + 
-    geom_line(aes(x = patch, y = fl.diversity, group = block), size = 1.5, color = "black", alpha = 0.2) +
-    geom_line(aes(x = patch, y = div_pred, group = block), size = 2) +
-    scale_x_discrete(labels = c('Connected', 'Winged')) +
-    scale_color_manual(values=c("#506D8F","#E2A03C")) +
-    xlab("Patch Type") +
-    ylab(expression(paste("Floral Foraging Diversity"))) +
- # ylim(0.72, 0.95) +
-    theme_classic() +
-    theme(legend.position = "none") +
-    theme(axis.text = element_text(size = 26)) + # axis tick mark size
-    theme(axis.title = element_text(size = 30)) #+ # axis label size
-fl.div.pred
-
-pdf(file = file.path("plots", "floral-diversity.pdf"), width = 10, height = 8)
-fl.div.pred
-dev.off()
-
-
-
-
-##### butterfly diversity ####
-butterfly_wider <- pollinator %>%
-  filter(order == "Lepidoptera") %>%
-  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
-  count(unique_ID, pollinator_species) %>%
-  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
-  # filter(unique_ID != "57.W") %>%
-  select(!unique_ID) # removing unique ID in order to rarefy
-
-butterfly_data <- pollinator %>% # adding rarefied floral data to block/patches
-  count(block, patch) %>%
-  mutate(unique_ID = paste(block, patch, sep = ".")) #%>% # creating a unique ID for each patch
-butterfly.div <- diversity(butterfly_wider)
-butterfly_data$butterfly.div <- butterfly.div
-
-m3 <- glmmTMB(butterfly.div ~ patch + (1|block), # block is random effect
-              data = butterfly_data, 
-              family = "gaussian") # gaussian family for non-integer continuous data
-summary(m3) # model summary
-plot(simulateResiduals(m3)) # looks good
-
-
-
-
-#### butterfly interaction diversity ####
-interaction.div <- pollinator %>% # converting floral interaction data into a community matrix
-  filter(order == "Lepidoptera") %>%
-  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
-  mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>%
-  count(unique_ID, interaction) %>%
-  pivot_wider(names_from = interaction, values_from = n, values_fill = 0) %>%
-  #filter(unique_ID != "57.W") %>%
-  select(!unique_ID) # removing unique ID in order to rarefy
-
-interaction.div <- diversity(interaction.div)
-butterfly_data$interaction.div <- interaction.div
-m4 <- glmmTMB(interaction.div ~ patch + (1|block), # block is random effect
-              data = butterfly_data, 
-              family = "gaussian") # gaussian family for non-integer continuous data
-summary(m4) # model summary
-plot(simulateResiduals(m4)) # looks good
-
-
-
-
-
-
-
-#filter(unique_ID != "57.W")
-rare.data$rare <- sRare # adding rarefied floral data to block/patches
-butterfly.div <- diversity(butterfly.div)
-rare.data$butterfly.div <- butterfly.div
-# diversity of butterfly interactions
-interaction.div <- butterfly %>% # converting floral interaction data into a community matrix
-  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
-  mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>%
-  count(unique_ID, interaction) %>%
-  pivot_wider(names_from = interaction, values_from = n, values_fill = 0) %>%
-  #filter(unique_ID != "57.W") %>%
-  select(!unique_ID) # removing unique ID in order to rarefy
-spAbund <- rowSums(interaction.div) # calculating minimum # of observation 
-min(spAbund) # 7 is the fewest interactions observed per patch
-sRare <- rarefy(interaction.div, 9) # now use function rarefy
-rare.data <- butterfly %>% # adding rarefied floral data to block/patches
-  count(block, patch) %>%
-  mutate(unique_ID = paste(block, patch, sep = ".")) #%>% # creating a unique ID for each patch
-#filter(unique_ID != "57.W")
-rare.data$rare <- sRare # adding rarefied floral data to block/patches
-interaction.div <- diversity(interaction.div)
-rare.data$interaction.div <- interaction.div
-m2 <- glmmTMB(interaction.div ~ patch + (1|block), # block is random effect
-              data = rare.data, 
-              family = "gaussian") # gaussian family for non-integer continuous data
-summary(m2) # model summary
-plot(simulateResiduals(m2)) # looks good
-
-
-# diversity of butterflies
-butterfly.div <- butterfly %>% # converting floral interaction data into a community matrix
-  mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating a unique ID for each patch
-  count(unique_ID, pollinator_species) %>%
-  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
-  # filter(unique_ID != "57.W") %>%
-  select(!unique_ID) # removing unique ID in order to rarefy
-spAbund <- rowSums(butterfly.div) # calculating minimum # of observation 
-min(spAbund) # 7 is the fewest interactions observed per patch
-sRare <- rarefy(butterfly.div, 9) # now use function rarefy
-rare.data <- butterfly %>% # adding rarefied floral data to block/patches
-  count(block, patch) %>%
-  mutate(unique_ID = paste(block, patch, sep = ".")) #%>% # creating a unique ID for each patch
-#filter(unique_ID != "57.W")
-rare.data$rare <- sRare # adding rarefied floral data to block/patches
-butterfly.div <- diversity(butterfly.div)
-rare.data$butterfly.div <- butterfly.div
-m3 <- glmmTMB(butterfly.div ~ patch + (1|block), # block is random effect
-              data = rare.data, 
-              family = "gaussian") # gaussian family for non-integer continuous data
-summary(m3) # model summary
-plot(simulateResiduals(m3)) # looks good
-
-
-
-
-
-
-
-#### community composition? ####
-community.comp <- pollinator %>%
-  #mutate(unique_ID = paste(block, patch, sep = ".")) %>%
-  #mutate(interaction = paste(pollinator_analysis, flower_species, sep = "-")) %>%
-  #count(unique_ID, interaction) %>%
+## pollinator diversity
+pollinator_wider <- pollinator %>%
   count(unique_ID, pollinator_analysis) %>%
-  pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0)
-community.comp.no.site <- community.comp[-1] # deleting site column
+  pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
+  select(!unique_ID) # removing unique ID for diversity measure
+pollinator_diversity <- diversity(pollinator_wider, "shannon") 
 
-set.seed(300) # setting seed to reproduce later
-# Choosing number of dimensions
-# Specifying the raw data models for all dimensions k
-mods.r <- list() # an empty list to hold model objects
-stress.r <- numeric() # an empty numeric vector to hold final stress values 
-conv.r <- character() # an empty character vector to hold convergence messages 
-for(i in 1:7){
-  mod <- metaMDS(community.comp.no.site, distance = 'bray', k = i, try = 20, trymax = 1000)
-  mods.r[[as.character(i)]] <- mod 
-  stress.r[i] <- mod$stress 
-  conv.r[i] <- mod$converged
-}
-# scree plot
-palette(c('red', 'black'))
-plot(x = 1:7, y = stress.r, main = 'Raw Data', xlab = 'Dimensionality',
-     ylab = 'Stress',
-     pch = 19, col = factor(conv.r))
-# red points are dimensions that there was no stable solution for
+pollinator_wider_noApis <- pollinator %>%
+  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  count(unique_ID, pollinator_analysis) %>%
+  pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
+  select(!unique_ID) # removing unique ID for diversity measure
+pollinator_div_noApis <- diversity(pollinator_wider, "shannon") 
 
 
-# Actual NMDS
-comp.mds <- metaMDS(community.comp.no.site, distance = "bray", k = 3, autotransform = F, pc = T, trymax = 1000)
-
-# Calculating how much variance in community data the NMDS accounts for
-bcd <- vegdist(community.comp.no.site, method = 'bray')
-r.ed <- dist(comp.mds$points[, 1:2]) # Calculating distance between sites according to the first two axes
-cor(r.ed, bcd, method = 'spearman') # Calculating Spearman's rho
-
-# Shepard plot, shows fit
-stressplot(comp.mds) # looks good
-
-
-# PERMANOVA patch type - testing if community composition differs between connected and winged patches
-obs <- community.comp.no.site # community data
-spp <- community.comp %>% 
-  dplyr::select(unique_ID) %>%
-  separate(unique_ID, c("block", "patch")) %>%
-  dplyr::select(patch) # separating patch type
-
-d.manova <- adonis2(obs ~ patch, method = "bray", data= spp) # testing difference between patch types
-d.manova # summary
-
-#### DIFFERENCES IN DISPERSION
-# Compute distance to group centroid (dispersion analysis)
-dispersion <- betadisper(vegdist(obs, method = "bray"), spp$patch)
-
-# Perform a permutation test for homogeneity of dispersions
-dispersion_test <- permutest(dispersion, permutations = 999)
-
-# Print test results
-print(dispersion_test)
-
-# Plot the dispersion results
-plot(dispersion, main = "Group Dispersion in NMDS Space")
-
-# Enhanced ggplot visualization of NMDS with group dispersions
-nmds_df <- as.data.frame(comp.mds$points)
-nmds_df$Group <- spp$patch
-
-ggplot(nmds_df, aes(x = MDS1, y = MDS2, color = Group)) +
-  geom_point(size = 3) +
-  stat_ellipse() +
-  theme_minimal() +
-  labs(title = "NMDS Plot with Group Dispersions",
-       x = "NMDS1", y = "NMDS2")
+#### exporting csv ####
+# adding all together
+network_metrics <- nestedness %>%
+  left_join(h2, by = c("block", "patch")) %>%
+  left_join(shannon, by = c("block", "patch")) %>%
+  left_join(links, by = c("block", "patch")) %>%
+  left_join(abundance, by = c("block", "patch"))
+network_metrics$floral_diversity <- floral_diversity
+network_metrics$floral_div_noApis <- floral_div_noApis
+network_metrics$pollinator_diversity <- pollinator_diversity
+network_metrics$pollinator_div_noApis <- pollinator_div_noApis
 
 
-
-
-
-
-
-# plotting NMDS
-plot.community <- community.comp %>%
-  separate(unique_ID, c("block", "patch")) %>%
-  mutate(patch.color = if_else(patch == "B", 1, 2)) # adding #s that will correspond to plot colors
-
-palette(c('thistle', 'lightblue')) # setting plot colors
-#plotting
-par(mar = c(5.1, 4.5, 4.1, 2.1))
-p1 <- plot(x = comp.mds$points[, 1], # x axis = 1st dimension
-           y = comp.mds$points[, 2], # y axis = 2nd dimension
-           pch = 19, # point shapes
-           cex = 2, # point size
-           col = plot.community$patch.color, # point colors, correspond to patch type
-           xlab = 'NMDS Axis 1', # x-axis label
-           ylab = 'NMDS Axis 2', # y-axis label
-           cex.axis = 1.5, # axis number size
-           cex.lab = 1.9#, # axis label size
-           #xlim = c(-2.4, 1.7), # plot x-axis size
-           #ylim = c(-1.5, 1.4)
-           ) # plot y-axis size
-# Plotting ellipse polygons 
-ordiellipse(comp.mds, 
-            groups = plot.community$patch, # groups are patch type
-            col = plot.community$patch.color, # ellipse colors, correspond to patch type
-            draw = 'polygon', # type of ellipse
-            kind = 'sd', # ellipse is drawing standard deviation of points
-            alpha = 140, # transparency of ellipse
-            border = plot.community$patch.color)# border color, correspond to patch type
-legend("topleft", # adding legend to top left corner
-       inset=c(0, -0.03), # exact legend locations
-       legend = c('Connected Patch', 'Winged Patch'), # legend names
-       bty = 'n', # no box drawn around legend
-       pch = 19, # legend point shape
-       col = plot.community$patch.color, # legend colors, correspond to patch type
-       cex = 1.8, # legend size
-       y.intersp = 0.4,
-       x.intersp = 0.3) # vertical distance between legend lines
-text(-2.1, -1.5, cex = 1.5, paste("stress =", round(comp.mds$stress, digits = 3))) # adding stress value to plot
-nmds.plot <- recordPlot() # saving plot as an object
-
+write.csv(network_metrics, file = file.path("data", "network_metrics.csv"))
 
 
 
