@@ -7,6 +7,7 @@
 library(tidyverse)
 library(bipartite)
 library(vegan)
+library(plyr)
 
 
 
@@ -16,18 +17,18 @@ pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.cs
 
 # removing removing non-IDed species, creating unique ID
 pollinator <- pollinator %>%
-  #filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
   filter(!pollinator_species == "") %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
   dplyr::select(c("unique_ID", "pollinator_analysis", "flower_species")) 
 
 
 
-#### network analysis ####
+#### network analysis: WITH ALL SPECIES ####
 pollinator_split <- pollinator %>%
-  count(unique_ID, pollinator_analysis, flower_species) %>%
-  group_by(unique_ID) %>%
+  dplyr::count(unique_ID, pollinator_analysis, flower_species) %>%
+  dplyr::group_by(unique_ID) %>%
   group_split() 
+
   
 # function to get data into correct format
 prepare_matrix <- function(df) {
@@ -48,14 +49,15 @@ names(webs) <- webs.names
 
 
 # Calculate network metric nestedness for all plant-pollinator sites
-net.metrics.nest <- lapply(webs, networklevel, index = 'nestedness') 
+net.metrics.nest <- lapply(webs, networklevel, index = 'NODF') 
 # Calculate network specialization for all plant-pollinator sites
 net.metrics.h2 <- lapply(webs, networklevel, index = 'H2') 
 # Calculate network interaction diversity for all plant-pollinator sites
 net.metrics.diversity <- lapply(webs, networklevel, index = 'Shannon diversity') 
 # Calculate links per pollinator species for all plant-pollinator sites
 net.metrics.links <- lapply(webs, networklevel, index = 'links per species', level = "higher") 
-
+# linkage density
+net.metrics.density <- lapply(webs, networklevel, index = "linkage density")
 
 
 # Make null models for all sites using the vaznull null
@@ -67,7 +69,7 @@ net.null.nest = function(nulls){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
     net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'nestedness'))
+                                   lapply(nulls[[i]], networklevel, index = 'NODF'))
   }
   names(net.null.metric) <- webs.names
   return(net.null.metric)
@@ -106,11 +108,23 @@ net.null.links = function(nulls){
   return(net.null.metric)
 }
 
+# Null distribution function for linkage density
+net.null.density = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'linkage density'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
 
 vaz.nest <- net.null.nest(net.nulls.vaz)
 vaz.h2 <- net.null.h2(net.nulls.vaz)
 vaz.diversity <- net.null.diversity(net.nulls.vaz)
 vaz.links <- net.null.links(net.nulls.vaz)
+vaz.density <- net.null.density(net.nulls.vaz)
 
 # Z-score function for comparing different networks
 net.zscore = function(obsval, nullval) {
@@ -121,8 +135,8 @@ net.zscore = function(obsval, nullval) {
 nest.zscore = function(nulltype){
   net.nest.zscore <- list() 
   for(i in 1:length(net.metrics.nest)){
-    net.nest.zscore[[i]] = net.zscore(net.metrics.nest[[i]]['nestedness'], 
-                                      nulltype[[i]][ ,'nestedness'])
+    net.nest.zscore[[i]] = net.zscore(net.metrics.nest[[i]]['NODF'], 
+                                      nulltype[[i]][ ,'NODF'])
   }
   names(net.nest.zscore) <- webs.names
   return(net.nest.zscore)
@@ -161,11 +175,23 @@ links.zscore = function(nulltype){
   return(net.links.zscore)
 }
 
+# Function that perform z-score calculation of linkage density using the observed and null networks
+density.zscore = function(nulltype){
+  net.density.zscore <- list() 
+  for(i in 1:length(net.metrics.density)){
+    net.density.zscore[[i]] = net.zscore(net.metrics.density[[i]]['linkage density'], 
+                                       nulltype[[i]][ ,'linkage density'])
+  }
+  names(net.density.zscore) <- webs.names
+  return(net.density.zscore)
+}
+
 
 vaz.nest.zscore <- nest.zscore(vaz.nest)
 vaz.h2.zscore <- h2.zscore(vaz.h2)
 vaz.diversity.zscore <- diversity.zscore(vaz.diversity)
 vaz.links.zscore <- links.zscore(vaz.links) # CAN'T USE - NO SD FOR NULL MODEL, USE REAL VALUES IN ANALYSIS
+vaz.density.zscore <- density.zscore(vaz.density) 
 
 # creating dataframes
 nestedness <- as.data.frame(do.call('rbind', vaz.nest.zscore) )
@@ -188,28 +214,194 @@ links <- links %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
 
+density <- as.data.frame(do.call('rbind', net.metrics.density))
+density <- density %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
+
+
+#### network analysis: NO APIS ####
+pollinator_split_noApis <- pollinator %>%
+  dplyr::filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  dplyr::count(unique_ID, pollinator_analysis, flower_species) %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split() 
+
+
+
+# getting each network into correct format
+webs_noApis <- pollinator_split_noApis %>%
+  lapply(prepare_matrix)
+
+# adding patch names to each network
+webs.names <- c("10.B","10.W","52.B","52.W", "53N.B", "53N.W",
+                "53S.B", "53S.W", "54S.B", "54S.W", "57.B", "57.W", "8.B", "8.W")
+names(webs_noApis) <- webs.names
+
+
+# Calculate network metric nestedness for all plant-pollinator sites
+net.metrics.nest_noApis <- lapply(webs_noApis, networklevel, index = 'NODF') 
+# Calculate network specialization for all plant-pollinator sites
+net.metrics.h2_noApis <- lapply(webs_noApis, networklevel, index = 'H2') 
+# Calculate network interaction diversity for all plant-pollinator sites
+net.metrics.diversity_noApis <- lapply(webs_noApis, networklevel, index = 'Shannon diversity') 
+# Calculate links per pollinator species for all plant-pollinator sites
+net.metrics.links_noApis <- lapply(webs_noApis, networklevel, index = 'links per species', level = "higher") 
+# linkage density
+net.metrics.density_noApis <- lapply(webs_noApis, networklevel, index = "linkage density")
+
+
+# Make null models for all sites using the vaznull null
+net.nulls.vaz_noApis <- lapply(webs_noApis, nullmodel, method = "vaznull", N = 500) 
+
+# null metrics
+vaz.nest_noApis <- net.null.nest(net.nulls.vaz_noApis)
+vaz.h2_noApis <- net.null.h2(net.nulls.vaz_noApis)
+vaz.diversity_noApis <- net.null.diversity(net.nulls.vaz_noApis)
+vaz.links_noApis <- net.null.links(net.nulls.vaz_noApis)
+vaz.density_noApis <- net.null.density(net.nulls.vaz_noApis)
+
+
+# z score
+vaz.nest.zscore_noApis <- nest.zscore(vaz.nest_noApis)
+vaz.h2.zscore_noApis <- h2.zscore(vaz.h2_noApis)
+vaz.diversity.zscore_noApis <- diversity.zscore(vaz.diversity_noApis)
+vaz.links.zscore_noApis <- links.zscore(vaz.links_noApis) # CAN'T USE - NO SD FOR NULL MODEL, USE REAL VALUES IN ANALYSIS
+vaz.density.zscore_noApis <- density.zscore(vaz.density_noApis) 
+
+# creating dataframes
+nestedness_noApis <- as.data.frame(do.call('rbind', vaz.nest.zscore_noApis) )
+nestedness_noApis <- nestedness_noApis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  dplyr::rename(NODF_noApis = NODF) %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into columns
+
+h2_noApis <- as.data.frame(do.call('rbind', vaz.h2.zscore_noApis) )
+h2_noApis <- h2_noApis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  dplyr::rename(h2_noApis = H2) %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
+
+shannon_noApis <- as.data.frame(do.call('rbind', vaz.diversity.zscore_noApis) )
+shannon_noApis <- shannon_noApis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  dplyr::rename(shannon_noApis = `Shannon diversity`) %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
+
+links_noApis <- as.data.frame(do.call('rbind', net.metrics.links_noApis))
+links_noApis <- links_noApis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  dplyr::rename(links_noApis = `links per species`) %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
+
+density_noApis <- as.data.frame(do.call('rbind', net.metrics.density_noApis))
+density_noApis <- density_noApis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  dplyr::rename(density_noApis = `linkage density`) %>%
+  separate(unique_ID, into = c("block", "patch"))  # seperating unique ID into column
+
+
+
+
+
+
+
+
+#### interaction rewiring and turnover ####
+network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(webs[[1]]), "10.W" = as.matrix(webs[[2]]),
+                                "52.B" = as.matrix(webs[[3]]), "52.W" = as.matrix(webs[[4]]),
+                                "53N.B" = as.matrix(webs[[5]]), "53N.W" = as.matrix(webs[[6]]),
+                                "53S.B" = as.matrix(webs[[7]]), "53S.W" = as.matrix(webs[[8]]),
+                                "54S.B" = as.matrix(webs[[9]]), "54S.W" = as.matrix(webs[[10]]),
+                                "57.B" = as.matrix(webs[[11]]), "57.W" = as.matrix(webs[[12]]),
+                                "8.B" = as.matrix(webs[[13]]), "8.W" = as.matrix(webs[[14]]))), 
+                                index = "sorensen", partitioning="commondenom")
+network_dissimilarity <- network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  #filter(block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+   #                        "54S.B-54S.W", "57.B-57.W", "8.B-8.W")) %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity")
+
+network_dissimilarity$type <- factor(network_dissimilarity$type, levels=c("S", "WN", "ST", "OS"))
+
+
+network_dissimilarity %>%
+  filter(type != "S") %>%
+  ggplot() +
+  geom_boxplot(aes(type, dissimilarity, fill = real_pairs)) +
+  #geom_jitter(aes(type, dissimilarity)) +
+  theme_classic() +
+  scale_fill_brewer(palette = "Set2") +
+  ylim(c(0, 0.9))
+
+turnover.rewiring <- network_dissimilarity %>%
+  filter(type %in% c("OS", "ST"))
+
+m.dissimiliarty <- t.test(dissimilarity ~ type, data = turnover.rewiring, var.equal = TRUE)
+m.dissimiliarty
+
+
+# two examples that give the same results as would the 
+# \code{betalink} function in the package of the same name
+betalinkr(webs2array(list(Safariland=Safariland, vazarr=vazarr)), 
+          index = "sorensen", partitioning="commondenom")
+betalinkr(webs2array(list(Safariland=Safariland, vazarr=vazarr)), 
+          function.dist="betadiver",index=1, partitioning="poisot")
+
+# same data, with recommended partitioning method plus further partitioning
+betalinkr(webs2array(list(Safariland=Safariland, vazarr=vazarr)), 
+          partitioning="commondenom", partition.st=TRUE)
+
+# another example (no shared links)
+testdata <- data.frame(higher = c("bee1","bee1","bee1","bee2","bee1","bee3"), 
+                       lower = c("plant1","plant2","plant1","plant2","plant3","plant4"), 
+                       webID = c("meadow","meadow","meadow","meadow","bog","bog"), freq=c(5,1,1,1,3,7))
+
+# more than two webs:
+betalinkr_multi(webs2array(Safariland, vazquenc, vazarr), index="jaccard")
+
+
+data(Safariland, vazquenc, vazquec)
+allin1 <- webs2array(Safariland, vazquenc, vazquec)
+str(allin1)
+
+
+
 
 
 
 
 #### Abundance ####
 abundance <- pollinator %>%
-  count(unique_ID) %>%
+  dplyr::count(unique_ID) %>%
   mutate(abundance = n) %>%
   separate(unique_ID, into = c("block", "patch")) %>%
   dplyr::select(!c("n"))
 
+abundance_noApis <- pollinator %>%
+  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  dplyr::count(unique_ID) %>%
+  mutate(abundance_noApis = n) %>%
+  separate(unique_ID, into = c("block", "patch")) %>%
+  dplyr::select(!c("n"))
+
+
 #### Flower and pollinator species diversity ####
 ## flower diversity
 floral_wider <- pollinator %>%
-  count(unique_ID, flower_species) %>%
+  dplyr::count(unique_ID, flower_species) %>%
   pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 floral_diversity <- diversity(floral_wider, "shannon") # calculating diversity of flowers that are interacted with
 
 floral_wider_noApis <- pollinator %>%
   filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
-  count(unique_ID, flower_species) %>%
+  dplyr::count(unique_ID, flower_species) %>%
   pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 floral_div_noApis <- diversity(floral_wider_noApis, "shannon") # calculating diversity of flowers that are interacted with
@@ -217,17 +409,17 @@ floral_div_noApis <- diversity(floral_wider_noApis, "shannon") # calculating div
 
 ## pollinator diversity
 pollinator_wider <- pollinator %>%
-  count(unique_ID, pollinator_analysis) %>%
+  dplyr::count(unique_ID, pollinator_analysis) %>%
   pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 pollinator_diversity <- diversity(pollinator_wider, "shannon") 
 
 pollinator_wider_noApis <- pollinator %>%
   filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
-  count(unique_ID, pollinator_analysis) %>%
+  dplyr::count(unique_ID, pollinator_analysis) %>%
   pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
-pollinator_div_noApis <- diversity(pollinator_wider, "shannon") 
+pollinator_div_noApis <- diversity(pollinator_wider_noApis, "shannon") 
 
 
 #### exporting csv ####
@@ -236,7 +428,14 @@ network_metrics <- nestedness %>%
   left_join(h2, by = c("block", "patch")) %>%
   left_join(shannon, by = c("block", "patch")) %>%
   left_join(links, by = c("block", "patch")) %>%
-  left_join(abundance, by = c("block", "patch"))
+  left_join(density, by = c("block", "patch")) %>%
+  left_join(nestedness_noApis, by = c("block", "patch")) %>%
+  left_join(h2_noApis, by = c("block", "patch")) %>%
+  left_join(shannon_noApis, by = c("block", "patch")) %>%
+  left_join(links_noApis, by = c("block", "patch")) %>%
+  left_join(density_noApis, by = c("block", "patch")) %>%
+  left_join(abundance, by = c("block", "patch")) %>%
+  left_join(abundance_noApis, by = c("block", "patch"))
 network_metrics$floral_diversity <- floral_diversity
 network_metrics$floral_div_noApis <- floral_div_noApis
 network_metrics$pollinator_diversity <- pollinator_diversity
