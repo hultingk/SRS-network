@@ -18,7 +18,8 @@ pollinator <- pollinator %>%
   mutate(family = dplyr::case_when(
     pollinator_species %in% c("Abaeis nicippe", "Eurema nicippe", "Phoebis sennae", 
                               "Pyrisitia lisa") ~ "Pieridae",
-    pollinator_species %in% c("Agapostemon splendens") ~ "Halictidae",
+    pollinator_species %in% c("Agapostemon splendens", "Lasioglossum sp.", "Augochlora pura",
+                              "Augochlorella aurata", "Augochloropsis metallica", "Halictus sp.") ~ "Halictidae",
     pollinator_species %in% c("Agraulis vanillae", "Danaus plexippus", "Euptoieta claudia",
                               "Junonia coenia", "Phyciodes tharos") ~ "Nymphalidae",
     pollinator_species %in% c("Allograpta exotica", "Allograpta obliqua", "Copestylum vittatum",
@@ -38,25 +39,28 @@ pollinator <- pollinator %>%
                               "Anthidium maculifrons", "Coelioxys sp.", "Megachile albitarsis",
                               "Megachile deflexa", "Megachile georgica", "Megachile mendica",
                               "Megachile petulans", "Megachile sp.", "Megachile texana", 
-                              "Megachile xylocopoides", "Trachusa ridingsii") ~ "Megachilidae",
+                              "Megachile xylocopoides", "Trachusa ridingsii", "Hoplitis sp.") ~ "Megachilidae",
     pollinator_species %in% c("Apis mellifera", "Bombus fraternus", "Bombus griseocollis",
                               "Bombus impatiens", "Bombus pensylvanicus", "Epimelissodes atripes",
                               "Epimelissodes obliqua", "Melissodes bimaculatus", "Melissodes boltoniae",
                               "Melissodes communis", "Melissodes sp.", "Xylocopa micans", 
-                              "Xylocopa virginica") ~ "Apidae",
-    pollinator_species %in% c("Archytas metallicus") ~ "Tachinidae",
+                              "Xylocopa virginica", "Ceratina sp.") ~ "Apidae",
+    pollinator_species %in% c("Archytas metallicus", "Tachinidae sp.1") ~ "Tachinidae",
     pollinator_species %in% c("Atlides halesus", "Calycopis cecrops", "Cupido comyntas", 
                               "Satyrium calanus", "Satyrium titus", "Strymon melinus") ~ "Lycaenidae",
     pollinator_species %in% c("Battus philenor", "Papilio glaucus", "Papilio palamedes",
                               "Papilio troilus") ~ "Papilionidae",
     pollinator_species %in% c("Cochliomyia macellaria", "Lucilia sp.") ~ "Calliphoridae",
-    pollinator_species %in% c("Colletes sp.") ~ "Colletidae",
-    pollinator_species %in% c("Physoconops bulbirostris", "Zodion sp.") ~ "Conopidae",
-    pollinator_species %in% c("Tabanidae sp.") ~ "Tabanidae"
-  )) %>%
+    pollinator_species %in% c("Colletes sp.", "Hylaeus sp.") ~ "Colletidae",
+    pollinator_species %in% c("Physoconops bulbirostris", "Zodion sp.1", "Zodion sp.2") ~ "Conopidae",
+    pollinator_species %in% c("Tabanidae sp.") ~ "Tabanidae",
+    pollinator_species %in% c("Calyptratae family") ~ "Calyptratae", 
+    pollinator_species %in% c("Perdita sp.") ~ "Andrenidae",
+    pollinator_species %in% c("Rivellia sp.") ~ "Platystomatidae"
+  )) %>% 
   mutate(order = dplyr::case_when(
-    family %in% c("Apidae", "Colletidae", "Halictidae", "Megachilidae") ~ "Hymenoptera",
-    family %in% c("Bombyliidae", "Calliphoridae", "Conopidae", "Syrphidae", "Tabanidae", "Tachinidae") ~ "Diptera",
+    family %in% c("Apidae", "Colletidae", "Halictidae", "Megachilidae", "Andrenidae") ~ "Hymenoptera",
+    family %in% c("Bombyliidae", "Calliphoridae", "Conopidae", "Syrphidae", "Tabanidae", "Tachinidae", "Calyptratae", "Platystomatidae") ~ "Diptera",
     family %in% c("Hesperiidae", "Lycaenidae", "Nymphalidae", "Papilionidae", "Pieridae") ~ "Lepidoptera"
   ))
 

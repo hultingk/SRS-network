@@ -13,7 +13,8 @@ library(vegan)
 # loading data 
 pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
 
-# removing non-IDed species, creating unique ID
+
+# removing removing non-IDed species, creating unique ID
 pollinator <- pollinator %>%
   #filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
   filter(!pollinator_species == "") %>%
