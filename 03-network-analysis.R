@@ -346,29 +346,7 @@ m.dissimiliarty <- t.test(dissimilarity ~ type, data = turnover.rewiring, var.eq
 m.dissimiliarty
 
 
-# two examples that give the same results as would the 
-# \code{betalink} function in the package of the same name
-betalinkr(webs2array(list(Safariland=Safariland, vazarr=vazarr)), 
-          index = "sorensen", partitioning="commondenom")
-betalinkr(webs2array(list(Safariland=Safariland, vazarr=vazarr)), 
-          function.dist="betadiver",index=1, partitioning="poisot")
 
-# same data, with recommended partitioning method plus further partitioning
-betalinkr(webs2array(list(Safariland=Safariland, vazarr=vazarr)), 
-          partitioning="commondenom", partition.st=TRUE)
-
-# another example (no shared links)
-testdata <- data.frame(higher = c("bee1","bee1","bee1","bee2","bee1","bee3"), 
-                       lower = c("plant1","plant2","plant1","plant2","plant3","plant4"), 
-                       webID = c("meadow","meadow","meadow","meadow","bog","bog"), freq=c(5,1,1,1,3,7))
-
-# more than two webs:
-betalinkr_multi(webs2array(Safariland, vazquenc, vazarr), index="jaccard")
-
-
-data(Safariland, vazquenc, vazquec)
-allin1 <- webs2array(Safariland, vazquenc, vazquec)
-str(allin1)
 
 
 

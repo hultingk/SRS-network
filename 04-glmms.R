@@ -39,19 +39,20 @@ nestedness.pred <- m.nestedness.df %>%
   ggplot() +
   geom_point(aes(x = patch, y = NODF, color = patch), size = 7, alpha = 0.7) + 
   geom_line(aes(x = patch, y = NODF, group = block), linewidth = 1.5, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 2) +
+  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 3, linetype = 2) +
   scale_x_discrete(labels = c('Connected', 'Winged')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
   ylab(expression(paste("NODF (z-score)"))) +
   theme_classic() +
   theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 24)) + # axis tick mark size
-  theme(axis.title = element_text(size = 26)) #+ # axis label size
+  theme(axis.text = element_text(size = 26)) + # axis tick mark size
+  theme(axis.title = element_text(size = 30)) #+ # axis label size
 nestedness.pred
 
-
-
+pdf(file = file.path("plots", "nestedness.pdf"), width = 10, height = 12)
+nestedness.pred
+dev.off()
 
 
 
