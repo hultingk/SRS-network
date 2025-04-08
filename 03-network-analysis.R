@@ -19,7 +19,7 @@ pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.cs
 pollinator <- pollinator %>%
   filter(!pollinator_species == "") %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
-  dplyr::select(c("unique_ID", "pollinator_analysis", "flower_species")) 
+  dplyr::select(c("unique_ID", "order", "family", "pollinator_analysis", "flower_species")) 
 
 
 
@@ -330,14 +330,26 @@ network_dissimilarity <- network_dissimilarity %>%
 network_dissimilarity$type <- factor(network_dissimilarity$type, levels=c("S", "WN", "ST", "OS"))
 
 
-network_dissimilarity %>%
+dissimilarity_plot <- network_dissimilarity %>%
   filter(type != "S") %>%
+  filter(real_pairs == "real") %>%
   ggplot() +
-  geom_boxplot(aes(type, dissimilarity, fill = real_pairs)) +
+  geom_boxplot(aes(type, dissimilarity, fill = type)) +
   #geom_jitter(aes(type, dissimilarity)) +
   theme_classic() +
   scale_fill_brewer(palette = "Set2") +
-  ylim(c(0, 0.9))
+  scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
+  ylim(c(0, 0.8)) +
+  xlab("Dissimilarity component") +
+  theme(legend.position = "none") +
+  ylab(expression(paste("Dissimilarity between patch pairs"))) +
+  theme(axis.text = element_text(size = 30)) + # axis tick mark size
+  theme(axis.title = element_text(size = 34)) #+ # axis label size
+dissimilarity_plot
+
+pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 12, height = 8)
+dissimilarity_plot
+dev.off()
 
 turnover.rewiring <- network_dissimilarity %>%
   filter(type %in% c("OS", "ST"))
@@ -392,12 +404,15 @@ pollinator_wider <- pollinator %>%
   select(!unique_ID) # removing unique ID for diversity measure
 pollinator_diversity <- diversity(pollinator_wider, "shannon") 
 
+
 pollinator_wider_noApis <- pollinator %>%
   filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
   dplyr::count(unique_ID, pollinator_analysis) %>%
   pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 pollinator_div_noApis <- diversity(pollinator_wider_noApis, "shannon") 
+
+
 
 
 #### exporting csv ####
