@@ -73,7 +73,7 @@ pollinator$flower_species <- str_replace(pollinator$flower_species, "Eupatorium 
 
 # checking flower species
 pollinator %>%
-  count(flower_species)
+  dplyr::count(flower_species)
 
 # --------------------------- #
 #### pollinator species cleaning ####
@@ -84,7 +84,7 @@ pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Ery
 
 # checking pollinator species
 pollinator %>%
-  count(pollinator_species)
+  dplyr::count(pollinator_species)
 
 pollinator <- pollinator %>%
   mutate(pollinator_analysis = case_when(

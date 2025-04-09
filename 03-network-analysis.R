@@ -21,7 +21,8 @@ pollinator <- pollinator %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
   dplyr::select(c("unique_ID", "order", "family", "pollinator_analysis", "flower_species")) 
 
-
+pollinator %>%
+  dplyr::count(flower_species)
 
 #### network analysis: WITH ALL SPECIES ####
 pollinator_split <- pollinator %>%
@@ -29,7 +30,7 @@ pollinator_split <- pollinator %>%
   dplyr::group_by(unique_ID) %>%
   group_split() 
 
-  
+
 # function to get data into correct format
 prepare_matrix <- function(df) {
   df_wide <- df %>% 
@@ -46,6 +47,11 @@ webs <- pollinator_split %>%
 webs.names <- c("10.B","10.W","52.B","52.W", "53N.B", "53N.W",
                 "53S.B", "53S.W", "54S.B", "54S.W", "57.B", "57.W", "8.B", "8.W")
 names(webs) <- webs.names
+
+#web.plot <- plotweb(webs[["53N.B"]], text.rot=90)
+#pdf(file = file.path("plots", "web.plot.pdf"), width = 8, height = 6)
+#plotweb(webs[["53N.B"]], text.rot=90, y.lim = c(-1,2.5))
+#dev.off()
 
 
 # Calculate network metric nestedness for all plant-pollinator sites
