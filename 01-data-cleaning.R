@@ -55,7 +55,7 @@ pollinator <- pollinator %>%
     pollinator_species %in% c("Physoconops bulbirostris", "Zodion sp.1", "Zodion sp.2") ~ "Conopidae",
     pollinator_species %in% c("Tabanidae sp.") ~ "Tabanidae",
     pollinator_species %in% c("Calyptratae family") ~ "Calyptratae", 
-    pollinator_species %in% c("Perdita sp.") ~ "Andrenidae",
+    pollinator_species %in% c("Perdita bishoppi", "Perdita boltoniae") ~ "Andrenidae",
     pollinator_species %in% c("Rivellia sp.") ~ "Platystomatidae"
   )) %>% 
   mutate(order = dplyr::case_when(
