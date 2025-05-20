@@ -43,7 +43,7 @@ pollinator <- pollinator %>%
     pollinator_species %in% c("Apis mellifera", "Bombus fraternus", "Bombus griseocollis",
                               "Bombus impatiens", "Bombus pensylvanicus", "Epimelissodes atripes",
                               "Epimelissodes obliqua", "Melissodes bimaculatus", "Melissodes boltoniae",
-                              "Melissodes communis", "Melissodes sp.", "Xylocopa micans", 
+                              "Melissodes communis", "Melissodes sp.", "Melissodes dentiventris", "Xylocopa micans", 
                               "Xylocopa virginica", "Ceratina sp.") ~ "Apidae",
     pollinator_species %in% c("Archytas metallicus", "Tachinidae sp.1") ~ "Tachinidae",
     pollinator_species %in% c("Atlides halesus", "Calycopis cecrops", "Cupido comyntas", 
@@ -83,16 +83,25 @@ pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Ery
 pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Erynnis zarucco", "Erynnis sp.")
 
 # checking pollinator species
-pollinator %>%
-  dplyr::count(pollinator_species)
+summary_pollinator <- pollinator %>%
+  dplyr::count(order, family, pollinator_species)
 
-pollinator <- pollinator %>%
-  mutate(pollinator_analysis = case_when(
-    pollinator_species %in% c("Megachile albitarsis", "Megachile deflexa", "Megachile georgica",
-                              "Megachile mendica", "Megachile petulans", "Megachile texana", "Megachile xylocopoides") ~ "Megachile sp.",
-    pollinator_species %in% c("Melissodes bimaculatus", "Melissodes boltoniae", "Melissodes communis") ~ "Melissodes sp.",
-    .default = pollinator_species
-  ))
+write.csv(summary_pollinator, file = file.path("data", "summary_pollinator.csv"), row.names = F)
+
+## filtered pollinator 
+pollinator_filtered <- pollinator %>%
+  dplyr::select(block, patch, date, sampling_round, start_time, am_pm, unique_ID, order, family, pollinator_species, flower_species, notes, X, X.1, X.2)
+
+write.csv(pollinator_filtered, file = file.path("data", "REU-SRS-plant-pollinator.csv"), row.names = F)
+
+
+#pollinator <- pollinator %>%
+#  mutate(pollinator_analysis = case_when(
+#    pollinator_species %in% c("Megachile albitarsis", "Megachile deflexa", "Megachile georgica",
+#                              "Megachile mendica", "Megachile petulans", "Megachile texana", "Megachile xylocopoides") ~ "Megachile sp.",
+#    pollinator_species %in% c("Melissodes bimaculatus", "Melissodes boltoniae", "Melissodes communis") ~ "Melissodes sp.",
+#    .default = pollinator_species
+#  ))
 
 # --------------------------- #
 #### writing cleaned file ####
