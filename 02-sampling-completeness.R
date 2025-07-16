@@ -17,7 +17,7 @@ sc_pollinator <- pollinator %>%
 
 # getting plant-pollinator data into correct format for sampling completeness estimation
 sc_pollinator <- sc_pollinator %>%
-  mutate(interaction = paste(pollinator_analysis, flower_species, sep = "-")) %>% # combining pollinator and flower into one column - creating interaction
+  mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>% # combining pollinator and flower into one column - creating interaction
   mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating unique ID for each patch
   dplyr::count(unique_ID, interaction) %>% # counting # of each interaction per patch
   pivot_wider(names_from = unique_ID, values_from = n, values_fill = 0) # pivoting into wider format for interaction by patch matrix

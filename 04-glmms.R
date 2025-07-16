@@ -23,7 +23,7 @@ summary(m.nestedness)
 plot(simulateResiduals(m.nestedness))
 check_model(m.nestedness)
 
-m.nestedness <- glmmTMB(NODF_noApis ~ patch + (1|block),
+m.nestedness.noApis <- glmmTMB(NODF_noApis ~ patch + (1|block),
                         data = network_metrics,
                         family = "gaussian")
 summary(m.nestedness)
@@ -65,10 +65,10 @@ summary(m.h2)
 plot(simulateResiduals(m.h2))
 check_model(m.h2)
 
-m.h2 <- glmmTMB(h2_noApis ~ patch + (1|block),
+m.h2.noApis <- glmmTMB(h2_noApis ~ patch + (1|block),
                 data = network_metrics,
                 family = "gaussian")
-summary(m.h2)
+summary(m.h2.noApis)
 
 # plotting
 # model predictions for plotting
@@ -109,10 +109,10 @@ summary(m.interaction.div)
 plot(simulateResiduals(m.interaction.div))
 check_model(m.interaction.div)
 
-m.interaction.div <- glmmTMB(shannon_noApis ~ patch + (1|block),
+m.interaction.div.noApis <- glmmTMB(shannon_noApis ~ patch + (1|block),
                              data = network_metrics,
                              family = "gaussian")
-summary(m.interaction.div)
+summary(m.interaction.div.noApis)
 
 #### links per species ####
 m.links <- glmmTMB(links.per.species ~ patch + (1|block),
@@ -122,10 +122,10 @@ summary(m.links)
 plot(simulateResiduals(m.links))
 check_model(m.links)
 
-m.links <- glmmTMB(links_noApis ~ patch + (1|block),
+m.links.noApis <- glmmTMB(links_noApis ~ patch + (1|block),
                    data = network_metrics,
                    family = "gaussian")
-summary(m.links)
+summary(m.links.noApis)
 
 
 #### linkage density ####
@@ -136,10 +136,10 @@ summary(m.density)
 plot(simulateResiduals(m.density))
 check_model(m.density)
 
-m.density <- glmmTMB(density_noApis ~ patch + (1|block),
+m.density.noApis <- glmmTMB(density_noApis ~ patch + (1|block),
                      data = network_metrics,
                      family = "gaussian")
-summary(m.density)
+summary(m.density.noApis)
 
 # plotting
 # model predictions for plotting
@@ -173,20 +173,24 @@ dev.off()
 
 #### flower diversity ####
 # with Apis
-m.floral.div <- glmmTMB(floral_diversity ~ patch + (1|block),
+m.floral.div <- glmmTMB(floral_diversity ~ patch + (1|block), # diversity
                    data = network_metrics,
                    family = "gaussian")
+m.floral.div <- glmmTMB(fl.rich ~ patch + (1|block), # richness
+                        data = network_metrics,
+                        family = "nbinom2")
 summary(m.floral.div)
 plot(simulateResiduals(m.floral.div))
 check_model(m.floral.div)
 
 # no Apis
-m.floral.div <- glmmTMB(floral_div_noApis ~ patch + (1|block),
+m.floral.div.noApis <- glmmTMB(floral_div_noApis ~ patch + (1|block),
                         data = network_metrics,
                         family = "gaussian")
-summary(m.floral.div)
-plot(simulateResiduals(m.floral.div))
-check_model(m.floral.div)
+summary(m.floral.div.noApis)
+plot(simulateResiduals(m.floral.div.noApis))
+check_model(m.floral.div.noApis)
+
 
 # plotting
 # model predictions for plotting
@@ -234,13 +238,13 @@ plot(simulateResiduals(m.pollinator.div))
 check_model(m.pollinator.div)
 
 # no Apis
-m.pollinator.div <- glmmTMB(pollinator_div_noApis ~ patch + (1|block),
+m.pollinator.div.noApis <- glmmTMB(pollinator_div_noApis ~ patch + (1|block),
                             data = network_metrics,
                             family = "gaussian")
-summary(m.pollinator.div)
-plot(simulateResiduals(m.pollinator.div))
-check_model(m.pollinator.div)
-
+summary(m.pollinator.div.noApis)
+plot(simulateResiduals(m.pollinator.div.noApis))
+check_model(m.pollinator.div.noApis)
+(exp(-0.36467)-1)*100
 # plotting
 # model predictions for plotting
 m.pollinator.div.df <- network_metrics %>%

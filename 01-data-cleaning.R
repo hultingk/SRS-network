@@ -86,13 +86,13 @@ pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Ery
 summary_pollinator <- pollinator %>%
   dplyr::count(order, family, pollinator_species)
 
-write.csv(summary_pollinator, file = file.path("data", "summary_pollinator.csv"), row.names = F)
+#write.csv(summary_pollinator, file = file.path("data", "summary_pollinator.csv"), row.names = F)
 
 ## filtered pollinator 
-pollinator_filtered <- pollinator %>%
-  dplyr::select(block, patch, date, sampling_round, start_time, am_pm, unique_ID, order, family, pollinator_species, flower_species, notes, X, X.1, X.2)
-
-write.csv(pollinator_filtered, file = file.path("data", "REU-SRS-plant-pollinator.csv"), row.names = F)
+# pollinator_filtered <- pollinator %>%
+#   dplyr::select(block, patch, date, sampling_round, start_time, am_pm, unique_ID, order, family, pollinator_species, flower_species, notes, X, X.1, X.2)
+# 
+# write.csv(pollinator_filtered, file = file.path("data", "REU-SRS-plant-pollinator.csv"), row.names = F)
 
 
 #pollinator <- pollinator %>%

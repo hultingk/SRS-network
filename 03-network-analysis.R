@@ -19,14 +19,14 @@ pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.cs
 pollinator <- pollinator %>%
   filter(!pollinator_species == "") %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
-  dplyr::select(c("unique_ID", "order", "family", "pollinator_analysis", "flower_species")) 
+  dplyr::select(c("unique_ID", "order", "family", "pollinator_species", "flower_species")) 
 
 pollinator %>%
   dplyr::count(flower_species)
 
 #### network analysis: WITH ALL SPECIES ####
 pollinator_split <- pollinator %>%
-  dplyr::count(unique_ID, pollinator_analysis, flower_species) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) %>%
   dplyr::group_by(unique_ID) %>%
   group_split() 
 
@@ -34,7 +34,7 @@ pollinator_split <- pollinator %>%
 # function to get data into correct format
 prepare_matrix <- function(df) {
   df_wide <- df %>% 
-    pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>% # wide format
+    pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>% # wide format
     dplyr::select(!c("unique_ID")) %>% # remove unique ID column
     column_to_rownames("flower_species") #convert years to rownames
 }
@@ -228,8 +228,8 @@ density <- density %>%
 
 #### network analysis: NO APIS ####
 pollinator_split_noApis <- pollinator %>%
-  dplyr::filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
-  dplyr::count(unique_ID, pollinator_analysis, flower_species) %>%
+  dplyr::filter(!pollinator_species %in% c("Apis mellifera")) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) %>%
   dplyr::group_by(unique_ID) %>%
   group_split() 
 
@@ -380,7 +380,7 @@ abundance <- pollinator %>%
   dplyr::select(!c("n"))
 
 abundance_noApis <- pollinator %>%
-  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  filter(!pollinator_species %in% c("Apis mellifera")) %>%
   dplyr::count(unique_ID) %>%
   mutate(abundance_noApis = n) %>%
   separate(unique_ID, into = c("block", "patch")) %>%
@@ -396,25 +396,42 @@ floral_wider <- pollinator %>%
 floral_diversity <- diversity(floral_wider, "shannon") # calculating diversity of flowers that are interacted with
 
 floral_wider_noApis <- pollinator %>%
-  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
+  filter(!pollinator_species %in% c("Apis mellifera")) %>%
   dplyr::count(unique_ID, flower_species) %>%
   pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 floral_div_noApis <- diversity(floral_wider_noApis, "shannon") # calculating diversity of flowers that are interacted with
 
 
+
+
+# floral richness - not rarefied
+floral_wider[floral_wider>0] <- 1 
+fl.rich <- rowSums(floral_wider)
+
+
+
+
+
+
+
+
+
+
+
+
 ## pollinator diversity
 pollinator_wider <- pollinator %>%
-  dplyr::count(unique_ID, pollinator_analysis) %>%
-  pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
+  dplyr::count(unique_ID, pollinator_species) %>%
+  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 pollinator_diversity <- diversity(pollinator_wider, "shannon") 
 
 
 pollinator_wider_noApis <- pollinator %>%
-  filter(!pollinator_analysis %in% c("Apis mellifera")) %>%
-  dplyr::count(unique_ID, pollinator_analysis) %>%
-  pivot_wider(names_from = pollinator_analysis, values_from = n, values_fill = 0) %>%
+  filter(!pollinator_species %in% c("Apis mellifera")) %>%
+  dplyr::count(unique_ID, pollinator_species) %>%
+  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
   select(!unique_ID) # removing unique ID for diversity measure
 pollinator_div_noApis <- diversity(pollinator_wider_noApis, "shannon") 
 
@@ -439,7 +456,7 @@ network_metrics$floral_diversity <- floral_diversity
 network_metrics$floral_div_noApis <- floral_div_noApis
 network_metrics$pollinator_diversity <- pollinator_diversity
 network_metrics$pollinator_div_noApis <- pollinator_div_noApis
-
+network_metrics$fl.rich <- fl.rich
 
 write.csv(network_metrics, file = file.path("data", "network_metrics.csv"))
 
