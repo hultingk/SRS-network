@@ -26,20 +26,20 @@ check_model(m.nestedness)
 m.nestedness.noApis <- glmmTMB(NODF_noApis ~ patch + (1|block),
                         data = network_metrics,
                         family = "gaussian")
-summary(m.nestedness)
+summary(m.nestedness.noApis)
 
-# plotting
+# plotting NO APIS
 # model predictions for plotting
-m.nestedness.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "NODF"))
-m.nestedness.df$nestedness_pred <- predict(m.nestedness, re.form = NA)
-m.nestedness.df$patch <- factor(m.nestedness.df$patch, levels = c("B", "W"))
+m.nestedness.noApis.df <- network_metrics %>%
+  dplyr::select(c("block", "patch", "NODF_noApis"))
+m.nestedness.noApis.df$nestedness_pred <- predict(m.nestedness.noApis, re.form = NA)
+m.nestedness.noApis.df$patch <- factor(m.nestedness.noApis.df$patch, levels = c("B", "W"))
 # plotting
-nestedness.pred <- m.nestedness.df %>%
+nestedness.pred <- m.nestedness.noApis.df %>%
   ggplot() +
-  geom_point(aes(x = patch, y = NODF, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = NODF, group = block), linewidth = 2, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 4, linetype = 2) +
+  geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
+  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5, linetype = 1) +
+  geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.8) + 
   scale_x_discrete(labels = c('Connected', 'Winged')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
@@ -69,19 +69,19 @@ m.h2.noApis <- glmmTMB(h2_noApis ~ patch + (1|block),
                 data = network_metrics,
                 family = "gaussian")
 summary(m.h2.noApis)
-
+(2.1497/5.4302)*100 # 39.58786 less nested
 # plotting
 # model predictions for plotting
-m.h2.df <- network_metrics %>%
+m.h2.noApis.df <- network_metrics %>%
   dplyr::select(c("block", "patch", "h2_noApis"))
-m.h2.df$h2.pred <- predict(m.h2, re.form = NA)
-m.h2.df$patch <- factor(m.h2.df$patch, levels = c("B", "W"))
+m.h2.noApis.df$h2.pred <- predict(m.h2.noApis, re.form = NA)
+m.h2.noApis.df$patch <- factor(m.h2.noApis.df$patch, levels = c("B", "W"))
 # plotting
-h2.pred <- m.h2.df %>%
+h2.pred <- m.h2.noApis.df %>%
   ggplot() +
-  geom_point(aes(x = patch, y = h2_noApis, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = h2_noApis, group = block), linewidth = 2, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = h2.pred, group = block), linewidth = 4, linetype = 2) +
+  geom_line(aes(x = patch, y = h2_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
+  geom_line(aes(x = patch, y = h2.pred, group = block), linewidth = 5, linetype = 1) +
+  geom_point(aes(x = patch, y = h2_noApis, color = patch), size = 11, alpha = 0.8) + 
   scale_x_discrete(labels = c('Connected', 'Winged')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
@@ -113,7 +113,7 @@ m.interaction.div.noApis <- glmmTMB(shannon_noApis ~ patch + (1|block),
                              data = network_metrics,
                              family = "gaussian")
 summary(m.interaction.div.noApis)
-
+(-5.633/-4.397)*100
 #### links per species ####
 m.links <- glmmTMB(links.per.species ~ patch + (1|block),
                              data = network_metrics,
@@ -140,19 +140,19 @@ m.density.noApis <- glmmTMB(density_noApis ~ patch + (1|block),
                      data = network_metrics,
                      family = "gaussian")
 summary(m.density.noApis)
-
+(-0.8167/4.8001)*100 #17% decrease in linkage density
 # plotting
 # model predictions for plotting
-m.density.df <- network_metrics %>%
+m.density.noApis.df <- network_metrics %>%
   dplyr::select(c("block", "patch", "density_noApis"))
-m.density.df$linkage.density.pred <- predict(m.density, re.form = NA)
-m.density.df$patch <- factor(m.density.df$patch, levels = c("B", "W"))
+m.density.noApis.df$linkage.density.pred <- predict(m.density.noApis, re.form = NA)
+m.density.noApis.df$patch <- factor(m.density.noApis.df$patch, levels = c("B", "W"))
 # plotting
-linkage.density.pred <- m.density.df %>%
+linkage.density.pred <- m.density.noApis.df %>%
   ggplot() +
-  geom_point(aes(x = patch, y = density_noApis, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 4) +
+  geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "lightslategray", alpha = 0.5) +
+  geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5) +
+  geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.8) + 
   scale_x_discrete(labels = c('Connected', 'Winged')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
@@ -183,8 +183,13 @@ summary(m.floral.div)
 plot(simulateResiduals(m.floral.div))
 check_model(m.floral.div)
 
+
+
 # no Apis
 m.floral.div.noApis <- glmmTMB(floral_div_noApis ~ patch + (1|block),
+                        data = network_metrics,
+                        family = "gaussian")
+m.floral.div.noApis <- glmmTMB(fl.rich.rare.noApis ~ patch + (1|block), # richness
                         data = network_metrics,
                         family = "gaussian")
 summary(m.floral.div.noApis)
@@ -244,7 +249,8 @@ m.pollinator.div.noApis <- glmmTMB(pollinator_div_noApis ~ patch + (1|block),
 summary(m.pollinator.div.noApis)
 plot(simulateResiduals(m.pollinator.div.noApis))
 check_model(m.pollinator.div.noApis)
-(exp(-0.36467)-1)*100
+
+
 # plotting
 # model predictions for plotting
 m.pollinator.div.df <- network_metrics %>%

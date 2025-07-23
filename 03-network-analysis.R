@@ -403,11 +403,21 @@ floral_wider_noApis <- pollinator %>%
 floral_div_noApis <- diversity(floral_wider_noApis, "shannon") # calculating diversity of flowers that are interacted with
 
 
+# floral richness - rarefied
+spAbund <- rowSums(floral_wider) # calculating minimum # of observation 
+min(spAbund) # 7 is the fewest interactions observed per patch
+sRare <- rarefy(floral_wider, 157) # now use function rarefy
+
+# floral richness - rarefied no apid
+spAbund_noApis <- rowSums(floral_wider_noApis) # calculating minimum # of observation 
+min(spAbund_noApis) # 7 is the fewest interactions observed per patch
+sRare_noApis <- rarefy(floral_wider_noApis, 137) # now use function rarefy
 
 
 # floral richness - not rarefied
 floral_wider[floral_wider>0] <- 1 
 fl.rich <- rowSums(floral_wider)
+
 
 
 
@@ -457,6 +467,8 @@ network_metrics$floral_div_noApis <- floral_div_noApis
 network_metrics$pollinator_diversity <- pollinator_diversity
 network_metrics$pollinator_div_noApis <- pollinator_div_noApis
 network_metrics$fl.rich <- fl.rich
+network_metrics$fl.rich.rare <- sRare
+network_metrics$fl.rich.rare.noApis <- sRare_noApis
 
 write.csv(network_metrics, file = file.path("data", "network_metrics.csv"))
 

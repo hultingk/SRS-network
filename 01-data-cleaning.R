@@ -70,7 +70,16 @@ pollinator <- pollinator %>%
 # --------------------------- #
 # combining Eupatorium glaucescens and Eupatorium linearifolium as one species
 pollinator$flower_species <- str_replace(pollinator$flower_species, "Eupatorium glaucescens", "Eupatorium linearifolium")
-
+pollinator <- pollinator %>%
+  mutate(flower_species = dplyr::case_when(
+    flower_species %in% c("Desmodium 1", "Desmodium 2", "Desmodium ciliare",
+                          "Desmodium fernaldii", "Desmodium marilandicum",
+                          "Desmodium obtusum", "Desmodium viridiflorum") ~ "Desmodium sp.",
+    flower_species %in% c("Sericocarpus asteroides", "Sericocarpus tortifolius") ~ "Sericocarpus sp.",
+    flower_species %in% c("Lespedeza angustifolia", "Lespedeza hirta",
+                          "Lespedeza repens", "Lespedeza stuevei", "Lespedeza virginica", "Lespedeza cuneata") ~ "Lespedeza sp.",
+    .default = flower_species
+  ))
 # checking flower species
 pollinator %>%
   dplyr::count(flower_species)
@@ -102,7 +111,8 @@ summary_pollinator <- pollinator %>%
 #    pollinator_species %in% c("Melissodes bimaculatus", "Melissodes boltoniae", "Melissodes communis") ~ "Melissodes sp.",
 #    .default = pollinator_species
 #  ))
-
+pollinator %>%
+  dplyr::count(pollinator_species)
 # --------------------------- #
 #### writing cleaned file ####
 # --------------------------- #
