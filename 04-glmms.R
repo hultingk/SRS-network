@@ -38,9 +38,9 @@ m.nestedness.noApis.df$patch <- factor(m.nestedness.noApis.df$patch, levels = c(
 nestedness.pred <- m.nestedness.noApis.df %>%
   ggplot() +
   geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
-  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5, linetype = 1) +
+  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5, linetype = 3) +
   geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.8) + 
-  scale_x_discrete(labels = c('Connected', 'Winged')) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
   ylab(expression(paste("NODF (z-score)"))) +
@@ -82,7 +82,7 @@ h2.pred <- m.h2.noApis.df %>%
   geom_line(aes(x = patch, y = h2_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
   geom_line(aes(x = patch, y = h2.pred, group = block), linewidth = 5, linetype = 1) +
   geom_point(aes(x = patch, y = h2_noApis, color = patch), size = 11, alpha = 0.8) + 
-  scale_x_discrete(labels = c('Connected', 'Winged')) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
   ylab(expression(paste("H2' (z-score)"))) +
@@ -153,7 +153,7 @@ linkage.density.pred <- m.density.noApis.df %>%
   geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "lightslategray", alpha = 0.5) +
   geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5) +
   geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.8) + 
-  scale_x_discrete(labels = c('Connected', 'Winged')) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
   ylab(expression(paste("Linkage density (z-score)"))) +
