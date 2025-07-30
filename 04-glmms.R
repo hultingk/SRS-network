@@ -183,18 +183,50 @@ summary(m.floral.div)
 plot(simulateResiduals(m.floral.div))
 check_model(m.floral.div)
 
-
+exp(3.21803)
+exp(3.21803-0.20816)
 
 # no Apis
 m.floral.div.noApis <- glmmTMB(floral_div_noApis ~ patch + (1|block),
                         data = network_metrics,
                         family = "gaussian")
-m.floral.div.noApis <- glmmTMB(fl.rich.rare.noApis ~ patch + (1|block), # richness
+m.floral.div.noApis <- glmmTMB(fl.rich.no_Apis ~ patch + (1|block), # richness
                         data = network_metrics,
-                        family = "gaussian")
+                        family = "nbinom2")
 summary(m.floral.div.noApis)
 plot(simulateResiduals(m.floral.div.noApis))
 check_model(m.floral.div.noApis)
+(-3.698/21.616)*100
+(-0.36451/2.51352)*100
+
+exp(3.21770)
+exp(3.21770-0.21473)
+
+# plotting
+# model predictions for plotting
+m.floral.div.df <- network_metrics %>%
+  dplyr::select(c("block", "patch", "fl.rich.no_Apis"))
+m.floral.div.df$floral.div.pred <- predict(m.floral.div.noApis, re.form = NA)
+m.floral.div.df$patch <- factor(m.floral.div.df$patch, levels = c("B", "W"))
+# plotting
+floral.div.pred <- m.floral.div.df %>%
+  ggplot() +
+  geom_point(aes(x = patch, y = fl.rich.no_Apis, color = patch), size = 9, alpha = 0.7) + 
+  geom_line(aes(x = patch, y = fl.rich.no_Apis, group = block), linewidth = 2, color = "black", alpha = 0.2) +
+  geom_line(aes(x = patch, y = exp(floral.div.pred), group = block), linewidth = 4) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#506D8F","#E2A03C")) +
+  xlab("Patch Type") +
+  ylab(expression(paste("Floral richness"))) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  theme(axis.text = element_text(size = 30)) + # axis tick mark size
+  theme(axis.title = element_text(size = 34)) #+ # axis label size
+floral.div.pred
+
+pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
+floral.div.pred
+dev.off()
 
 
 # plotting
@@ -241,6 +273,12 @@ m.pollinator.div <- glmmTMB(pollinator_diversity ~ patch + (1|block),
 summary(m.pollinator.div)
 plot(simulateResiduals(m.pollinator.div))
 check_model(m.pollinator.div)
+
+# pollinator richness
+m.pollinator.rich <- glmmTMB(pollinator.rich ~ patch + (1|block),
+                            data = network_metrics,
+                            family = "poisson")
+summary(m.pollinator.rich)
 
 # no Apis
 m.pollinator.div.noApis <- glmmTMB(pollinator_div_noApis ~ patch + (1|block),

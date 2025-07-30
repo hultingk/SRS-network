@@ -72,17 +72,19 @@ pollinator <- pollinator %>%
 pollinator$flower_species <- str_replace(pollinator$flower_species, "Eupatorium glaucescens", "Eupatorium linearifolium")
 pollinator <- pollinator %>%
   mutate(flower_species = dplyr::case_when(
-    flower_species %in% c("Desmodium 1", "Desmodium 2", "Desmodium ciliare",
-                          "Desmodium fernaldii", "Desmodium marilandicum",
-                          "Desmodium obtusum", "Desmodium viridiflorum") ~ "Desmodium sp.",
+    #flower_species %in% c("Desmodium 1", "Desmodium 2", "Desmodium ciliare",
+    #                      "Desmodium fernaldii", "Desmodium marilandicum",
+    #                      "Desmodium obtusum", "Desmodium viridiflorum") ~ "Desmodium sp.",
     flower_species %in% c("Sericocarpus asteroides", "Sericocarpus tortifolius") ~ "Sericocarpus sp.",
     flower_species %in% c("Lespedeza angustifolia", "Lespedeza hirta",
                           "Lespedeza repens", "Lespedeza stuevei", "Lespedeza virginica", "Lespedeza cuneata") ~ "Lespedeza sp.",
+    flower_species %in% c("Tephrosia florida", "Tephrosia spicata") ~ "Tephrosia sp.",
+    flower_species %in% c("Solidago nemoralis", "Solidago odora") ~ "Solidago sp.",
     .default = flower_species
   ))
 # checking flower species
 pollinator %>%
-  dplyr::count(flower_species)
+  dplyr::count(flower_species, patch)
 
 # --------------------------- #
 #### pollinator species cleaning ####
