@@ -84,7 +84,9 @@ pollinator <- pollinator %>%
   ))
 # checking flower species
 pollinator %>%
-  dplyr::count(flower_species, patch)
+  dplyr::count(pollinator_species, flower_species) %>%
+  arrange(desc(n)) %>%
+  View()
 
 # --------------------------- #
 #### pollinator species cleaning ####
