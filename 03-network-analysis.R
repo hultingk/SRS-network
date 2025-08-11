@@ -337,14 +337,15 @@ network_dissimilarity$type <- factor(network_dissimilarity$type, levels=c("S", "
 
 
 dissimilarity_plot <- network_dissimilarity %>%
-  filter(type != "S") %>%
+  filter(!type %in% c("S", "WN")) %>%
   filter(real_pairs == "real") %>%
   ggplot() +
   geom_boxplot(aes(type, dissimilarity, fill = type)) +
   #geom_jitter(aes(type, dissimilarity)) +
   theme_classic() +
   scale_fill_brewer(palette = "Set2") +
-  scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
+  #scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
+  scale_x_discrete(labels = c(expression("Species turnover"), expression("Interaction rewiring"))) +
   ylim(c(0, 0.8)) +
   xlab("Dissimilarity component") +
   theme(legend.position = "none") +
@@ -353,7 +354,7 @@ dissimilarity_plot <- network_dissimilarity %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 dissimilarity_plot
 
-pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 12, height = 8)
+pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 8, height = 9)
 dissimilarity_plot
 dev.off()
 
