@@ -37,9 +37,9 @@ m.nestedness.noApis.df$patch <- factor(m.nestedness.noApis.df$patch, levels = c(
 # plotting
 nestedness.pred <- m.nestedness.noApis.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
-  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5, linetype = 3) +
-  geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.8) + 
+  geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
+  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5.5, linetype = 3) +
+  geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.95) + 
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
@@ -150,9 +150,9 @@ m.density.noApis.df$patch <- factor(m.density.noApis.df$patch, levels = c("B", "
 # plotting
 linkage.density.pred <- m.density.noApis.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "lightslategray", alpha = 0.5) +
-  geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5) +
-  geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.8) + 
+  geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
+  geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5.5) +
+  geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.95) + 
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
@@ -211,9 +211,9 @@ m.floral.div.df$patch <- factor(m.floral.div.df$patch, levels = c("B", "W"))
 # plotting
 floral.div.pred <- m.floral.div.df %>%
   ggplot() +
-  geom_point(aes(x = patch, y = fl.rich.no_Apis, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = fl.rich.no_Apis, group = block), linewidth = 2, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = exp(floral.div.pred), group = block), linewidth = 4) +
+  geom_point(aes(x = patch, y = fl.rich.no_Apis, color = patch), size = 9, alpha = 0.95) + 
+  geom_line(aes(x = patch, y = fl.rich.no_Apis, group = block), linewidth = 2, color = "grey25", alpha = 0.85) +
+  geom_line(aes(x = patch, y = exp(floral.div.pred), group = block), linewidth = 5.5) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +
   xlab("Patch Type") +
