@@ -3,10 +3,8 @@
 # Author: Katherine Hulting, hultingk@msu.edu
 # -------------------------------------- #
 
-# loading libaries
-library(tidyverse)
-library(iNEXT)
-library(bipartite)
+# loading libraries
+librarian::shelf(tidyverse, iNEXT, bipartite)
 
 # loading data 
 pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))

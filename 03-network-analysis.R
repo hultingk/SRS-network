@@ -3,12 +3,8 @@
 # Author: Katherine Hulting, hultingk@msu.edu
 # -------------------------------------- #
 
-# loading libaries
-library(tidyverse)
-library(bipartite)
-library(vegan)
-library(plyr)
-
+# loading libraries
+librarian::shelf(tidyverse, plyr, vegan, bipartite)
 
 
 # loading data 
@@ -354,9 +350,9 @@ dissimilarity_plot <- network_dissimilarity %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 dissimilarity_plot
 
-pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 8, height = 9)
-dissimilarity_plot
-dev.off()
+# pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 8, height = 9)
+# dissimilarity_plot
+# dev.off()
 
 turnover.rewiring <- network_dissimilarity %>%
   filter(type %in% c("OS", "ST"))

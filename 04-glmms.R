@@ -4,12 +4,8 @@
 # -------------------------------------- #
 
 # loading libraries 
-library(glmmTMB)
-library(DHARMa)
-library(performance)
-library(ggeffects)
-library(ggpubr)
-library(tidyverse)
+librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
+
 
 # load data
 network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
@@ -50,9 +46,9 @@ nestedness.pred <- m.nestedness.noApis.df %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 nestedness.pred
 
-pdf(file = file.path("plots", "nestedness_noApis.pdf"), width = 8, height = 10)
-nestedness.pred
-dev.off()
+# pdf(file = file.path("plots", "nestedness_noApis.pdf"), width = 8, height = 10)
+# nestedness.pred
+# dev.off()
 
 
 
@@ -93,10 +89,10 @@ h2.pred <- m.h2.noApis.df %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 h2.pred
 
-
-pdf(file = file.path("plots", "h2_noApis.pdf"), width = 8, height = 10)
-h2.pred
-dev.off()
+# 
+# pdf(file = file.path("plots", "h2_noApis.pdf"), width = 8, height = 10)
+# h2.pred
+# dev.off()
 
 
 
@@ -164,9 +160,9 @@ linkage.density.pred <- m.density.noApis.df %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 linkage.density.pred
 
-pdf(file = file.path("plots", "linkage.density_noApis.pdf"), width = 8, height = 10)
-linkage.density.pred
-dev.off()
+# pdf(file = file.path("plots", "linkage.density_noApis.pdf"), width = 8, height = 10)
+# linkage.density.pred
+# dev.off()
 
 
 
@@ -176,6 +172,9 @@ dev.off()
 m.floral.div <- glmmTMB(floral_diversity ~ patch + (1|block), # diversity
                    data = network_metrics,
                    family = "gaussian")
+m.floral.div <- glmmTMB(fl.rich.rare ~ patch + (1|block), # diversity
+                        data = network_metrics,
+                        family = "gaussian")
 m.floral.div <- glmmTMB(fl.rich ~ patch + (1|block), # richness
                         data = network_metrics,
                         family = "nbinom2")
@@ -190,9 +189,9 @@ exp(3.21803-0.20816)
 m.floral.div.noApis <- glmmTMB(floral_div_noApis ~ patch + (1|block),
                         data = network_metrics,
                         family = "gaussian")
-m.floral.div.noApis <- glmmTMB(fl.rich.no_Apis ~ patch + (1|block), # richness
+m.floral.div.noApis <- glmmTMB(fl.rich.rare.noApis ~ patch + (1|block), # richness
                         data = network_metrics,
-                        family = "nbinom2")
+                        family = "gaussian")
 summary(m.floral.div.noApis)
 plot(simulateResiduals(m.floral.div.noApis))
 check_model(m.floral.div.noApis)
@@ -224,9 +223,9 @@ floral.div.pred <- m.floral.div.df %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 floral.div.pred
 
-pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
-floral.div.pred
-dev.off()
+# pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
+# floral.div.pred
+# dev.off()
 
 
 # plotting
@@ -251,9 +250,9 @@ floral.div.pred <- m.floral.div.df %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 floral.div.pred
 
-pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
-floral.div.pred
-dev.off()
+# pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
+# floral.div.pred
+# dev.off()
 
 
 
@@ -311,9 +310,9 @@ pollinator_diversity.pred <- m.pollinator.div.df %>%
   theme(axis.title = element_text(size = 34)) #+ # axis label size
 pollinator_diversity.pred
 
-pdf(file = file.path("plots", "pollinator_diversity.pdf"), width = 8, height = 10)
-pollinator_diversity.pred
-dev.off()
+# pdf(file = file.path("plots", "pollinator_diversity.pdf"), width = 8, height = 10)
+# pollinator_diversity.pred
+# dev.off()
 
 
 
