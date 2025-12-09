@@ -172,9 +172,13 @@ linkage.density.pred
 m.floral.div <- glmmTMB(floral_diversity ~ patch + (1|block), # diversity
                    data = network_metrics,
                    family = "gaussian")
+summary(m.floral.div)
+
 m.floral.div <- glmmTMB(fl.rich.rare ~ patch + (1|block), # diversity
                         data = network_metrics,
                         family = "gaussian")
+summary(m.floral.div)
+
 m.floral.div <- glmmTMB(fl.rich ~ patch + (1|block), # richness
                         data = network_metrics,
                         family = "nbinom2")
@@ -189,6 +193,8 @@ exp(3.21803-0.20816)
 m.floral.div.noApis <- glmmTMB(floral_div_noApis ~ patch + (1|block),
                         data = network_metrics,
                         family = "gaussian")
+summary(m.floral.div.noApis)
+
 m.floral.div.noApis <- glmmTMB(fl.rich.rare.noApis ~ patch + (1|block), # richness
                         data = network_metrics,
                         family = "gaussian")
@@ -274,9 +280,9 @@ plot(simulateResiduals(m.pollinator.div))
 check_model(m.pollinator.div)
 
 # pollinator richness
-m.pollinator.rich <- glmmTMB(pollinator.rich ~ patch + (1|block),
+m.pollinator.rich <- glmmTMB(pollinator.rich.rare ~ patch + (1|block),
                             data = network_metrics,
-                            family = "poisson")
+                            family = "gaussian")
 summary(m.pollinator.rich)
 
 # no Apis
@@ -287,18 +293,24 @@ summary(m.pollinator.div.noApis)
 plot(simulateResiduals(m.pollinator.div.noApis))
 check_model(m.pollinator.div.noApis)
 
+m.pollinator.rich.noApis <- glmmTMB(pollinator.rich.rare.noApis ~ patch + (1|block),
+                             data = network_metrics,
+                             family = "gaussian")
+summary(m.pollinator.rich.noApis)
+
+
 
 # plotting
 # model predictions for plotting
 m.pollinator.div.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "pollinator_div_noApis"))
+  dplyr::select(c("block", "patch", "pollinator_diversity"))
 m.pollinator.div.df$pollinator_diversity.pred <- predict(m.pollinator.div, re.form = NA)
 m.pollinator.div.df$patch <- factor(m.pollinator.div.df$patch, levels = c("B", "W"))
 # plotting
 pollinator_diversity.pred <- m.pollinator.div.df %>%
   ggplot() +
-  geom_point(aes(x = patch, y = pollinator_div_noApis, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = pollinator_div_noApis, group = block), linewidth = 2, color = "black", alpha = 0.2) +
+  geom_point(aes(x = patch, y = pollinator_diversity, color = patch), size = 9, alpha = 0.7) + 
+  geom_line(aes(x = patch, y = pollinator_diversity, group = block), linewidth = 2, color = "black", alpha = 0.2) +
   geom_line(aes(x = patch, y = pollinator_diversity.pred, group = block), linewidth = 4) +
   scale_x_discrete(labels = c('Connected', 'Winged')) +
   scale_color_manual(values=c("#506D8F","#E2A03C")) +

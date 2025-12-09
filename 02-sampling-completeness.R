@@ -10,11 +10,11 @@ librarian::shelf(tidyverse, iNEXT, bipartite)
 pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
 
 # excluding non-identified pollinators for now
-sc_pollinator <- pollinator %>%
-  filter(!pollinator_species %in% c(" ", "")) 
+# sc_pollinator <- pollinator %>%
+#   filter(!pollinator_species %in% c(" ", "")) 
 
 # getting plant-pollinator data into correct format for sampling completeness estimation
-sc_pollinator <- sc_pollinator %>%
+sc_pollinator <- pollinator %>%
   mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>% # combining pollinator and flower into one column - creating interaction
   mutate(unique_ID = paste(block, patch, sep = ".")) %>% # creating unique ID for each patch
   dplyr::count(unique_ID, interaction) %>% # counting # of each interaction per patch
