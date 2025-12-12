@@ -19,16 +19,12 @@ pollinator <- pollinator %>%
                                    "0", "WASP", "LOST", "beetle", "NOT A POLLINATOR", "Butterfly", "", " ",
                                    "Mosquito", "damaged - missing from pin", "not a pollinator"))
 
-# grouping Erynnis species 
-pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Erynnis horatius", "Erynnis sp.")
-pollinator$pollinator_species <- str_replace(pollinator$pollinator_species, "Erynnis zarucco", "Erynnis sp.")
-
+# grouping some sets of species 
 pollinator <- pollinator %>%
   mutate(pollinator_species = dplyr::case_when(
+    pollinator_species %in% c("Erynnis horatius", "Erynnis zarucco") ~ "Erynnis sp.", # grouping Erynnis species 
     pollinator_species %in% c("Zodion sp.1", "Zodion sp.2") ~ "Zodion sp.",
     pollinator_species %in% c("Melissodes communis", "Melissodes sp.") ~ "Melissodes sp.01",
-    pollinator_species %in% c("Milichiinae sp.", "Milichiidae sp.") ~ "Milichiidae sp.",
-    pollinator_species %in% c("small Acalyptrate fly", "tiny Acalyptrate fly") ~ "Acalyptrate sp.01",
     .default = pollinator_species
   )) %>%
   filter(!pollinator_species %in% c("Lasioglossum sp.", "Skipper sp."))
@@ -55,6 +51,7 @@ pollinator <- pollinator %>%
     genus %in% c("Cochliomyia", "Lucilia") ~ "Calliphoridae",
     genus %in% c("Colletes", "Hylaeus") ~ "Colletidae",
     genus %in% c("Physoconops", "Zodion") ~ "Conopidae",
+    genus %in% c("Chloropidae") ~ "Chloropidae",
     genus %in% c("Tabanidae") ~ "Tabanidae",
     genus %in% c("Calyptratae") ~ "Calyptratae", 
     genus %in% c("Perdita") ~ "Andrenidae",
@@ -66,9 +63,14 @@ pollinator <- pollinator %>%
   )) %>% 
   mutate(order = dplyr::case_when(
     family %in% c("Apidae", "Colletidae", "Halictidae", "Megachilidae", "Andrenidae") ~ "Hymenoptera",
-    family %in% c("Bombyliidae", "Calliphoridae", "Conopidae", "Syrphidae", "Tabanidae", "Tachinidae", "Calyptratae", "Platystomatidae", "Sarcophagidae", "Dolichopodidae", "Acalyptrate", "Milichiidae") ~ "Diptera",
+    family %in% c("Bombyliidae", "Calliphoridae", "Conopidae", "Chloropidae", "Syrphidae", "Tabanidae", "Tachinidae", "Calyptratae", "Platystomatidae", "Sarcophagidae", "Dolichopodidae", "Acalyptrate", "Milichiidae") ~ "Diptera",
     family %in% c("Hesperiidae", "Lycaenidae", "Nymphalidae", "Papilionidae", "Pieridae") ~ "Lepidoptera"
   ))
+
+
+# removing fly not IDed to family level
+pollinator <- pollinator %>%
+  filter(!family %in% c("Acalyptrate"))
 
 
 # --------------------------- #
@@ -90,7 +92,6 @@ pollinator <- pollinator %>%
                           "Liatris virgata") ~ "Liatris sp.",
     .default = flower_species
   ))
-
 
 
 
