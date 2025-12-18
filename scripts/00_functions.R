@@ -12,12 +12,45 @@ prepare_matrix <- function(df) {
 }
 
 ####### NULL DISTRIBUTION FUNCTIONS #######
+# Null distribution function for connectance 
+net.null.connect = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'connectance'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
+# Null distribution function for weighted 
+net.null.weightconnect = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'weighted connectance'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
 # Null distribution function for nestedness 
 net.null.nest = function(nulls){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
     net.null.metric[[i]] = do.call('rbind', 
                                    lapply(nulls[[i]], networklevel, index = 'NODF'))
+  }
+  names(net.null.metric) <- webs.names
+  return(net.null.metric)
+}
+
+# Null distribution function for weighted nestedness 
+net.null.weightnest = function(nulls){
+  net.null.metric <- list()
+  for (i in 1:length(nulls)) {
+    net.null.metric[[i]] = do.call('rbind', 
+                                   lapply(nulls[[i]], networklevel, index = 'weighted NODF'))
   }
   names(net.null.metric) <- webs.names
   return(net.null.metric)
@@ -76,6 +109,28 @@ net.zscore = function(obsval, nullval) {
   (obsval - mean(nullval))/sd(nullval)  
 } 
 
+# Function that perform z-score calculation of connectance using the observed and null networks
+connect.zscore = function(nulltype){
+  net.connect.zscore <- list() 
+  for(i in 1:length(net.metrics.connect)){
+    net.connect.zscore[[i]] = net.zscore(net.metrics.connect[[i]]['connectance'], 
+                                               nulltype[[i]][ ,'connectance'])
+  }
+  names(net.connect.zscore) <- webs.names
+  return(net.connect.zscore)
+}
+
+# Function that perform z-score calculation of weighted connectance using the observed and null networks
+weightconnect.zscore = function(nulltype){
+  net.weightconnect.zscore <- list() 
+  for(i in 1:length(net.metrics.weightconnect)){
+    net.weightconnect.zscore[[i]] = net.zscore(net.metrics.weightconnect[[i]]['weighted connectance'], 
+                                      nulltype[[i]][ ,'weighted connectance'])
+  }
+  names(net.weightconnect.zscore) <- webs.names
+  return(net.weightconnect.zscore)
+}
+
 # Function that perform z-score calculation of nestedness using the observed and null networks
 nest.zscore = function(nulltype){
   net.nest.zscore <- list() 
@@ -85,6 +140,17 @@ nest.zscore = function(nulltype){
   }
   names(net.nest.zscore) <- webs.names
   return(net.nest.zscore)
+}
+
+# Function that perform z-score calculation of weighted nestedness using the observed and null networks
+weightnest.zscore = function(nulltype){
+  net.weightnest.zscore <- list() 
+  for(i in 1:length(net.metrics.weightnest)){
+    net.weightnest.zscore[[i]] = net.zscore(net.metrics.weightnest[[i]]['weighted NODF'], 
+                                      nulltype[[i]][ ,'weighted NODF'])
+  }
+  names(net.weightnest.zscore) <- webs.names
+  return(net.weightnest.zscore)
 }
 
 # Function that perform z-score calculation of specialization using the observed and null networks
