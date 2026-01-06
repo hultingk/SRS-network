@@ -9,85 +9,133 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 
 # load data
 network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
+diversity_metrics <- read.csv(file = file.path("data", "diversity_metrics.csv"))
+
+#### connectance ####
+# no vaznull metric for connectance
+# unconnected patches have higher connectance, even excluding Apis
+m.connect.r2d <- glmmTMB(r2d.connect ~ patch + (1|block),
+                         data = network_metrics)
+summary(m.connect.r2d)
+m.connect.r2d_noApis <- glmmTMB(r2d.connect_noApis ~ patch + (1|block),
+                         data = network_metrics)
+summary(m.connect.r2d_noApis)
+
+#### weighted connectance ####
+# no vaznull metric for weighted connectance
+# no difference in weighted connectance including apis, slightly higher connectance in unconnected patches excluding apis
+m.weightconnect.r2d <- glmmTMB(r2d.weightconnect ~ patch + (1|block),
+                         data = network_metrics)
+summary(m.weightconnect.r2d)
+m.weightconnect.r2d_noApis <- glmmTMB(r2d.weightconnect_noApis ~ patch + (1|block),
+                                data = network_metrics)
+summary(m.weightconnect.r2d_noApis)
+
 
 
 #### nestedness ####
-m.nestedness <- glmmTMB(NODF ~ patch + (1|block),
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.nestedness)
-plot(simulateResiduals(m.nestedness))
-check_model(m.nestedness)
+m.nestedness.r2d <- glmmTMB(r2d.NODF ~ patch + (1|block), # no difference
+                        data = network_metrics)
+summary(m.nestedness.r2d)
 
-m.nestedness.noApis <- glmmTMB(NODF_noApis ~ patch + (1|block),
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.nestedness.noApis)
+m.nestedness.r2d_noApis <- glmmTMB(r2d.NODF_noApis ~ patch + (1|block), # no difference
+                        data = network_metrics)
+summary(m.nestedness.r2d_noApis)
 
-# plotting NO APIS
-# model predictions for plotting
-m.nestedness.noApis.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "NODF_noApis"))
-m.nestedness.noApis.df$nestedness_pred <- predict(m.nestedness.noApis, re.form = NA)
-m.nestedness.noApis.df$patch <- factor(m.nestedness.noApis.df$patch, levels = c("B", "W"))
-# plotting
-nestedness.pred <- m.nestedness.noApis.df %>%
-  ggplot() +
-  geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
-  geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5.5, linetype = 3) +
-  geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.95) + 
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#506D8F","#E2A03C")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("NODF (z-score)"))) +
-  theme_classic() +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-nestedness.pred
+m.nestedness.vaz <- glmmTMB(vaz.NODF ~ patch + (1|block), # significantly lower in connected patches 
+                            data = network_metrics)
+summary(m.nestedness.vaz)
+
+m.nestedness.vaz_noApis <- glmmTMB(vaz.NODF_noApis ~ patch + (1|block), # no difference
+                                   data = network_metrics)
+summary(m.nestedness.vaz_noApis)
+
+# # plotting NO APIS
+# # model predictions for plotting
+# m.nestedness.noApis.df <- network_metrics %>%
+#   dplyr::select(c("block", "patch", "NODF_noApis"))
+# m.nestedness.noApis.df$nestedness_pred <- predict(m.nestedness.noApis, re.form = NA)
+# m.nestedness.noApis.df$patch <- factor(m.nestedness.noApis.df$patch, levels = c("B", "W"))
+# # plotting
+# nestedness.pred <- m.nestedness.noApis.df %>%
+#   ggplot() +
+#   geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
+#   geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5.5, linetype = 3) +
+#   geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.95) + 
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   scale_color_manual(values=c("#506D8F","#E2A03C")) +
+#   xlab("Patch Type") +
+#   ylab(expression(paste("NODF (z-score)"))) +
+#   theme_classic() +
+#   theme(legend.position = "none") +
+#   theme(axis.text = element_text(size = 30)) + # axis tick mark size
+#   theme(axis.title = element_text(size = 34)) #+ # axis label size
+# nestedness.pred
 
 # pdf(file = file.path("plots", "nestedness_noApis.pdf"), width = 8, height = 10)
 # nestedness.pred
 # dev.off()
 
+#### weighted nestedness ####
+m.weightnest.r2d <- glmmTMB(r2d.weightedNODF ~ patch + (1|block), # no difference
+                            data = network_metrics)
+summary(m.weightnest.r2d)
 
+m.weightnest.r2d_noApis <- glmmTMB(r2d.weightedNODF_noApis ~ patch + (1|block), # no difference
+                                   data = network_metrics)
+summary(m.weightnest.r2d_noApis)
+
+m.weightnest.vaz <- glmmTMB(vaz.weightedNODF ~ patch + (1|block), # marginally significantly lower in connected patches 
+                            data = network_metrics)
+summary(m.weightnest.vaz)
+
+m.weightnest.vaz_noApis <- glmmTMB(vaz.weightedNODF_noApis ~ patch + (1|block), # no difference
+                                   data = network_metrics)
+summary(m.weightnest.vaz_noApis)
 
 
 #### H2' ####
-m.h2 <- glmmTMB(H2 ~ patch + (1|block),
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.h2)
-plot(simulateResiduals(m.h2))
-check_model(m.h2)
+m.h2.r2d <- glmmTMB(r2d.h2 ~ patch + (1|block), # no difference
+                        data = network_metrics)
+summary(m.h2.r2d)
 
-m.h2.noApis <- glmmTMB(h2_noApis ~ patch + (1|block),
-                data = network_metrics,
-                family = "gaussian")
-summary(m.h2.noApis)
-(2.1497/5.4302)*100 # 39.58786 less nested
-# plotting
-# model predictions for plotting
-m.h2.noApis.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "h2_noApis"))
-m.h2.noApis.df$h2.pred <- predict(m.h2.noApis, re.form = NA)
-m.h2.noApis.df$patch <- factor(m.h2.noApis.df$patch, levels = c("B", "W"))
-# plotting
-h2.pred <- m.h2.noApis.df %>%
-  ggplot() +
-  geom_line(aes(x = patch, y = h2_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
-  geom_line(aes(x = patch, y = h2.pred, group = block), linewidth = 5, linetype = 1) +
-  geom_point(aes(x = patch, y = h2_noApis, color = patch), size = 11, alpha = 0.8) + 
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#506D8F","#E2A03C")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("H2' (z-score)"))) +
-  theme_classic() +
-  ylim(c(2, 17)) +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-h2.pred
+m.h2.r2d_noApis <- glmmTMB(r2d.h2_noApis ~ patch + (1|block), # no difference
+                data = network_metrics)
+summary(m.h2.r2d_noApis)
+
+m.h2.vaz <- glmmTMB(vaz.h2 ~ patch + (1|block), # significantly higher in unconnected patches
+                    data = network_metrics)
+summary(m.h2.vaz)
+
+m.h2.vaz_noApis <- glmmTMB(vaz.h2_noApis ~ patch + (1|block), # no difference
+                           data = network_metrics)
+summary(m.h2.vaz_noApis)
+
+
+# 
+# (2.1497/5.4302)*100 # 39.58786 less nested
+# # plotting
+# # model predictions for plotting
+# m.h2.noApis.df <- network_metrics %>%
+#   dplyr::select(c("block", "patch", "h2_noApis"))
+# m.h2.noApis.df$h2.pred <- predict(m.h2.noApis, re.form = NA)
+# m.h2.noApis.df$patch <- factor(m.h2.noApis.df$patch, levels = c("B", "W"))
+# # plotting
+# h2.pred <- m.h2.noApis.df %>%
+#   ggplot() +
+#   geom_line(aes(x = patch, y = h2_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
+#   geom_line(aes(x = patch, y = h2.pred, group = block), linewidth = 5, linetype = 1) +
+#   geom_point(aes(x = patch, y = h2_noApis, color = patch), size = 11, alpha = 0.8) + 
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   scale_color_manual(values=c("#506D8F","#E2A03C")) +
+#   xlab("Patch Type") +
+#   ylab(expression(paste("H2' (z-score)"))) +
+#   theme_classic() +
+#   ylim(c(2, 17)) +
+#   theme(legend.position = "none") +
+#   theme(axis.text = element_text(size = 30)) + # axis tick mark size
+#   theme(axis.title = element_text(size = 34)) #+ # axis label size
+# h2.pred
 
 # 
 # pdf(file = file.path("plots", "h2_noApis.pdf"), width = 8, height = 10)
@@ -98,67 +146,91 @@ h2.pred
 
 
 #### interaction diversity ####
-m.interaction.div <- glmmTMB(Shannon.diversity ~ patch + (1|block),
-                data = network_metrics,
-                family = "gaussian")
-summary(m.interaction.div)
-plot(simulateResiduals(m.interaction.div))
-check_model(m.interaction.div)
+m.shannon.r2d <- glmmTMB(r2d.shannon ~ patch + (1|block), # no difference
+                    data = network_metrics)
+summary(m.shannon.r2d)
 
-m.interaction.div.noApis <- glmmTMB(shannon_noApis ~ patch + (1|block),
-                             data = network_metrics,
-                             family = "gaussian")
-summary(m.interaction.div.noApis)
-(-5.633/-4.397)*100
+m.shannon.r2d_noApis <- glmmTMB(r2d.shannon_noApis ~ patch + (1|block), # no difference
+                           data = network_metrics)
+summary(m.shannon.r2d_noApis)
+
+m.shannon.vaz <- glmmTMB(vaz.shannon ~ patch + (1|block), # no difference
+                    data = network_metrics)
+summary(m.shannon.vaz)
+
+m.shannon.vaz_noApis <- glmmTMB(vaz.shannon_noApis ~ patch + (1|block), # no difference
+                           data = network_metrics)
+summary(m.shannon.vaz_noApis)
+
+
+
+
+
 #### links per species ####
-m.links <- glmmTMB(links.per.species ~ patch + (1|block),
-                             data = network_metrics,
-                             family = "gaussian")
-summary(m.links)
-plot(simulateResiduals(m.links))
-check_model(m.links)
+m.links.r2d <- glmmTMB(r2d.links ~ patch + (1|block), # sig higher in unconnected patches
+                         data = network_metrics)
+summary(m.links.r2d)
 
-m.links.noApis <- glmmTMB(links_noApis ~ patch + (1|block),
-                   data = network_metrics,
-                   family = "gaussian")
-summary(m.links.noApis)
+m.links.r2d_noApis <- glmmTMB(r2d.links_noApis ~ patch + (1|block), # sig higher in unconnected patches
+                                data = network_metrics)
+summary(m.links.r2d_noApis)
+
+links.raw <- as.data.frame(do.call('rbind', net.metrics.links) )
+links.raw <- links.raw %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(links.raw = `links per species`)
+m.links.raw <- glmmTMB(links.raw ~ patch + (1|block), # sig lower in unconnected patches
+                         data = links.raw)
+summary(m.links.raw)
+
+m.links.vaz_noApis <- glmmTMB(vaz.links_noApis ~ patch + (1|block), # NA values
+                                data = network_metrics)
+summary(m.links.vaz_noApis)
+
 
 
 #### linkage density ####
-m.density <- glmmTMB(linkage.density ~ patch + (1|block),
-                   data = network_metrics,
-                   family = "gaussian")
-summary(m.density)
-plot(simulateResiduals(m.density))
-check_model(m.density)
+m.density.r2d <- glmmTMB(r2d.density ~ patch + (1|block), # no diff
+                       data = network_metrics)
+summary(m.density.r2d)
 
-m.density.noApis <- glmmTMB(density_noApis ~ patch + (1|block),
-                     data = network_metrics,
-                     family = "gaussian")
-summary(m.density.noApis)
-(-0.8167/4.8001)*100 #17% decrease in linkage density
-# plotting
-# model predictions for plotting
-m.density.noApis.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "density_noApis"))
-m.density.noApis.df$linkage.density.pred <- predict(m.density.noApis, re.form = NA)
-m.density.noApis.df$patch <- factor(m.density.noApis.df$patch, levels = c("B", "W"))
-# plotting
-linkage.density.pred <- m.density.noApis.df %>%
-  ggplot() +
-  geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
-  geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5.5) +
-  geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.95) + 
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#506D8F","#E2A03C")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("Linkage density (z-score)"))) +
-  theme_classic() +
-  ylim(c(2.5, 5.5)) +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-linkage.density.pred
+m.density.r2d_noApis <- glmmTMB(r2d.density_noApis ~ patch + (1|block), # sig higher in unconnected patches
+                              data = network_metrics)
+summary(m.density.r2d_noApis)
+
+m.density.raw <- glmmTMB(vaz.density ~ patch + (1|block), # marginally significantly lower in unconnected patches
+                       data = network_metrics)
+summary(m.density.vaz)
+
+m.density.vaz_noApis <- glmmTMB(vaz.density_noApis ~ patch + (1|block), # no diff
+                              data = network_metrics)
+summary(m.density.vaz_noApis)
+
+# 
+# (-0.8167/4.8001)*100 #17% decrease in linkage density
+# # plotting
+# # model predictions for plotting
+# m.density.noApis.df <- network_metrics %>%
+#   dplyr::select(c("block", "patch", "density_noApis"))
+# m.density.noApis.df$linkage.density.pred <- predict(m.density.noApis, re.form = NA)
+# m.density.noApis.df$patch <- factor(m.density.noApis.df$patch, levels = c("B", "W"))
+# # plotting
+# linkage.density.pred <- m.density.noApis.df %>%
+#   ggplot() +
+#   geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
+#   geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5.5) +
+#   geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.95) + 
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   scale_color_manual(values=c("#506D8F","#E2A03C")) +
+#   xlab("Patch Type") +
+#   ylab(expression(paste("Linkage density (z-score)"))) +
+#   theme_classic() +
+#   ylim(c(2.5, 5.5)) +
+#   theme(legend.position = "none") +
+#   theme(axis.text = element_text(size = 30)) + # axis tick mark size
+#   theme(axis.title = element_text(size = 34)) #+ # axis label size
+# linkage.density.pred
 
 # pdf(file = file.path("plots", "linkage.density_noApis.pdf"), width = 8, height = 10)
 # linkage.density.pred
@@ -167,171 +239,165 @@ linkage.density.pred
 
 
 
-#### flower diversity ####
-# with Apis
-m.floral.div <- glmmTMB(floral_diversity ~ patch + (1|block), # diversity
-                   data = network_metrics,
-                   family = "gaussian")
-summary(m.floral.div)
+#### DIVERSITY and ABUNDANCE ####
+#### abundance ####
+# abundance all interactions
+m.abundance <- glmmTMB(abundance ~ patch + (1|block), # no difference
+                       data = diversity_metrics, 
+                       family = "nbinom2")
+summary(m.abundance)
 
-m.floral.div <- glmmTMB(fl.rich.rare ~ patch + (1|block), # diversity
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.floral.div)
+# abundance no apis
+m.abundance_noApis <- glmmTMB(abundance_noApis ~ patch + (1|block), # significantly lower in unconnected
+                       data = diversity_metrics, 
+                       family = "nbinom2")
+summary(m.abundance_noApis)
 
-m.floral.div <- glmmTMB(fl.rich ~ patch + (1|block), # richness
-                        data = network_metrics,
+# abundance no poe
+m.abundance_noPoe <- glmmTMB(abundance_noPoe ~ patch + (1|block), # no difference
+                              data = diversity_metrics, 
+                              family = "nbinom2")
+summary(m.abundance_noPoe)
+
+# abundance no poe or apis
+m.abundance_noApis_Poe <- glmmTMB(abundance_noApis_Poe ~ patch + (1|block), # significantly lower in unconnected
+                             data = diversity_metrics, 
+                             family = "nbinom2")
+summary(m.abundance_noApis_Poe)
+
+# abundance butterflies
+m.abundance_lep <- glmmTMB(abundance_lep ~ patch + (1|block), # marginally significantly lower in unconnected
+                        data = diversity_metrics, 
                         family = "nbinom2")
-summary(m.floral.div)
-plot(simulateResiduals(m.floral.div))
-check_model(m.floral.div)
+summary(m.abundance_lep)
 
-exp(3.21803)
-exp(3.21803-0.20816)
+# abundance bee
+m.abundance_bee <- glmmTMB(abundance_bee ~ patch + (1|block), # no difference
+                           data = diversity_metrics, 
+                           family = "nbinom2")
+summary(m.abundance_bee)
 
-# no Apis
-m.floral.div.noApis <- glmmTMB(floral_div_noApis ~ patch + (1|block),
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.floral.div.noApis)
-
-m.floral.div.noApis <- glmmTMB(fl.rich.rare.noApis ~ patch + (1|block), # richness
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.floral.div.noApis)
-plot(simulateResiduals(m.floral.div.noApis))
-check_model(m.floral.div.noApis)
-(-3.698/21.616)*100
-(-0.36451/2.51352)*100
-
-exp(3.21770)
-exp(3.21770-0.21473)
-
-# plotting
-# model predictions for plotting
-m.floral.div.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "fl.rich.no_Apis"))
-m.floral.div.df$floral.div.pred <- predict(m.floral.div.noApis, re.form = NA)
-m.floral.div.df$patch <- factor(m.floral.div.df$patch, levels = c("B", "W"))
-# plotting
-floral.div.pred <- m.floral.div.df %>%
-  ggplot() +
-  geom_point(aes(x = patch, y = fl.rich.no_Apis, color = patch), size = 9, alpha = 0.95) + 
-  geom_line(aes(x = patch, y = fl.rich.no_Apis, group = block), linewidth = 2, color = "grey25", alpha = 0.85) +
-  geom_line(aes(x = patch, y = exp(floral.div.pred), group = block), linewidth = 5.5) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#506D8F","#E2A03C")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("Floral richness"))) +
-  theme_classic() +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-floral.div.pred
-
-# pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
-# floral.div.pred
-# dev.off()
+# abundance fly
+m.abundance_fly <- glmmTMB(abundance_fly ~ patch + (1|block), # no difference
+                           data = diversity_metrics, 
+                           family = "nbinom2")
+summary(m.abundance_fly)
 
 
-# plotting
-# model predictions for plotting
-m.floral.div.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "floral_diversity"))
-m.floral.div.df$floral.div.pred <- predict(m.floral.div, re.form = NA)
-m.floral.div.df$patch <- factor(m.floral.div.df$patch, levels = c("B", "W"))
-# plotting
-floral.div.pred <- m.floral.div.df %>%
-  ggplot() +
-  geom_point(aes(x = patch, y = floral_diversity, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = floral_diversity, group = block), linewidth = 2, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = floral.div.pred, group = block), linewidth = 4) +
-  scale_x_discrete(labels = c('Connected', 'Winged')) +
-  scale_color_manual(values=c("#506D8F","#E2A03C")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("Floral diversity (shannon)"))) +
-  theme_classic() +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-floral.div.pred
+##### floral diversity #####
+### ALTOGETHER - pollinators are interacting with a lower floral diversity in unconnected patches, but this effect goes away when taking out the most dominant fly species 
+# shannon all species
+m.floral_1 <- glmmTMB(floral_1 ~ patch + (1|block), # significantly lower in unconnected
+                      data = diversity_metrics)
+summary(m.floral_1)
 
-# pdf(file = file.path("plots", "floral_diversity.pdf"), width = 8, height = 10)
-# floral.div.pred
-# dev.off()
+# simpsons all species
+m.floral_2 <- glmmTMB(floral_2 ~ patch + (1|block), # significantly lower in unconnected
+                      data = diversity_metrics)
+summary(m.floral_2)
+
+# shannon no apis
+m.floral_noApis_1 <- glmmTMB(floral_noApis_1 ~ patch + (1|block), # significantly lower in unconnected
+                      data = diversity_metrics)
+summary(m.floral_noApis_1)
+
+# simpsons no apis
+m.floral_noApis_2 <- glmmTMB(floral_noApis_2 ~ patch + (1|block), # significantly lower in unconnected
+                      data = diversity_metrics)
+summary(m.floral_noApis_2)
+
+# shannon no poe
+m.floral_noPoe_1 <- glmmTMB(floral_noPoe_1 ~ patch + (1|block), # no difference
+                             data = diversity_metrics)
+summary(m.floral_noPoe_1)
+
+# simpsons no poe
+m.floral_noPoe_2 <- glmmTMB(floral_noPoe_2 ~ patch + (1|block), # no difference
+                             data = diversity_metrics)
+summary(m.floral_noPoe_2)
+
+# shannon no poe and apis
+m.floral_noPoe_Apis_1 <- glmmTMB(floral_noPoe_Apis_1 ~ patch + (1|block), # no difference
+                            data = diversity_metrics)
+summary(m.floral_noPoe_Apis_1)
+
+# simpsons no poe and apis
+m.floral_noPoe_Apis_2 <- glmmTMB(floral_noPoe_Apis_2 ~ patch + (1|block), # no difference
+                            data = diversity_metrics)
+summary(m.floral_noPoe_Apis_2)
 
 
 
 
 
+##### pollinator diversity #####
+# lower pollinator diversity in unconnected patches no matter what metric
+# shannon all species
+m.pollinator_1 <- glmmTMB(pollinator_1 ~ patch + (1|block), # significantly lower in unconnected
+                      data = diversity_metrics)
+summary(m.pollinator_1)
+
+# simpsons all species
+m.pollinator_2 <- glmmTMB(pollinator_2 ~ patch + (1|block), # significantly lower in unconnected
+                      data = diversity_metrics)
+summary(m.pollinator_2)
+
+# shannon no apis
+m.pollinator_noApis_1 <- glmmTMB(pollinator_noApis_1 ~ patch + (1|block), # significantly lower in unconnected
+                             data = diversity_metrics)
+summary(m.pollinator_noApis_1)
+
+# simpsons no apis
+m.pollinator_noApis_2 <- glmmTMB(pollinator_noApis_2 ~ patch + (1|block), # significantly lower in unconnected
+                             data = diversity_metrics)
+summary(m.pollinator_noApis_2)
+
+# shannon no poe
+m.pollinator_noPoe_1 <- glmmTMB(pollinator_noPoe_1 ~ patch + (1|block), # significantly lower in unconnected
+                            data = diversity_metrics)
+summary(m.pollinator_noPoe_1)
+
+# simpsons no poe
+m.pollinator_noPoe_2 <- glmmTMB(pollinator_noPoe_2 ~ patch + (1|block), # significantly lower in unconnected
+                            data = diversity_metrics)
+summary(m.pollinator_noPoe_2)
+
+# shannon no poe and apis
+m.pollinator_noPoe_Apis_1 <- glmmTMB(pollinator_noPoe_Apis_1 ~ patch + (1|block), # significantly lower in unconnected
+                                 data = diversity_metrics)
+summary(m.pollinator_noPoe_Apis_1)
+-2.3491/26.4289 * 100 # 8.9% decrease
+
+# simpsons no poe and apis
+m.pollinator_noPoe_Apis_2 <- glmmTMB(pollinator_noPoe_Apis_2 ~ patch + (1|block), # significantly lower in unconnected
+                                 data = diversity_metrics)
+summary(m.pollinator_noPoe_Apis_2)
 
 
 
 
+##### order diversity ####
+m.lep_1 <- glmmTMB(lep_1 ~ patch + (1|block), # no difference
+                   data = diversity_metrics)
+summary(m.lep_1)
 
+m.lep_2 <- glmmTMB(lep_2 ~ patch + (1|block), # no difference
+                   data = diversity_metrics)
+summary(m.lep_2)
 
+m.bee_1 <- glmmTMB(bee_1 ~ patch + (1|block), # marginally significantly lower in unconnected patches
+                   data = diversity_metrics)
+summary(m.bee_1)
 
-#### pollinator diversity ####
-m.pollinator.div <- glmmTMB(pollinator_diversity ~ patch + (1|block),
-                        data = network_metrics,
-                        family = "gaussian")
-summary(m.pollinator.div)
-plot(simulateResiduals(m.pollinator.div))
-check_model(m.pollinator.div)
+m.bee_2 <- glmmTMB(bee_2 ~ patch + (1|block), # no difference
+                   data = diversity_metrics)
+summary(m.bee_2)
 
-# pollinator richness
-m.pollinator.rich <- glmmTMB(pollinator.rich.rare ~ patch + (1|block),
-                            data = network_metrics,
-                            family = "gaussian")
-summary(m.pollinator.rich)
+m.fly_1 <- glmmTMB(fly_1 ~ patch + (1|block), # no difference
+                   data = diversity_metrics)
+summary(m.fly_1)
 
-# no Apis
-m.pollinator.div.noApis <- glmmTMB(pollinator_div_noApis ~ patch + (1|block),
-                            data = network_metrics,
-                            family = "gaussian")
-summary(m.pollinator.div.noApis)
-plot(simulateResiduals(m.pollinator.div.noApis))
-check_model(m.pollinator.div.noApis)
-
-m.pollinator.rich.noApis <- glmmTMB(pollinator.rich.rare.noApis ~ patch + (1|block),
-                             data = network_metrics,
-                             family = "gaussian")
-summary(m.pollinator.rich.noApis)
-
-
-
-# plotting
-# model predictions for plotting
-m.pollinator.div.df <- network_metrics %>%
-  dplyr::select(c("block", "patch", "pollinator_diversity"))
-m.pollinator.div.df$pollinator_diversity.pred <- predict(m.pollinator.div, re.form = NA)
-m.pollinator.div.df$patch <- factor(m.pollinator.div.df$patch, levels = c("B", "W"))
-# plotting
-pollinator_diversity.pred <- m.pollinator.div.df %>%
-  ggplot() +
-  geom_point(aes(x = patch, y = pollinator_diversity, color = patch), size = 9, alpha = 0.7) + 
-  geom_line(aes(x = patch, y = pollinator_diversity, group = block), linewidth = 2, color = "black", alpha = 0.2) +
-  geom_line(aes(x = patch, y = pollinator_diversity.pred, group = block), linewidth = 4) +
-  scale_x_discrete(labels = c('Connected', 'Winged')) +
-  scale_color_manual(values=c("#506D8F","#E2A03C")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("Pollinator diversity (shannon)"))) +
-  theme_classic() +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-pollinator_diversity.pred
-
-# pdf(file = file.path("plots", "pollinator_diversity.pdf"), width = 8, height = 10)
-# pollinator_diversity.pred
-# dev.off()
-
-
-
-
-
-
-
-
-
+m.fly_2 <- glmmTMB(fly_2 ~ patch + (1|block), # no difference
+                   data = diversity_metrics)
+summary(m.fly_2)
 

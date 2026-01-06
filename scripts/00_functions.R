@@ -109,90 +109,100 @@ net.zscore = function(obsval, nullval) {
   (obsval - mean(nullval))/sd(nullval)  
 } 
 
-# Function that perform z-score calculation of connectance using the observed and null networks
-connect.zscore = function(nulltype){
-  net.connect.zscore <- list() 
-  for(i in 1:length(net.metrics.connect)){
-    net.connect.zscore[[i]] = net.zscore(net.metrics.connect[[i]]['connectance'], 
-                                               nulltype[[i]][ ,'connectance'])
+zscore_metric = function(obsval, nullval, metric){
+  zscore_values <- list() 
+  for(i in 1:length(obsval)){
+    zscore_values[[i]] = net.zscore(obsval[[i]][metric], 
+                                         nullval[[i]][ ,metric])
   }
-  names(net.connect.zscore) <- webs.names
-  return(net.connect.zscore)
+  names(zscore_values) <- webs.names
+  return(zscore_values)
 }
 
-# Function that perform z-score calculation of weighted connectance using the observed and null networks
-weightconnect.zscore = function(nulltype){
-  net.weightconnect.zscore <- list() 
-  for(i in 1:length(net.metrics.weightconnect)){
-    net.weightconnect.zscore[[i]] = net.zscore(net.metrics.weightconnect[[i]]['weighted connectance'], 
-                                      nulltype[[i]][ ,'weighted connectance'])
-  }
-  names(net.weightconnect.zscore) <- webs.names
-  return(net.weightconnect.zscore)
-}
-
-# Function that perform z-score calculation of nestedness using the observed and null networks
-nest.zscore = function(nulltype){
-  net.nest.zscore <- list() 
-  for(i in 1:length(net.metrics.nest)){
-    net.nest.zscore[[i]] = net.zscore(net.metrics.nest[[i]]['NODF'], 
-                                      nulltype[[i]][ ,'NODF'])
-  }
-  names(net.nest.zscore) <- webs.names
-  return(net.nest.zscore)
-}
-
-# Function that perform z-score calculation of weighted nestedness using the observed and null networks
-weightnest.zscore = function(nulltype){
-  net.weightnest.zscore <- list() 
-  for(i in 1:length(net.metrics.weightnest)){
-    net.weightnest.zscore[[i]] = net.zscore(net.metrics.weightnest[[i]]['weighted NODF'], 
-                                      nulltype[[i]][ ,'weighted NODF'])
-  }
-  names(net.weightnest.zscore) <- webs.names
-  return(net.weightnest.zscore)
-}
-
-# Function that perform z-score calculation of specialization using the observed and null networks
-h2.zscore = function(nulltype){
-  net.h2.zscore <- list() 
-  for(i in 1:length(net.metrics.h2)){
-    net.h2.zscore[[i]] = net.zscore(net.metrics.h2[[i]]['H2'], 
-                                    nulltype[[i]][ ,'H2'])
-  }
-  names(net.h2.zscore) <- webs.names
-  return(net.h2.zscore)
-}
-
-# Function that perform z-score calculation of interaction diversity using the observed and null networks
-diversity.zscore = function(nulltype){
-  net.diversity.zscore <- list() 
-  for(i in 1:length(net.metrics.diversity)){
-    net.diversity.zscore[[i]] = net.zscore(net.metrics.diversity[[i]]['Shannon diversity'], 
-                                           nulltype[[i]][ ,'Shannon diversity'])
-  }
-  names(net.diversity.zscore) <- webs.names
-  return(net.diversity.zscore)
-}
-
-# Function that perform z-score calculation of interaction diversity using the observed and null networks
-links.zscore = function(nulltype){
-  net.links.zscore <- list() 
-  for(i in 1:length(net.metrics.links)){
-    net.links.zscore[[i]] = net.zscore(net.metrics.links[[i]]['links per species'], 
-                                       nulltype[[i]][ ,'links per species'])
-  }
-  names(net.links.zscore) <- webs.names
-  return(net.links.zscore)
-}
-
-# Function that perform z-score calculation of linkage density using the observed and null networks
-density.zscore = function(nulltype){
-  net.density.zscore <- list() 
-  for(i in 1:length(net.metrics.density)){
-    net.density.zscore[[i]] = net.zscore(net.metrics.density[[i]]['linkage density'], 
-                                         nulltype[[i]][ ,'linkage density'])
-  }
-  names(net.density.zscore) <- webs.names
-  return(net.density.zscore)
-}
+# # Function that perform z-score calculation of connectance using the observed and null networks
+# connect.zscore = function(obsval, nullval){
+#   net.connect.zscore <- list() 
+#   for(i in 1:length(obsval)){
+#     net.connect.zscore[[i]] = net.zscore(obsval[[i]]['connectance'], 
+#                                          nullval[[i]][ ,'connectance'])
+#   }
+#   names(net.connect.zscore) <- webs.names
+#   return(net.connect.zscore)
+# }
+# 
+# # Function that perform z-score calculation of weighted connectance using the observed and null networks
+# weightconnect.zscore = function(obsval, nullval){
+#   net.weightconnect.zscore <- list() 
+#   for(i in 1:length(obsval)){
+#     net.weightconnect.zscore[[i]] = net.zscore(obsval[[i]]['weighted connectance'], 
+#                                                nullval[[i]][ ,'weighted connectance'])
+#   }
+#   names(net.weightconnect.zscore) <- webs.names
+#   return(net.weightconnect.zscore)
+# }
+# 
+# # Function that perform z-score calculation of nestedness using the observed and null networks
+# nest.zscore = function(nulltype){
+#   net.nest.zscore <- list() 
+#   for(i in 1:length(net.metrics.nest)){
+#     net.nest.zscore[[i]] = net.zscore(net.metrics.nest[[i]]['NODF'], 
+#                                       nulltype[[i]][ ,'NODF'])
+#   }
+#   names(net.nest.zscore) <- webs.names
+#   return(net.nest.zscore)
+# }
+# 
+# # Function that perform z-score calculation of weighted nestedness using the observed and null networks
+# weightnest.zscore = function(nulltype){
+#   net.weightnest.zscore <- list() 
+#   for(i in 1:length(net.metrics.weightnest)){
+#     net.weightnest.zscore[[i]] = net.zscore(net.metrics.weightnest[[i]]['weighted NODF'], 
+#                                       nulltype[[i]][ ,'weighted NODF'])
+#   }
+#   names(net.weightnest.zscore) <- webs.names
+#   return(net.weightnest.zscore)
+# }
+# 
+# # Function that perform z-score calculation of specialization using the observed and null networks
+# h2.zscore = function(nulltype){
+#   net.h2.zscore <- list() 
+#   for(i in 1:length(net.metrics.h2)){
+#     net.h2.zscore[[i]] = net.zscore(net.metrics.h2[[i]]['H2'], 
+#                                     nulltype[[i]][ ,'H2'])
+#   }
+#   names(net.h2.zscore) <- webs.names
+#   return(net.h2.zscore)
+# }
+# 
+# # Function that perform z-score calculation of interaction diversity using the observed and null networks
+# diversity.zscore = function(nulltype){
+#   net.diversity.zscore <- list() 
+#   for(i in 1:length(net.metrics.diversity)){
+#     net.diversity.zscore[[i]] = net.zscore(net.metrics.diversity[[i]]['Shannon diversity'], 
+#                                            nulltype[[i]][ ,'Shannon diversity'])
+#   }
+#   names(net.diversity.zscore) <- webs.names
+#   return(net.diversity.zscore)
+# }
+# 
+# # Function that perform z-score calculation of interaction diversity using the observed and null networks
+# links.zscore = function(nulltype){
+#   net.links.zscore <- list() 
+#   for(i in 1:length(net.metrics.links)){
+#     net.links.zscore[[i]] = net.zscore(net.metrics.links[[i]]['links per species'], 
+#                                        nulltype[[i]][ ,'links per species'])
+#   }
+#   names(net.links.zscore) <- webs.names
+#   return(net.links.zscore)
+# }
+# 
+# # Function that perform z-score calculation of linkage density using the observed and null networks
+# density.zscore = function(nulltype){
+#   net.density.zscore <- list() 
+#   for(i in 1:length(net.metrics.density)){
+#     net.density.zscore[[i]] = net.zscore(net.metrics.density[[i]]['linkage density'], 
+#                                          nulltype[[i]][ ,'linkage density'])
+#   }
+#   names(net.density.zscore) <- webs.names
+#   return(net.density.zscore)
+# }
