@@ -58,7 +58,8 @@ net.metrics.diversity <- lapply(webs, networklevel, index = 'Shannon diversity')
 net.metrics.links <- lapply(webs, networklevel, index = 'links per species', level = "higher") 
 # linkage density
 net.metrics.density <- lapply(webs, networklevel, index = "linkage density")
-
+# modularity 
+net.metrics.modularity <- lapply(webs, computeModules, method = "Beckett")
 
 # Make null models for all sites 
 net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 1000) # using the vaznull null - maintains connectance 
@@ -76,12 +77,13 @@ net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 1000) # using t
 # r2d.density <- net.null.density(net.nulls.r2d)
 
 # getting vaznull null for each metric
-vaz.nest <- net.null.nest(net.nulls.vaz)
-vaz.weightnest <- net.null.weightnest(net.nulls.vaz)
-vaz.h2 <- net.null.h2(net.nulls.vaz)
-vaz.diversity <- net.null.diversity(net.nulls.vaz)
-vaz.links <- net.null.links(net.nulls.vaz)
-vaz.density <- net.null.density(net.nulls.vaz)
+vaz.nest <- net.null.networklevel(nulls = net.nulls.vaz, metric = "NODF")
+vaz.weightnest <- net.null.networklevel(nulls = net.nulls.vaz, metric = "weighted NODF")
+vaz.h2 <- net.null.networklevel(nulls = net.nulls.vaz, metric = "H2")
+vaz.diversity <- net.null.networklevel(nulls = net.nulls.vaz, metric = "Shannon diversity")
+vaz.links <- net.null.networklevel(nulls = net.nulls.vaz, metric = "links per species") # NEED TO ADD ARGUEMENT FOR UPPER
+vaz.density <- net.null.networklevel(nulls = net.nulls.vaz, metric = "linkage density")
+vaz.module <- net.null.computeModule(nulls = net.nulls.vaz)
 
 
 # # getting z score - r2dtable

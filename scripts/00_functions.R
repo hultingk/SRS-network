@@ -12,94 +12,27 @@ prepare_matrix <- function(df) {
 }
 
 ####### NULL DISTRIBUTION FUNCTIONS #######
-# Null distribution function for connectance 
-net.null.connect = function(nulls){
+# null distributions
+net.null.networklevel = function(nulls, metric){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
     net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'connectance'))
+                                   lapply(nulls[[i]], networklevel, index = metric))
   }
   names(net.null.metric) <- webs.names
   return(net.null.metric)
 }
 
-# Null distribution function for weighted 
-net.null.weightconnect = function(nulls){
+# null distribution for modularity
+net.null.computeModule <- function(nulls){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
     net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'weighted connectance'))
+                                   lapply(nulls[[i]], computeModules, method = "Beckett"))
   }
   names(net.null.metric) <- webs.names
   return(net.null.metric)
 }
-
-# Null distribution function for nestedness 
-net.null.nest = function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'NODF'))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
-
-# Null distribution function for weighted nestedness 
-net.null.weightnest = function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'weighted NODF'))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
-
-# Null distribution function for specialization 
-net.null.h2 = function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'H2'))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
-
-# Null distribution function for interaction diversity 
-net.null.diversity = function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'Shannon diversity'))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
-
-# Null distribution function for links per species 
-net.null.links = function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'links per species', level = "higher"))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
-
-# Null distribution function for linkage density
-net.null.density = function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = 'linkage density'))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
-
 
 
 
