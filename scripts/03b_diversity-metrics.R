@@ -306,8 +306,8 @@ diversity_metrics <- abundance %>%
   left_join(pollinator_noPoe_Apis_est, by = c("unique_ID", "block", "patch")) %>%
   left_join(lep_est, by = c("unique_ID", "block", "patch")) %>%
   left_join(bee_est, by = c("unique_ID", "block", "patch")) %>%
-  left_join(fly_est, by = c("unique_ID", "block", "patch")) %>%
-  dplyr::select(!ends_with("0"))
+  left_join(fly_est, by = c("unique_ID", "block", "patch")) #%>%
+  #dplyr::select(!ends_with("0"))
   
 write.csv(diversity_metrics, file = file.path("data", "diversity_metrics.csv"))
 

@@ -61,19 +61,19 @@ net.metrics.density <- lapply(webs, networklevel, index = "linkage density")
 
 
 # Make null models for all sites 
-net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 500) # using the vaznull null - maintains connectance 
-net.nulls.r2d <- lapply(webs, nullmodel, method = "r2dtable", N = 500) # using the r2dtable null - maintains row and column sums
+net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 1000) # using the vaznull null - maintains connectance 
+#net.nulls.r2d <- lapply(webs, nullmodel, method = "r2dtable", N = 1000) # using the r2dtable null - maintains row and column sums
 
 
-# getting r2dtable null for each metric
-r2d.connect <- net.null.connect(net.nulls.r2d) # can only use r2dtable null model for connectance -- vaznull maintains connectance
-r2d.weightconnect <- net.null.weightconnect(net.nulls.r2d) # can only use r2dtable null model for connectance -- vaznull maintains connectance
-r2d.nest <- net.null.nest(net.nulls.r2d)
-r2d.weightnest <- net.null.weightnest(net.nulls.r2d)
-r2d.h2 <- net.null.h2(net.nulls.r2d)
-r2d.diversity <- net.null.diversity(net.nulls.r2d)
-r2d.links <- net.null.links(net.nulls.r2d)
-r2d.density <- net.null.density(net.nulls.r2d)
+# # getting r2dtable null for each metric
+# r2d.connect <- net.null.connect(net.nulls.r2d) # can only use r2dtable null model for connectance -- vaznull maintains connectance
+# r2d.weightconnect <- net.null.weightconnect(net.nulls.r2d) # can only use r2dtable null model for connectance -- vaznull maintains connectance
+# r2d.nest <- net.null.nest(net.nulls.r2d)
+# r2d.weightnest <- net.null.weightnest(net.nulls.r2d)
+# r2d.h2 <- net.null.h2(net.nulls.r2d)
+# r2d.diversity <- net.null.diversity(net.nulls.r2d)
+# r2d.links <- net.null.links(net.nulls.r2d)
+# r2d.density <- net.null.density(net.nulls.r2d)
 
 # getting vaznull null for each metric
 vaz.nest <- net.null.nest(net.nulls.vaz)
@@ -84,23 +84,23 @@ vaz.links <- net.null.links(net.nulls.vaz)
 vaz.density <- net.null.density(net.nulls.vaz)
 
 
-# getting z score - r2dtable
-r2d.connect.zscore <- zscore_metric(obsval = net.metrics.connect, 
-                                    nullval = r2d.connect, metric = "connectance")
-r2d.weightconnect.zscore <- zscore_metric(obsval = net.metrics.weightconnect,
-                                          nullval = r2d.weightconnect, metric = "weighted connectance")
-r2d.nest.zscore <- zscore_metric(obsval = net.metrics.nest,
-                                 nullval = r2d.nest, metric = "NODF")
-r2d.weightnest.zscore <- zscore_metric(obsval = net.metrics.weightnest,
-                                       nullval = r2d.weightnest, metric = "weighted NODF")
-r2d.h2.zscore <- zscore_metric(obsval = net.metrics.h2,
-                               nullval = r2d.h2, metric = "H2")
-r2d.diversity.zscore <- zscore_metric(obsval = net.metrics.diversity,
-                                      nullval = r2d.diversity, metric = "Shannon diversity")
-r2d.links.zscore <- zscore_metric(obsval = net.metrics.links,
-                                  nullval = r2d.links, metric = "links per species")
-r2d.density.zscore <- zscore_metric(obsval = net.metrics.density,
-                                    nullval = r2d.density, metric = "linkage density")
+# # getting z score - r2dtable
+# r2d.connect.zscore <- zscore_metric(obsval = net.metrics.connect, 
+#                                     nullval = r2d.connect, metric = "connectance")
+# r2d.weightconnect.zscore <- zscore_metric(obsval = net.metrics.weightconnect,
+#                                           nullval = r2d.weightconnect, metric = "weighted connectance")
+# r2d.nest.zscore <- zscore_metric(obsval = net.metrics.nest,
+#                                  nullval = r2d.nest, metric = "NODF")
+# r2d.weightnest.zscore <- zscore_metric(obsval = net.metrics.weightnest,
+#                                        nullval = r2d.weightnest, metric = "weighted NODF")
+# r2d.h2.zscore <- zscore_metric(obsval = net.metrics.h2,
+#                                nullval = r2d.h2, metric = "H2")
+# r2d.diversity.zscore <- zscore_metric(obsval = net.metrics.diversity,
+#                                       nullval = r2d.diversity, metric = "Shannon diversity")
+# r2d.links.zscore <- zscore_metric(obsval = net.metrics.links,
+#                                   nullval = r2d.links, metric = "links per species")
+# r2d.density.zscore <- zscore_metric(obsval = net.metrics.density,
+#                                     nullval = r2d.density, metric = "linkage density")
 
 # getting z score - vaznull
 vaz.nest.zscore <- zscore_metric(obsval = net.metrics.nest,
@@ -116,54 +116,54 @@ vaz.links.zscore <- zscore_metric(obsval = net.metrics.links,
 vaz.density.zscore <- zscore_metric(obsval = net.metrics.density,
                                     nullval = vaz.density, metric = "linkage density")
 
-# creating dataframes - r2dtable
-r2d.connect <- as.data.frame(do.call('rbind', r2d.connect.zscore) )
-r2d.connect <- r2d.connect %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.connect = connectance)
-
-r2d.weightconnect <- as.data.frame(do.call('rbind', r2d.weightconnect.zscore) )
-r2d.weightconnect <- r2d.weightconnect %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.weightconnect = `weighted connectance`)
-
-r2d.nestedness <- as.data.frame(do.call('rbind', r2d.nest.zscore) )
-r2d.nestedness <- r2d.nestedness %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.NODF = NODF)
-
-r2d.weightnestedness <- as.data.frame(do.call('rbind', r2d.weightnest.zscore) )
-r2d.weightnestedness <- r2d.weightnestedness %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.weightedNODF = `weighted NODF`)
-
-r2d.h2 <- as.data.frame(do.call('rbind', r2d.h2.zscore) )
-r2d.h2 <- r2d.h2 %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.h2 = H2)
-
-r2d.shannon <- as.data.frame(do.call('rbind', r2d.diversity.zscore) )
-r2d.shannon <- r2d.shannon %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.shannon = `Shannon diversity`)
-
-r2d.links <- as.data.frame(do.call('rbind', r2d.links.zscore)) 
-r2d.links <- r2d.links %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.links = `links per species`)
-
-r2d.density <- as.data.frame(do.call('rbind', r2d.density.zscore))
-r2d.density <- r2d.density %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.density = `linkage density`)
+# # creating dataframes - r2dtable
+# r2d.connect <- as.data.frame(do.call('rbind', r2d.connect.zscore) )
+# r2d.connect <- r2d.connect %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.connect = connectance)
+# 
+# r2d.weightconnect <- as.data.frame(do.call('rbind', r2d.weightconnect.zscore) )
+# r2d.weightconnect <- r2d.weightconnect %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.weightconnect = `weighted connectance`)
+# 
+# r2d.nestedness <- as.data.frame(do.call('rbind', r2d.nest.zscore) )
+# r2d.nestedness <- r2d.nestedness %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.NODF = NODF)
+# 
+# r2d.weightnestedness <- as.data.frame(do.call('rbind', r2d.weightnest.zscore) )
+# r2d.weightnestedness <- r2d.weightnestedness %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.weightedNODF = `weighted NODF`)
+# 
+# r2d.h2 <- as.data.frame(do.call('rbind', r2d.h2.zscore) )
+# r2d.h2 <- r2d.h2 %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.h2 = H2)
+# 
+# r2d.shannon <- as.data.frame(do.call('rbind', r2d.diversity.zscore) )
+# r2d.shannon <- r2d.shannon %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.shannon = `Shannon diversity`)
+# 
+# r2d.links <- as.data.frame(do.call('rbind', r2d.links.zscore)) 
+# r2d.links <- r2d.links %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.links = `links per species`)
+# 
+# r2d.density <- as.data.frame(do.call('rbind', r2d.density.zscore))
+# r2d.density <- r2d.density %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.density = `linkage density`)
 
 
 # creating dataframes - vaznull
@@ -245,19 +245,19 @@ net.metrics.density_noApis <- lapply(webs_noApis, networklevel, index = "linkage
 
 
 # Make null models for all sites 
-net.nulls.vaz_noApis <- lapply(webs_noApis, nullmodel, method = "vaznull", N = 500) # using the vaznull null - maintains connectance 
-net.nulls.r2d_noApis <- lapply(webs_noApis, nullmodel, method = "r2dtable", N = 500) # using the r2dtable null - maintains row and column sums
+net.nulls.vaz_noApis <- lapply(webs_noApis, nullmodel, method = "vaznull", N = 1000) # using the vaznull null - maintains connectance 
+#net.nulls.r2d_noApis <- lapply(webs_noApis, nullmodel, method = "r2dtable", N = 1000) # using the r2dtable null - maintains row and column sums
 
 
-# getting r2dtable null for each metric
-r2d.connect_noApis <- net.null.connect(net.nulls.r2d_noApis) # can only use r2dtable null model for connectance -- vaznull maintains connectance
-r2d.weightconnect_noApis <- net.null.weightconnect(net.nulls.r2d_noApis) # can only use r2dtable null model for connectance -- vaznull maintains connectance
-r2d.nest_noApis <- net.null.nest(net.nulls.r2d_noApis)
-r2d.weightnest_noApis <- net.null.weightnest(net.nulls.r2d_noApis)
-r2d.h2_noApis <- net.null.h2(net.nulls.r2d_noApis)
-r2d.diversity_noApis <- net.null.diversity(net.nulls.r2d_noApis)
-r2d.links_noApis <- net.null.links(net.nulls.r2d_noApis)
-r2d.density_noApis <- net.null.density(net.nulls.r2d_noApis)
+# # getting r2dtable null for each metric
+# r2d.connect_noApis <- net.null.connect(net.nulls.r2d_noApis) # can only use r2dtable null model for connectance -- vaznull maintains connectance
+# r2d.weightconnect_noApis <- net.null.weightconnect(net.nulls.r2d_noApis) # can only use r2dtable null model for connectance -- vaznull maintains connectance
+# r2d.nest_noApis <- net.null.nest(net.nulls.r2d_noApis)
+# r2d.weightnest_noApis <- net.null.weightnest(net.nulls.r2d_noApis)
+# r2d.h2_noApis <- net.null.h2(net.nulls.r2d_noApis)
+# r2d.diversity_noApis <- net.null.diversity(net.nulls.r2d_noApis)
+# r2d.links_noApis <- net.null.links(net.nulls.r2d_noApis)
+# r2d.density_noApis <- net.null.density(net.nulls.r2d_noApis)
 
 # getting vaznull null for each metric
 vaz.nest_noApis <- net.null.nest(net.nulls.vaz_noApis)
@@ -268,23 +268,23 @@ vaz.links_noApis <- net.null.links(net.nulls.vaz_noApis)
 vaz.density_noApis <- net.null.density(net.nulls.vaz_noApis)
 
 
-# getting z score - r2dtable
-r2d.connect.zscore_noApis <- zscore_metric(obsval = net.metrics.connect_noApis, 
-                                            nullval = r2d.connect_noApis, metric = "connectance")
-r2d.weightconnect.zscore_noApis <- zscore_metric(obsval = net.metrics.weightconnect_noApis,
-                                                 nullval = r2d.weightconnect_noApis, metric = "weighted connectance")
-r2d.nest.zscore_noApis <- zscore_metric(obsval = net.metrics.nest_noApis, 
-                                        nullval = r2d.nest_noApis, metric = "NODF")
-r2d.weightnest.zscore_noApis <- zscore_metric(obsval = net.metrics.weightnest_noApis, 
-                                              nullval = r2d.weightnest_noApis, metric = "weighted NODF")
-r2d.h2.zscore_noApis <- zscore_metric(obsval = net.metrics.h2_noApis, 
-                                      nullval = r2d.h2_noApis, metric = "H2")
-r2d.diversity.zscore_noApis <- zscore_metric(obsval = net.metrics.diversity_noApis, 
-                                             nullval = r2d.diversity_noApis, metric = "Shannon diversity")
-r2d.links.zscore_noApis <- zscore_metric(obsval = net.metrics.links_noApis, 
-                                         nullval = r2d.links_noApis, metric = "links per species") 
-r2d.density.zscore_noApis <- zscore_metric(obsval = net.metrics.density_noApis, 
-                                           nullval = r2d.density_noApis, metric = "linkage density") 
+# # getting z score - r2dtable
+# r2d.connect.zscore_noApis <- zscore_metric(obsval = net.metrics.connect_noApis, 
+#                                             nullval = r2d.connect_noApis, metric = "connectance")
+# r2d.weightconnect.zscore_noApis <- zscore_metric(obsval = net.metrics.weightconnect_noApis,
+#                                                  nullval = r2d.weightconnect_noApis, metric = "weighted connectance")
+# r2d.nest.zscore_noApis <- zscore_metric(obsval = net.metrics.nest_noApis, 
+#                                         nullval = r2d.nest_noApis, metric = "NODF")
+# r2d.weightnest.zscore_noApis <- zscore_metric(obsval = net.metrics.weightnest_noApis, 
+#                                               nullval = r2d.weightnest_noApis, metric = "weighted NODF")
+# r2d.h2.zscore_noApis <- zscore_metric(obsval = net.metrics.h2_noApis, 
+#                                       nullval = r2d.h2_noApis, metric = "H2")
+# r2d.diversity.zscore_noApis <- zscore_metric(obsval = net.metrics.diversity_noApis, 
+#                                              nullval = r2d.diversity_noApis, metric = "Shannon diversity")
+# r2d.links.zscore_noApis <- zscore_metric(obsval = net.metrics.links_noApis, 
+#                                          nullval = r2d.links_noApis, metric = "links per species") 
+# r2d.density.zscore_noApis <- zscore_metric(obsval = net.metrics.density_noApis, 
+#                                            nullval = r2d.density_noApis, metric = "linkage density") 
 
 # getting z score - vaznull
 vaz.nest.zscore_noApis <- zscore_metric(obsval = net.metrics.nest_noApis, 
@@ -300,54 +300,54 @@ vaz.links.zscore_noApis <- zscore_metric(obsval = net.metrics.links_noApis,
 vaz.density.zscore_noApis <- zscore_metric(obsval = net.metrics.density_noApis, 
                                             nullval = vaz.density_noApis, metric = "linkage density") 
 
-# creating dataframes - r2dtable
-r2d.connect_noApis <- as.data.frame(do.call('rbind', r2d.connect.zscore_noApis) )
-r2d.connect_noApis <- r2d.connect_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.connect_noApis = connectance)
-
-r2d.weightconnect_noApis <- as.data.frame(do.call('rbind', r2d.weightconnect.zscore_noApis) )
-r2d.weightconnect_noApis <- r2d.weightconnect_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.weightconnect_noApis = `weighted connectance`)
-
-r2d.nestedness_noApis <- as.data.frame(do.call('rbind', r2d.nest.zscore_noApis) )
-r2d.nestedness_noApis <- r2d.nestedness_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.NODF_noApis = NODF)
-
-r2d.weightnestedness_noApis <- as.data.frame(do.call('rbind', r2d.weightnest.zscore_noApis) )
-r2d.weightnestedness_noApis <- r2d.weightnestedness_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.weightedNODF_noApis = `weighted NODF`)
-
-r2d.h2_noApis <- as.data.frame(do.call('rbind', r2d.h2.zscore_noApis) )
-r2d.h2_noApis <- r2d.h2_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.h2_noApis = H2)
-
-r2d.shannon_noApis <- as.data.frame(do.call('rbind', r2d.diversity.zscore_noApis) )
-r2d.shannon_noApis <- r2d.shannon_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.shannon_noApis = `Shannon diversity`)
-
-r2d.links_noApis <- as.data.frame(do.call('rbind', r2d.links.zscore_noApis)) 
-r2d.links_noApis <- r2d.links_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.links_noApis = `links per species`)
-
-r2d.density_noApis <- as.data.frame(do.call('rbind', r2d.density.zscore_noApis))
-r2d.density_noApis <- r2d.density_noApis %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(r2d.density_noApis = `linkage density`)
+# # creating dataframes - r2dtable
+# r2d.connect_noApis <- as.data.frame(do.call('rbind', r2d.connect.zscore_noApis) )
+# r2d.connect_noApis <- r2d.connect_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.connect_noApis = connectance)
+# 
+# r2d.weightconnect_noApis <- as.data.frame(do.call('rbind', r2d.weightconnect.zscore_noApis) )
+# r2d.weightconnect_noApis <- r2d.weightconnect_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.weightconnect_noApis = `weighted connectance`)
+# 
+# r2d.nestedness_noApis <- as.data.frame(do.call('rbind', r2d.nest.zscore_noApis) )
+# r2d.nestedness_noApis <- r2d.nestedness_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.NODF_noApis = NODF)
+# 
+# r2d.weightnestedness_noApis <- as.data.frame(do.call('rbind', r2d.weightnest.zscore_noApis) )
+# r2d.weightnestedness_noApis <- r2d.weightnestedness_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.weightedNODF_noApis = `weighted NODF`)
+# 
+# r2d.h2_noApis <- as.data.frame(do.call('rbind', r2d.h2.zscore_noApis) )
+# r2d.h2_noApis <- r2d.h2_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.h2_noApis = H2)
+# 
+# r2d.shannon_noApis <- as.data.frame(do.call('rbind', r2d.diversity.zscore_noApis) )
+# r2d.shannon_noApis <- r2d.shannon_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.shannon_noApis = `Shannon diversity`)
+# 
+# r2d.links_noApis <- as.data.frame(do.call('rbind', r2d.links.zscore_noApis)) 
+# r2d.links_noApis <- r2d.links_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.links_noApis = `links per species`)
+# 
+# r2d.density_noApis <- as.data.frame(do.call('rbind', r2d.density.zscore_noApis))
+# r2d.density_noApis <- r2d.density_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(r2d.density_noApis = `linkage density`)
 
 
 # creating dataframes - vaznull
@@ -392,28 +392,29 @@ vaz.density_noApis <- vaz.density_noApis %>%
 
 #### exporting csv ####
 # adding all together
-network_metrics <- r2d.connect %>%
-  left_join(r2d.weightconnect, by = c("block", "patch")) %>%
-  left_join(r2d.nestedness, by = c("block", "patch")) %>%
-  left_join(r2d.weightnestedness, by = c("block", "patch")) %>%
-  left_join(r2d.h2, by = c("block", "patch")) %>%
-  left_join(r2d.shannon, by = c("block", "patch")) %>%
-  left_join(r2d.links, by = c("block", "patch")) %>%
-  left_join(r2d.density, by = c("block", "patch")) %>%
+network_metrics <- net.metrics.weightconnect %>%
+  #r2d.connect %>%
+  # left_join(r2d.weightconnect, by = c("block", "patch")) %>%
+  # left_join(r2d.nestedness, by = c("block", "patch")) %>%
+  # left_join(r2d.weightnestedness, by = c("block", "patch")) %>%
+  # left_join(r2d.h2, by = c("block", "patch")) %>%
+  # left_join(r2d.shannon, by = c("block", "patch")) %>%
+  # left_join(r2d.links, by = c("block", "patch")) %>%
+  # left_join(r2d.density, by = c("block", "patch")) %>%
   left_join(vaz.nestedness, by = c("block", "patch")) %>%
   left_join(vaz.weightnestedness, by = c("block", "patch")) %>%
   left_join(vaz.h2, by = c("block", "patch")) %>%
   left_join(vaz.shannon, by = c("block", "patch")) %>%
   left_join(vaz.links, by = c("block", "patch")) %>%
   left_join(vaz.density, by = c("block", "patch")) %>%
-  left_join(r2d.connect_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.weightconnect_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.nestedness_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.weightnestedness_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.h2_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.shannon_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.links_noApis, by = c("block", "patch")) %>%
-  left_join(r2d.density_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.connect_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.weightconnect_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.nestedness_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.weightnestedness_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.h2_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.shannon_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.links_noApis, by = c("block", "patch")) %>%
+  # left_join(r2d.density_noApis, by = c("block", "patch")) %>%
   left_join(vaz.nestedness_noApis, by = c("block", "patch")) %>%
   left_join(vaz.weightnestedness_noApis, by = c("block", "patch")) %>%
   left_join(vaz.h2_noApis, by = c("block", "patch")) %>%
@@ -421,27 +422,6 @@ network_metrics <- r2d.connect %>%
   left_join(vaz.links_noApis, by = c("block", "patch")) %>%
   left_join(vaz.density_noApis, by = c("block", "patch")) 
 
-# network_metrics <- nestedness %>%
-#   left_join(h2, by = c("block", "patch")) %>%
-#   left_join(shannon, by = c("block", "patch")) %>%
-#   left_join(links, by = c("block", "patch")) %>%
-#   left_join(density, by = c("block", "patch")) %>%
-#   left_join(nestedness_noApis, by = c("block", "patch")) %>%
-#   left_join(h2_noApis, by = c("block", "patch")) %>%
-#   left_join(shannon_noApis, by = c("block", "patch")) %>%
-#   left_join(links_noApis, by = c("block", "patch")) %>%
-#   left_join(density_noApis, by = c("block", "patch")) #%>%
-  # left_join(abundance, by = c("block", "patch")) %>%
-  # left_join(abundance_noApis, by = c("block", "patch"))
-# network_metrics$floral_diversity <- floral_diversity
-# network_metrics$floral_div_noApis <- floral_div_noApis
-# network_metrics$pollinator_diversity <- pollinator_diversity
-# network_metrics$pollinator_div_noApis <- pollinator_div_noApis
-# network_metrics$pollinator.rich.rare <- sRare_pollinator
-# network_metrics$pollinator.rich.rare.noApis <- sRare_pollinator_noApis
-# network_metrics$fl.rich <- fl.rich
-# network_metrics$fl.rich.rare <- sRare
-# network_metrics$fl.rich.rare.noApis <- sRare_noApis
 
 write.csv(network_metrics, file = file.path("data", "network_metrics.csv"))
 
