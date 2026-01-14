@@ -13,11 +13,11 @@ prepare_matrix <- function(df) {
 
 ####### NULL DISTRIBUTION FUNCTIONS #######
 # null distributions
-net.null.networklevel = function(nulls, metric){
+net.null.networklevel = function(nulls, metric, level){
   net.null.metric <- list()
   for (i in 1:length(nulls)) {
     net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = metric))
+                                   lapply(nulls[[i]], networklevel, index = metric, level = level))
   }
   names(net.null.metric) <- webs.names
   return(net.null.metric)

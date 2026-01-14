@@ -10,45 +10,48 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 # load data
 network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
 diversity_metrics <- read.csv(file = file.path("data", "diversity_metrics.csv"))
+network_vaznull <- read.csv(file = file.path("data", "network_vaznull.csv"))
 
 #### connectance ####
 # no vaznull metric for connectance
-# unconnected patches have higher connectance, even excluding Apis
-m.connect.r2d <- glmmTMB(r2d.connect ~ patch + (1|block),
-                         data = network_metrics)
-summary(m.connect.r2d)
-m.connect.r2d_noApis <- glmmTMB(r2d.connect_noApis ~ patch + (1|block),
-                         data = network_metrics)
-summary(m.connect.r2d_noApis)
+# unconnected patches have higher connectance, even excluding Apis and Poe
+m.connect <- glmmTMB(connectance ~ patch + (1|block),
+                         data = network_vaznull)
+summary(m.connect)
+m.connect_noApis <- glmmTMB(connectance_noApis ~ patch + (1|block),
+                         data = network_vaznull)
+summary(m.connect_noApis)
+m.connect_noPoe <- glmmTMB(connectance_noPoe ~ patch + (1|block),
+                            data = network_vaznull)
+summary(m.connect_noPoe)
 
 #### weighted connectance ####
 # no vaznull metric for weighted connectance
-# no difference in weighted connectance including apis, slightly higher connectance in unconnected patches excluding apis
-m.weightconnect.r2d <- glmmTMB(r2d.weightconnect ~ patch + (1|block),
-                         data = network_metrics)
-summary(m.weightconnect.r2d)
-m.weightconnect.r2d_noApis <- glmmTMB(r2d.weightconnect_noApis ~ patch + (1|block),
-                                data = network_metrics)
-summary(m.weightconnect.r2d_noApis)
+# no difference in weighted connectance including or excluding api and poe
+m.weightconnect <- glmmTMB(weightconnectance ~ patch + (1|block),
+                     data = network_vaznull)
+summary(m.weightconnect)
+m.weightconnect_noApis <- glmmTMB(weightconnectance_noApis ~ patch + (1|block),
+                            data = network_vaznull)
+summary(m.weightconnect_noApis)
+m.weightconnect_noPoe <- glmmTMB(weightconnectance_noPoe ~ patch + (1|block),
+                           data = network_vaznull)
+summary(m.weightconnect_noPoe)
 
 
 
 #### nestedness ####
-m.nestedness.r2d <- glmmTMB(r2d.NODF ~ patch + (1|block), # no difference
-                        data = network_metrics)
-summary(m.nestedness.r2d)
-
-m.nestedness.r2d_noApis <- glmmTMB(r2d.NODF_noApis ~ patch + (1|block), # no difference
-                        data = network_metrics)
-summary(m.nestedness.r2d_noApis)
-
 m.nestedness.vaz <- glmmTMB(vaz.NODF ~ patch + (1|block), # significantly lower in connected patches 
-                            data = network_metrics)
+                            data = network_vaznull)
 summary(m.nestedness.vaz)
 
 m.nestedness.vaz_noApis <- glmmTMB(vaz.NODF_noApis ~ patch + (1|block), # no difference
-                                   data = network_metrics)
+                                   data = network_vaznull)
 summary(m.nestedness.vaz_noApis)
+
+m.nestedness.vaz_noPoe <- glmmTMB(vaz.NODF_noPoe ~ patch + (1|block), # no difference
+                                   data = network_vaznull)
+summary(m.nestedness.vaz_noPoe)
 
 # # plotting NO APIS
 # # model predictions for plotting
@@ -76,40 +79,20 @@ summary(m.nestedness.vaz_noApis)
 # nestedness.pred
 # dev.off()
 
-#### weighted nestedness ####
-m.weightnest.r2d <- glmmTMB(r2d.weightedNODF ~ patch + (1|block), # no difference
-                            data = network_metrics)
-summary(m.weightnest.r2d)
-
-m.weightnest.r2d_noApis <- glmmTMB(r2d.weightedNODF_noApis ~ patch + (1|block), # no difference
-                                   data = network_metrics)
-summary(m.weightnest.r2d_noApis)
-
-m.weightnest.vaz <- glmmTMB(vaz.weightedNODF ~ patch + (1|block), # marginally significantly lower in connected patches 
-                            data = network_metrics)
-summary(m.weightnest.vaz)
-
-m.weightnest.vaz_noApis <- glmmTMB(vaz.weightedNODF_noApis ~ patch + (1|block), # no difference
-                                   data = network_metrics)
-summary(m.weightnest.vaz_noApis)
 
 
 #### H2' ####
-m.h2.r2d <- glmmTMB(r2d.h2 ~ patch + (1|block), # no difference
-                        data = network_metrics)
-summary(m.h2.r2d)
-
-m.h2.r2d_noApis <- glmmTMB(r2d.h2_noApis ~ patch + (1|block), # no difference
-                data = network_metrics)
-summary(m.h2.r2d_noApis)
-
-m.h2.vaz <- glmmTMB(vaz.h2 ~ patch + (1|block), # significantly higher in unconnected patches
-                    data = network_metrics)
+m.h2.vaz <- glmmTMB(vaz.h2 ~ patch + (1|block), # significantly lower in connected patches 
+                            data = network_vaznull)
 summary(m.h2.vaz)
 
 m.h2.vaz_noApis <- glmmTMB(vaz.h2_noApis ~ patch + (1|block), # no difference
-                           data = network_metrics)
+                                   data = network_vaznull)
 summary(m.h2.vaz_noApis)
+
+m.h2.vaz_noPoe <- glmmTMB(vaz.h2_noPoe ~ patch + (1|block), # no difference
+                                  data = network_vaznull)
+summary(m.h2.vaz_noPoe)
 
 
 # 
@@ -146,95 +129,60 @@ summary(m.h2.vaz_noApis)
 
 
 #### interaction diversity ####
-m.shannon.r2d <- glmmTMB(r2d.shannon ~ patch + (1|block), # no difference
-                    data = network_metrics)
-summary(m.shannon.r2d)
-
-m.shannon.r2d_noApis <- glmmTMB(r2d.shannon_noApis ~ patch + (1|block), # no difference
-                           data = network_metrics)
-summary(m.shannon.r2d_noApis)
-
 m.shannon.vaz <- glmmTMB(vaz.shannon ~ patch + (1|block), # no difference
-                    data = network_metrics)
+                    data = network_vaznull)
 summary(m.shannon.vaz)
 
 m.shannon.vaz_noApis <- glmmTMB(vaz.shannon_noApis ~ patch + (1|block), # no difference
-                           data = network_metrics)
+                           data = network_vaznull)
 summary(m.shannon.vaz_noApis)
 
+m.shannon.vaz_noPoe <- glmmTMB(vaz.shannon_noPoe ~ patch + (1|block), # no difference
+                          data = network_vaznull)
+summary(m.shannon.vaz_noPoe)
 
 
+#### interaction evenness ####
+m.evenness.vaz <- glmmTMB(vaz.evenness ~ patch + (1|block), # no difference
+                         data = network_vaznull)
+summary(m.evenness.vaz)
+
+m.evenness.vaz_noApis <- glmmTMB(vaz.evenness_noApis ~ patch + (1|block), # no difference
+                                data = network_vaznull)
+summary(m.evenness.vaz_noApis)
+
+m.evenness.vaz_noPoe <- glmmTMB(vaz.evenness_noPoe ~ patch + (1|block), # no difference
+                               data = network_vaznull)
+summary(m.evenness.vaz_noPoe)
 
 
-#### links per species ####
-m.links.r2d <- glmmTMB(r2d.links ~ patch + (1|block), # sig higher in unconnected patches
-                         data = network_metrics)
-summary(m.links.r2d)
+#### pollinator: links per species ####
+m.pol.links <- glmmTMB(pol.links ~ patch + (1|block), # lower in unconnected patches
+                         data = network_vaznull)
+summary(m.pol.links)
 
-m.links.r2d_noApis <- glmmTMB(r2d.links_noApis ~ patch + (1|block), # sig higher in unconnected patches
-                                data = network_metrics)
-summary(m.links.r2d_noApis)
+m.pol.links_noApis <- glmmTMB(pol.links_noApis ~ patch + (1|block), # lower in unconnected patches
+                                data = network_vaznull)
+summary(m.pol.links_noApis)
 
-links.raw <- as.data.frame(do.call('rbind', net.metrics.links) )
-links.raw <- links.raw %>%
-  rownames_to_column(var = "unique_ID") %>%
-  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(links.raw = `links per species`)
-m.links.raw <- glmmTMB(links.raw ~ patch + (1|block), # sig lower in unconnected patches
-                         data = links.raw)
-summary(m.links.raw)
-
-m.links.vaz_noApis <- glmmTMB(vaz.links_noApis ~ patch + (1|block), # NA values
-                                data = network_metrics)
-summary(m.links.vaz_noApis)
+m.pol.links_noPoe <- glmmTMB(pol.links_noPoe ~ patch + (1|block), # lower in unconnected patches
+                               data = network_vaznull)
+summary(m.pol.links_noPoe)
 
 
+#### plant: links per species ####
+m.plant.links <- glmmTMB(plant.links ~ patch + (1|block), # lower in unconnected patches
+                       data = network_vaznull)
+summary(m.plant.links)
 
-#### linkage density ####
-m.density.r2d <- glmmTMB(r2d.density ~ patch + (1|block), # no diff
-                       data = network_metrics)
-summary(m.density.r2d)
+m.plant.links_noApis <- glmmTMB(plant.links_noApis ~ patch + (1|block), # lower in unconnected patches
+                              data = network_vaznull)
+summary(m.plant.links_noApis)
 
-m.density.r2d_noApis <- glmmTMB(r2d.density_noApis ~ patch + (1|block), # sig higher in unconnected patches
-                              data = network_metrics)
-summary(m.density.r2d_noApis)
+m.plant.links_noPoe <- glmmTMB(plant.links_noPoe ~ patch + (1|block), # lower in unconnected patches
+                             data = network_vaznull)
+summary(m.plant.links_noPoe)
 
-m.density.raw <- glmmTMB(vaz.density ~ patch + (1|block), # marginally significantly lower in unconnected patches
-                       data = network_metrics)
-summary(m.density.vaz)
-
-m.density.vaz_noApis <- glmmTMB(vaz.density_noApis ~ patch + (1|block), # no diff
-                              data = network_metrics)
-summary(m.density.vaz_noApis)
-
-# 
-# (-0.8167/4.8001)*100 #17% decrease in linkage density
-# # plotting
-# # model predictions for plotting
-# m.density.noApis.df <- network_metrics %>%
-#   dplyr::select(c("block", "patch", "density_noApis"))
-# m.density.noApis.df$linkage.density.pred <- predict(m.density.noApis, re.form = NA)
-# m.density.noApis.df$patch <- factor(m.density.noApis.df$patch, levels = c("B", "W"))
-# # plotting
-# linkage.density.pred <- m.density.noApis.df %>%
-#   ggplot() +
-#   geom_line(aes(x = patch, y = density_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
-#   geom_line(aes(x = patch, y = linkage.density.pred, group = block), linewidth = 5.5) +
-#   geom_point(aes(x = patch, y = density_noApis, color = patch), size = 11, alpha = 0.95) + 
-#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-#   scale_color_manual(values=c("#506D8F","#E2A03C")) +
-#   xlab("Patch Type") +
-#   ylab(expression(paste("Linkage density (z-score)"))) +
-#   theme_classic() +
-#   ylim(c(2.5, 5.5)) +
-#   theme(legend.position = "none") +
-#   theme(axis.text = element_text(size = 30)) + # axis tick mark size
-#   theme(axis.title = element_text(size = 34)) #+ # axis label size
-# linkage.density.pred
-
-# pdf(file = file.path("plots", "linkage.density_noApis.pdf"), width = 8, height = 10)
-# linkage.density.pred
-# dev.off()
 
 
 
