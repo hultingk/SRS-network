@@ -2,6 +2,7 @@
 #### Functions script ####
 # Author: Katherine Hulting, hultingk@msu.edu
 # -------------------------------------- #
+library(parallel, tidyverse)
 
 # function to get data into correct format for network analysis
 prepare_matrix <- function(df) {
@@ -13,12 +14,17 @@ prepare_matrix <- function(df) {
 
 ####### NULL DISTRIBUTION FUNCTIONS #######
 # null distributions
-net.null.networklevel = function(nulls, metric, level){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], networklevel, index = metric, level = level))
-  }
+net.null.networklevel = function(nulls, metric, level, web.names, cores = detectCores() - 1){
+  net.null.metric <- mclapply(
+    nulls,
+    function(webs) {
+      do.call(
+        rbind,
+        lapply(webs, networklevel, index = metric, level = level)
+      )
+    },
+    mc.cores = cores)
+  
   names(net.null.metric) <- webs.names
   return(net.null.metric)
 }

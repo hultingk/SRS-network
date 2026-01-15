@@ -5,7 +5,7 @@
 # -------------------------------------- #
 
 # loading libraries
-librarian::shelf(tidyverse, plyr, vegan, bipartite)
+librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel)
 
 # loading functions
 source(here::here(file.path("scripts", "00_functions.R")))
@@ -55,17 +55,17 @@ net.metrics.plant.links <- lapply(webs, networklevel, index = 'links per species
 net.metrics.modularity <- lapply(webs, networklevel, index = 'modularity', level = "both")
 
 # Make null models for all sites 
-net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 999) # using the vaznull null - maintains connectance 
+net.nulls.vaz <- lapply(webs, nullmodel, method = "vaznull", N = 500) # using the vaznull null - maintains connectance 
 
 
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
-vaz.nest <- net.null.networklevel(nulls = net.nulls.vaz, metric = "NODF", level = "both")
-vaz.h2 <- net.null.networklevel(nulls = net.nulls.vaz, metric = "H2", level = "both")
-vaz.diversity <- net.null.networklevel(nulls = net.nulls.vaz, metric = "Shannon diversity", level = "both")
-vaz.even <- net.null.networklevel(nulls = net.nulls.vaz, metric = "interaction evenness", level = "both")
-vaz.pol.links <- net.null.networklevel(nulls = net.nulls.vaz, metric = "links per species", level = "higher")  # can't use -- NAN
-vaz.plant.links <- net.null.networklevel(nulls = net.nulls.vaz, metric = "links per species", level = "lower") # can't use -- NAN
-vaz.module <- net.null.networklevel(nulls = net.nulls.vaz, metric = "modularity", level = "both")
+vaz.nest <- net.null.networklevel(nulls = net.nulls.vaz, metric = "NODF", level = "both", web.names = web.names)
+vaz.h2 <- net.null.networklevel(nulls = net.nulls.vaz, metric = "H2", level = "both", web.names = web.names)
+vaz.diversity <- net.null.networklevel(nulls = net.nulls.vaz, metric = "Shannon diversity", level = "both", web.names = web.names)
+vaz.even <- net.null.networklevel(nulls = net.nulls.vaz, metric = "interaction evenness", level = "both", web.names = web.names)
+vaz.pol.links <- net.null.networklevel(nulls = net.nulls.vaz, metric = "links per species", level = "higher", web.names = web.names)  # can't use -- NAN
+vaz.plant.links <- net.null.networklevel(nulls = net.nulls.vaz, metric = "links per species", level = "lower", web.names = web.names) # can't use -- NAN
+vaz.module <- net.null.networklevel(nulls = net.nulls.vaz, metric = "modularity", level = "both", web.names = web.names)
 
 
 
@@ -179,7 +179,7 @@ net.metrics.modularity_noApis <- lapply(webs_noApis, networklevel, index = 'modu
 
 
 # Make null models for all sites 
-net.nulls.vaz_noApis <- lapply(webs_noApis, nullmodel, method = "vaznull", N = 999) # using the vaznull null - maintains connectance 
+net.nulls.vaz_noApis <- lapply(webs_noApis, nullmodel, method = "vaznull", N = 500) # using the vaznull null - maintains connectance 
 
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
 vaz.nest_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, metric = "NODF", level = "both")
@@ -300,7 +300,7 @@ net.metrics.modularity_noPoe <- lapply(webs_noPoe, networklevel, index = 'modula
 
 
 # Make null models for all sites 
-net.nulls.vaz_noPoe <- lapply(webs_noPoe, nullmodel, method = "vaznull", N = 999) # using the vaznull null - maintains connectance 
+net.nulls.vaz_noPoe <- lapply(webs_noPoe, nullmodel, method = "vaznull", N = 500) # using the vaznull null - maintains connectance 
 
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
 vaz.nest_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, metric = "NODF", level = "both")
