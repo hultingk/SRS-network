@@ -14,7 +14,7 @@ prepare_matrix <- function(df) {
 
 ####### NULL DISTRIBUTION FUNCTIONS #######
 # null distributions
-net.null.networklevel = function(nulls, metric, level, web.names, cores = detectCores() - 1){
+net.null.networklevel = function(nulls, metric, level, web.names, cores = (detectCores() - 2)){
   net.null.metric <- mclapply(
     nulls,
     function(webs) {
@@ -28,6 +28,9 @@ net.null.networklevel = function(nulls, metric, level, web.names, cores = detect
   names(net.null.metric) <- webs.names
   return(net.null.metric)
 }
+
+
+
 
 # null distribution for modularity
 net.null.computeModule <- function(nulls){

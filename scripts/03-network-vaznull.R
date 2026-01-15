@@ -5,7 +5,7 @@
 # -------------------------------------- #
 
 # loading libraries
-librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel)
+librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel, data.table)
 
 # loading functions
 source(here::here(file.path("scripts", "00_functions.R")))
@@ -68,7 +68,6 @@ vaz.plant.links <- net.null.networklevel(nulls = net.nulls.vaz, metric = "links 
 vaz.module <- net.null.networklevel(nulls = net.nulls.vaz, metric = "modularity", level = "both", web.names = web.names)
 
 
-
 # getting z score 
 vaz.nest.zscore <- zscore_metric(obsval = net.metrics.nest,
                                  nullval = vaz.nest, metric = "NODF")
@@ -83,7 +82,8 @@ vaz.pol.links.zscore <- zscore_metric(obsval = net.metrics.pol.links,
 vaz.plant.links.zscore <- zscore_metric(obsval = net.metrics.plant.links,
                                       nullval = vaz.plant.links, metric = "links per species") # can't use -- NAN
 vaz.module.zscore <- zscore_metric(obsval = net.metrics.modularity,
-                                        nullval = vaz.module, metric = "modularity")
+                                        nullval = vaz.module, metric = "modularity Q")
+
 
 
 
@@ -136,11 +136,11 @@ plant.links <- plant.links %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
   dplyr::rename(plant.links = `links per species`)
 
-vaz.module <- as.data.frame(do.call('rbind', vaz.module.zscore)) 
-vaz.module <- vaz.module %>%
+vaz.module.df <- as.data.frame(do.call('rbind', vaz.module.zscore)) 
+vaz.module.df <- vaz.module.df %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(vaz.module = `modularity`)
+  dplyr::rename(vaz.module = `modularity Q`)
 
 
 
@@ -395,7 +395,7 @@ network_vaznull <- net.connect %>%
   left_join(vaz.evenness, by = c("block", "patch")) %>%
   left_join(pol.links, by = c("block", "patch")) %>%
   left_join(plant.links, by = c("block", "patch")) %>%
-  left_join(vaz.module, by = c("block", "patch")) %>%
+  left_join(vaz.module.df, by = c("block", "patch")) %>%
   left_join(net.connect_noApis, by = c("block", "patch")) %>%
   left_join(net.weightconnect_noApis, by = c("block", "patch")) %>%
   left_join(vaz.nestedness_noApis, by = c("block", "patch")) %>%
