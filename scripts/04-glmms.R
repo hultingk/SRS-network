@@ -8,7 +8,7 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 
 
 # load data
-network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
+#network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
 diversity_metrics <- read.csv(file = file.path("data", "diversity_metrics.csv"))
 network_vaznull <- read.csv(file = file.path("data", "network_vaznull.csv"))
 
@@ -27,7 +27,7 @@ summary(m.connect_noPoe)
 
 #### weighted connectance ####
 # no vaznull metric for weighted connectance
-# no difference in weighted connectance including or excluding api and poe
+# no difference in weighted connectance including or excluding apis and poe
 m.weightconnect <- glmmTMB(weightconnectance ~ patch + (1|block),
                      data = network_vaznull)
 summary(m.weightconnect)

@@ -23,7 +23,6 @@ pollinator <- pollinator %>%
 pollinator <- pollinator %>%
   mutate(pollinator_species = dplyr::case_when(
     pollinator_species %in% c("Erynnis horatius", "Erynnis zarucco") ~ "Erynnis sp.", # grouping Erynnis species 
-    pollinator_species %in% c("Zodion sp.1", "Zodion sp.2") ~ "Zodion sp.",
     pollinator_species %in% c("Melissodes communis", "Melissodes sp.") ~ "Melissodes sp.01",
     .default = pollinator_species
   )) %>%
@@ -34,7 +33,7 @@ pollinator <- pollinator %>%
 pollinator <- pollinator %>%
   separate(pollinator_species, into = c("genus", "species"), sep = " ", remove = F) %>%
   mutate(family = dplyr::case_when(
-    genus %in% c("Abaeis", "Eurema", "Phoebis", "Pyrisitia") ~ "Pieridae",
+    genus %in% c("Eurema", "Phoebis") ~ "Pieridae",
     genus %in% c("Agapostemon", "Lasioglossum", "Augochlora", "Augochlorella", "Augochloropsis", "Halictus") ~ "Halictidae",
     genus %in% c("Agraulis", "Danaus", "Euptoieta", "Junonia", "Phyciodes") ~ "Nymphalidae",
     genus %in% c("Allograpta", "Copestylum", "Milesia", "Ocyptamus", "Palpada", "Platycheirus", 
@@ -90,9 +89,9 @@ pollinator <- pollinator %>%
     flower_species %in% c("Solidago nemoralis", "Solidago odora") ~ "Solidago sp.",
     flower_species %in% c("Liatris elegans", "Liatris graminifolia", "Liatris secunda", "Liatris tenuifolia",
                           "Liatris virgata") ~ "Liatris sp.",
+    flower_species %in% c("Helianthus hirsutus") ~ "Helianthus sp.",
     .default = flower_species
   ))
-
 
 
 
