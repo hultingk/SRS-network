@@ -34,6 +34,7 @@ names(webs) <- webs.names
 net.metrics.modularity <- lapply(webs, networklevel, index = 'modularity', level = "both")
 # null model modularity  - takes a very long time
 vaz.module <- net.null.networklevel(nulls = net.nulls.vaz, metric = "modularity", level = "both", web.names = web.names)
+#save(vaz.module, file = file.path("data", "vaz.module.RData"))
 # z score
 vaz.module.zscore <- zscore_metric(obsval = net.metrics.modularity,
                                    nullval = vaz.module, metric = "modularity Q")
