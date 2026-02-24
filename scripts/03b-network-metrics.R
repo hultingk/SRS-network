@@ -5,7 +5,7 @@
 # -------------------------------------- #
 
 # loading libraries
-librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel, data.table)
+librarian::shelf(tidyverse, plyr, vegan, bipartite, data.table)
 
 # loading functions
 source(here::here(file.path("scripts", "00_functions.R")))

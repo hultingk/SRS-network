@@ -26,8 +26,7 @@ pollinator <- pollinator %>%
     pollinator_species %in% c("Melissodes communis", "Melissodes sp.") ~ "Melissodes sp.01",
     .default = pollinator_species
   )) %>%
-  filter(!pollinator_species %in% c("Lasioglossum sp.", "Skipper sp."))
-
+  filter(!pollinator_species %in% c("Lasioglossum sp.", "Skipper sp.", "Lasioglossum batya")) # not confident on my ID of Lasioglossum batya
 
 # adding family and order 
 pollinator <- pollinator %>%
@@ -92,7 +91,6 @@ pollinator <- pollinator %>%
     flower_species %in% c("Helianthus hirsutus") ~ "Helianthus sp.",
     .default = flower_species
   ))
-
 
 
 # --------------------------- #
