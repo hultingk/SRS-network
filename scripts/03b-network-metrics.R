@@ -11,8 +11,8 @@ librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel, data.table)
 source(here::here(file.path("scripts", "00_functions.R")))
 
 # loading data 
-pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
-load(file = file.path("data", "nulls.RData"))
+pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv"))
+load(file = file.path("data", "L2_nulls", "nulls.RData"))
 
 
 # creating unique ID
@@ -378,7 +378,7 @@ network_vaznull <- net.connect %>%
   left_join(pol.links_noPoe, by = c("block", "patch")) %>%
   left_join(plant.links_noPoe, by = c("block", "patch"))
 
-write.csv(network_vaznull, file = file.path("data", "network_vaznull.csv"))
+write.csv(network_vaznull, file = file.path("data", "L4_metrics", "network_vaznull.csv"))
 
 
 

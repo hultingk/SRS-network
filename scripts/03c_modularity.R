@@ -5,8 +5,8 @@ librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel, data.table)
 source(here::here(file.path("scripts", "00_functions.R")))
 
 # loading data 
-pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
-load(file = file.path("data", "nulls.RData"))
+pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv"))
+load(file = file.path("data", "L2_nulls", "nulls.RData"))
 
 # creating unique ID
 pollinator <- pollinator %>%
@@ -34,7 +34,7 @@ names(webs) <- webs.names
 net.metrics.modularity <- lapply(webs, networklevel, index = 'modularity', level = "both")
 # null model modularity  - takes a very long time
 vaz.module <- net.null.networklevel(nulls = net.nulls.vaz, metric = "modularity", level = "both", web.names = web.names)
-#save(vaz.module, file = file.path("data", "vaz.module.RData"))
+#save(vaz.module, file = file.path("data", "L3_modularity", "vaz.module.RData"))
 # z score
 vaz.module.zscore <- zscore_metric(obsval = net.metrics.modularity,
                                    nullval = vaz.module, metric = "modularity Q")
@@ -65,7 +65,7 @@ names(webs_noApis) <- webs.names
 net.metrics.modularity_noApis <- lapply(webs_noApis, networklevel, index = 'modularity', level = "both") 
 # null model modularity
 vaz.module_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, metric = "modularity", level = "both")
-#save(vaz.module_noApis, file = file.path("data", "vaz.module_noApis.RData"))
+#save(vaz.module_noApis, file = file.path("data", "L3_modularity","vaz.module_noApis.RData"))
 # z score
 vaz.module.zscore_noApis <- zscore_metric(obsval = net.metrics.modularity_noApis,
                                           nullval = vaz.module_noApis, metric = "modularity Q")
@@ -95,6 +95,7 @@ names(webs_noPoe) <- webs.names
 net.metrics.modularity_noPoe <- lapply(webs_noPoe, networklevel, index = 'modularity', level = "both") 
 # null model modularity 
 vaz.module_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, metric = "modularity", level = "both") 
+#save(vaz.module_noPoe, file = file.path("data", "L3_modularity","vaz.module_noPoe.RData"))
 # z score
 vaz.module.zscore_noPoe <- zscore_metric(obsval = net.metrics.modularity_noPoe,
                                          nullval = vaz.module_noPoe, metric = "modularity Q")

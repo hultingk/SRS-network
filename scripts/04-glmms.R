@@ -9,8 +9,8 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 
 # load data
 #network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
-diversity_metrics <- read.csv(file = file.path("data", "diversity_metrics.csv"))
-network_vaznull <- read.csv(file = file.path("data", "network_vaznull.csv"))
+diversity_metrics <- read.csv(file = file.path("data", "L4_metrics", "diversity_metrics.csv"))
+network_vaznull <- read.csv(file = file.path("data", "L4_metrics", "network_vaznull.csv"))
 
 #### connectance ####
 # no vaznull metric for connectance

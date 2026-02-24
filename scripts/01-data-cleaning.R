@@ -8,7 +8,7 @@ librarian::shelf(tidyverse)
 
 
 # loading data 
-pollinator <- read.csv(file = file.path("data", "2024-SRS-plant-pollinator.csv"))
+pollinator <- read.csv(file = file.path("data", "L0_original", "2024-SRS-plant-pollinator.csv"))
 
 # --------------------------- #
 #### pollinator species cleaning ####
@@ -98,6 +98,6 @@ pollinator <- pollinator %>%
 # --------------------------- #
 #### writing cleaned file ####
 # --------------------------- #
-write.csv(pollinator, file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
+write.csv(pollinator, file = file.path("data", "L1_wrangled","cleaned-SRS-plant-pollinator.csv"))
 
 

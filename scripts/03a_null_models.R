@@ -5,7 +5,7 @@ librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel, data.table)
 source(here::here(file.path("scripts", "00_functions.R")))
 
 # loading data 
-pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
+pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv"))
 
 
 # creating unique ID
@@ -74,4 +74,4 @@ net.nulls.vaz_noPoe <- lapply(webs_noPoe, nullmodel, method = "vaznull", N = 500
 
 
 # exporting as R data objects
-save(net.nulls.vaz, net.nulls.vaz_noApis, net.nulls.vaz_noPoe, file = file.path("data", "nulls.RData"))
+save(net.nulls.vaz, net.nulls.vaz_noApis, net.nulls.vaz_noPoe, file = file.path("data", "L2_nulls", "nulls.RData"))

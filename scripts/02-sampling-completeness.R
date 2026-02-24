@@ -7,7 +7,7 @@
 librarian::shelf(tidyverse, iNEXT, bipartite)
 
 # loading data 
-pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv"))
+pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv"))
 
 # excluding non-identified pollinators for now
 # sc_pollinator <- pollinator %>%

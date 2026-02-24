@@ -9,7 +9,7 @@
 librarian::shelf(tidyverse, vegan, glmmTMB, iNEXT)
 
 # loading data 
-pollinator <- read.csv(file = file.path("data", "cleaned-SRS-plant-pollinator.csv")) # plant-pollinator interaction data
+pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv")) # plant-pollinator interaction data
 
 
 # creating unique ID
@@ -309,5 +309,5 @@ diversity_metrics <- abundance %>%
   left_join(fly_est, by = c("unique_ID", "block", "patch")) #%>%
   #dplyr::select(!ends_with("0"))
   
-write.csv(diversity_metrics, file = file.path("data", "diversity_metrics.csv"))
+write.csv(diversity_metrics, file = file.path("data", "L4_metrics", "diversity_metrics.csv"))
 
