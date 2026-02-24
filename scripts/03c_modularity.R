@@ -107,9 +107,13 @@ vaz.module_noPoe <- vaz.module_noPoe %>%
   dplyr::rename(vaz.module_noPoe = `modularity Q`)
 
 
+# all together
+modularity <- vaz.module.df %>%
+  left_join(vaz.module_noApis, by = c("block", "patch")) %>%
+  left_join(vaz.module_noPoe, by = c("block", "patch"))
 
-
-
+# exporting
+write.csv(modularity, file = file.path("data", "L4_metrics", "modularity.csv"))
 
 
 

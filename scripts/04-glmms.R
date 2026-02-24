@@ -11,6 +11,7 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 #network_metrics <- read.csv(file = file.path("data", "network_metrics.csv"))
 diversity_metrics <- read.csv(file = file.path("data", "L4_metrics", "diversity_metrics.csv"))
 network_vaznull <- read.csv(file = file.path("data", "L4_metrics", "network_vaznull.csv"))
+modularity <- read.csv(file = file.path("data", "L4_metrics", "modularity.csv"))
 
 #### connectance ####
 # no vaznull metric for connectance
@@ -185,7 +186,18 @@ summary(m.plant.links_noPoe)
 
 
 
+#### modularity ####
+m.module <- glmmTMB(vaz.module ~ patch + (1|block),
+                    data = modularity)
+summary(m.module)
 
+m.module_noApis <- glmmTMB(vaz.module_noApis ~ patch + (1|block),
+                    data = modularity)
+summary(m.module_noApis)
+
+m.module_noPoe <- glmmTMB(vaz.module_noPoe ~ patch + (1|block),
+                           data = modularity)
+summary(m.module_noPoe)
 
 #### DIVERSITY and ABUNDANCE ####
 #### abundance ####
