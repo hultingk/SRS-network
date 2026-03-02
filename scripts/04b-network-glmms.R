@@ -262,6 +262,28 @@ m.plant.links_noPoe_Apis <- glmmTMB(plant.links_noPoe_Apis ~ patch + (1|block), 
 summary(m.plant.links_noPoe_Apis)
 
 
+# plotting
+# links per species plant all species
+# model predictions for plotting
+m.plant.links_predict<- ggpredict(m.plant.links, terms = c("patch"), back_transform = T)
+# plotting
+plant.links.pred <- m.plant.links_predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = plant.links, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.plant.links_predict, width = 0, linewidth = 2.5) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Links per plant species"))) +
+  theme_classic(base_size = 20) +
+  ylim(1.2, 1.75) +
+  theme(legend.position = "none") 
+plant.links.pred
+
 
 
 
