@@ -44,6 +44,22 @@ net.null.computeModule <- function(nulls){
 }
 
 
+# null distribution for extinction 
+net.null.extinct <- function(nulls){
+  net.null.robust.metric  <- list()
+  
+  for (i in 1:length(nulls)) {
+    net.null.extinct.metric <- lapply(nulls[[i]], second.extinct, participant = "lower")
+    net.null.robust.metric[[i]] = do.call('rbind', 
+                                          lapply(net.null.extinct.metric, robustness))
+    }
+  names(net.null.robust.metric) <- webs.names
+  return(net.null.robust.metric)
+    
+}
+
+
+
 
 ####### Z SCORE FUNCTIONS #########
 # Z-score function for comparing different networks

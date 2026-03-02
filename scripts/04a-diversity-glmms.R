@@ -110,11 +110,11 @@ m.floral_1.df$patch <- factor(m.floral_1.df$patch, levels = c("B", "W"))
 # plotting
 floral_1.pred <- m.floral_1.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = floral_1, group = block), linewidth = 1.5, color = "grey25", alpha = 0.85) +
+  geom_line(aes(x = patch, y = floral_1, group = block), linewidth = 1.5, color = "grey55", alpha = 0.65) +
   geom_line(aes(x = patch, y = floral_1_predict, group = block), linewidth = 3.5, linetype = 1) +
   geom_point(aes(x = patch, y = floral_1, color = patch), size = 8, alpha = 0.55) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#DC267F","#FFB000")) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
   ylab(expression(paste("Floral diversity (Hill-Shannon)"))) +
   theme_classic(base_size = 20) +
@@ -132,11 +132,11 @@ m.floral_noPoe_Apis_1.df$patch <- factor(m.floral_noPoe_Apis_1.df$patch, levels 
 # plotting
 floral_noPoe_Apis_1.pred <- m.floral_noPoe_Apis_1.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = floral_noPoe_Apis_1, group = block), linewidth = 1.5, color = "grey25", alpha = 0.85) +
+  geom_line(aes(x = patch, y = floral_noPoe_Apis_1, group = block), linewidth = 1.5, color = "grey55", alpha = 0.65) +
   geom_line(aes(x = patch, y = floral_noPoe_Apis_1_predict, group = block), linewidth = 3.5, linetype = 2) +
   geom_point(aes(x = patch, y = floral_noPoe_Apis_1, color = patch), size = 8, alpha = 0.55) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#DC267F","#FFB000")) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
   ylab(expression(atop("Floral diversity (Hill-Shannon)", paste("excluding 2 dominant pollinators")))) +
   theme_classic(base_size = 20) +

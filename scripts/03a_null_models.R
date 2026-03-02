@@ -73,5 +73,27 @@ net.nulls.vaz_noPoe <- lapply(webs_noPoe, nullmodel, method = "vaznull", N = 500
 
 
 
+#### NO Poecilognathus sulphureus OR Apis mellifera ####
+pollinator_split_noPoe_Apis <- pollinator %>%
+  dplyr::filter(!pollinator_species %in% c("Poecilognathus sulphureus", "Apis mellifera")) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split()
+
+# getting each network into correct format
+webs_noPoe_Apis <- pollinator_split_noPoe_Apis %>%
+  lapply(prepare_matrix)
+
+# adding patch names to each network
+names(webs_noPoe_Apis) <- webs.names
+
+
+# Make null models for all sites 
+net.nulls.vaz_noPoe_Apis <- lapply(webs_noPoe_Apis, nullmodel, method = "vaznull", N = 500) # using the vaznull null - maintains connectance 
+
+
+
+
+
 # exporting as R data objects
-save(net.nulls.vaz, net.nulls.vaz_noApis, net.nulls.vaz_noPoe, file = file.path("data", "L2_nulls", "nulls.RData"))
+save(net.nulls.vaz, net.nulls.vaz_noApis, net.nulls.vaz_noPoe, net.nulls.vaz_noPoe_Apis, file = file.path("data", "L2_nulls", "nulls.RData"))

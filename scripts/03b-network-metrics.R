@@ -351,8 +351,116 @@ plant.links_noPoe <- plant.links_noPoe %>%
 
 
 
+#### network analysis: NO Poecilognathus sulphureus OR Apis mellifera ####
+pollinator_split_noPoe_Apis <- pollinator %>%
+  dplyr::filter(!pollinator_species %in% c("Poecilognathus sulphureus", "Apis mellifera")) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split()
 
-# putting all together
+# getting each network into correct format
+webs_noPoe_Apis <- pollinator_split_noPoe_Apis %>%
+  lapply(prepare_matrix)
+
+# adding patch names to each network
+names(webs_noPoe_Apis) <- webs.names
+
+# Calculate network connectance - unweighted
+net.metrics.connect_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'connectance') 
+# Calculate network connectance - weighted
+net.metrics.weightconnect_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'weighted connectance') # NOTE this is linkage density divided by number of species in the network
+# Calculate network metric nestedness for all plant-pollinator sites
+net.metrics.nest_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'NODF') 
+# Calculate network specialization for all plant-pollinator sites
+net.metrics.h2_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'H2') 
+# Calculate network interaction diversity for all plant-pollinator sites
+net.metrics.diversity_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'Shannon diversity') 
+# Calculate network interaction evenness for all plant-pollinator sites
+net.metrics.even_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'interaction evenness') 
+# Calculate links per pollinator species for all plant-pollinator sites
+net.metrics.pol.links_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'links per species', level = "higher") 
+# Calculate links per plant species for all plant-pollinator sites
+net.metrics.plant.links_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'links per species', level = "lower") 
+
+# getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
+vaz.nest_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "NODF", level = "both")
+vaz.h2_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "H2", level = "both")
+vaz.diversity_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "Shannon diversity", level = "both")
+vaz.even_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "interaction evenness", level = "both")
+# vaz.pol.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "links per species", level = "higher") # can't use -- NAN
+# vaz.plant.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "links per species", level = "lower") # can't use -- NAN
+
+
+# getting z score 
+vaz.nest.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.nest_noPoe_Apis,
+                                       nullval = vaz.nest_noPoe_Apis, metric = "NODF")
+vaz.h2.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.h2_noPoe_Apis,
+                                     nullval = vaz.h2_noPoe_Apis, metric = "H2")
+vaz.diversity.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.diversity_noPoe_Apis,
+                                            nullval = vaz.diversity_noPoe_Apis, metric = "Shannon diversity")
+vaz.even.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.even_noPoe_Apis,
+                                       nullval = vaz.even_noPoe_Apis, metric = "interaction evenness")
+# vaz.pol.links.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.pol.links_noPoe_Apis,
+#                                              nullval = vaz.pol.links_noPoe_Apis, metric = "links per species") # can't use -- NAN
+# vaz.plant.links.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.plant.links_noPoe_Apis,
+#                                                nullval = vaz.plant.links_noPoe_Apis, metric = "links per species") # can't use -- NAN
+
+# creating dataframes
+net.connect_noPoe_Apis <- as.data.frame(do.call('rbind', net.metrics.connect_noPoe_Apis) )
+net.connect_noPoe_Apis <- net.connect_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(connectance_noPoe_Apis = connectance)
+
+net.weightconnect_noPoe_Apis <- as.data.frame(do.call('rbind', net.metrics.weightconnect_noPoe_Apis) )
+net.weightconnect_noPoe_Apis <- net.weightconnect_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(weightconnectance_noPoe_Apis = `weighted connectance`)
+
+vaz.nestedness_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.nest.zscore_noPoe_Apis) )
+vaz.nestedness_noPoe_Apis <- vaz.nestedness_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(vaz.NODF_noPoe_Apis = NODF)
+
+vaz.h2_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.h2.zscore_noPoe_Apis) )
+vaz.h2_noPoe_Apis <- vaz.h2_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(vaz.h2_noPoe_Apis = H2)
+
+vaz.shannon_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.diversity.zscore_noPoe_Apis) )
+vaz.shannon_noPoe_Apis <- vaz.shannon_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(vaz.shannon_noPoe_Apis = `Shannon diversity`)
+
+vaz.evenness_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.even.zscore_noPoe_Apis) )
+vaz.evenness_noPoe_Apis <- vaz.evenness_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(vaz.evenness_noPoe_Apis = `interaction evenness`)
+
+pol.links_noPoe_Apis <- as.data.frame(do.call('rbind', net.metrics.pol.links_noPoe_Apis)) 
+pol.links_noPoe_Apis <- pol.links_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(pol.links_noPoe_Apis = `links per species`)
+
+plant.links_noPoe_Apis <- as.data.frame(do.call('rbind', net.metrics.plant.links_noPoe_Apis)) 
+plant.links_noPoe_Apis <- plant.links_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(plant.links_noPoe_Apis = `links per species`)
+
+
+
+
+
+
+
+#### putting all together ####
 network_vaznull <- net.connect %>%
   left_join(net.weightconnect, by = c("block", "patch")) %>%
   left_join(vaz.nestedness, by = c("block", "patch")) %>%
@@ -376,7 +484,15 @@ network_vaznull <- net.connect %>%
   left_join(vaz.shannon_noPoe, by = c("block", "patch")) %>%
   left_join(vaz.evenness_noPoe, by = c("block", "patch")) %>%
   left_join(pol.links_noPoe, by = c("block", "patch")) %>%
-  left_join(plant.links_noPoe, by = c("block", "patch"))
+  left_join(plant.links_noPoe, by = c("block", "patch")) %>%
+  left_join(net.connect_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(net.weightconnect_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(vaz.nestedness_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(vaz.h2_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(vaz.shannon_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(vaz.evenness_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(pol.links_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(plant.links_noPoe_Apis, by = c("block", "patch"))
 
 write.csv(network_vaznull, file = file.path("data", "L4_metrics", "network_vaznull.csv"))
 

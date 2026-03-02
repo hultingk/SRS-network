@@ -18,10 +18,17 @@ summary(m.connect_noApis)
 m.connect_noPoe <- glmmTMB(connectance_noPoe ~ patch + (1|block),
                            data = network_vaznull)
 summary(m.connect_noPoe)
+m.connect_noPoe_Apis <- glmmTMB(connectance_noPoe_Apis ~ patch + (1|block),
+                           data = network_vaznull)
+summary(m.connect_noPoe_Apis)
+
+
+
+
 
 #### weighted connectance ####
 # no vaznull metric for weighted connectance
-# no difference in weighted connectance including or excluding apis and poe
+# no difference in weighted connectance including or excluding apis and poe, except when both are excluded
 m.weightconnect <- glmmTMB(weightconnectance ~ patch + (1|block),
                            data = network_vaznull)
 summary(m.weightconnect)
@@ -31,6 +38,9 @@ summary(m.weightconnect_noApis)
 m.weightconnect_noPoe <- glmmTMB(weightconnectance_noPoe ~ patch + (1|block),
                                  data = network_vaznull)
 summary(m.weightconnect_noPoe)
+m.weightconnect_noPoe_Apis <- glmmTMB(weightconnectance_noPoe_Apis ~ patch + (1|block),
+                                 data = network_vaznull)
+summary(m.weightconnect_noPoe_Apis)
 
 
 
@@ -46,6 +56,9 @@ summary(m.nestedness.vaz_noApis)
 m.nestedness.vaz_noPoe <- glmmTMB(vaz.NODF_noPoe ~ patch + (1|block), # no difference
                                   data = network_vaznull)
 summary(m.nestedness.vaz_noPoe)
+m.nestedness.vaz_noPoe_Apis <- glmmTMB(vaz.NODF_noPoe_Apis ~ patch + (1|block), # no difference
+                                  data = network_vaznull)
+summary(m.nestedness.vaz_noPoe_Apis)
 
 # # plotting NO APIS
 # # model predictions for plotting
@@ -87,6 +100,10 @@ summary(m.h2.vaz_noApis)
 m.h2.vaz_noPoe <- glmmTMB(vaz.h2_noPoe ~ patch + (1|block), # no difference
                           data = network_vaznull)
 summary(m.h2.vaz_noPoe)
+
+m.h2.vaz_noPoe_Apis <- glmmTMB(vaz.h2_noPoe_Apis ~ patch + (1|block), # no difference
+                          data = network_vaznull)
+summary(m.h2.vaz_noPoe_Apis)
 
 
 # 
@@ -135,6 +152,11 @@ m.shannon.vaz_noPoe <- glmmTMB(vaz.shannon_noPoe ~ patch + (1|block), # no diffe
                                data = network_vaznull)
 summary(m.shannon.vaz_noPoe)
 
+m.shannon.vaz_noPoe_Apis <- glmmTMB(vaz.shannon_noPoe_Apis ~ patch + (1|block), # no difference
+                               data = network_vaznull)
+summary(m.shannon.vaz_noPoe_Apis)
+
+
 
 #### interaction evenness ####
 m.evenness.vaz <- glmmTMB(vaz.evenness ~ patch + (1|block), # no difference
@@ -148,6 +170,13 @@ summary(m.evenness.vaz_noApis)
 m.evenness.vaz_noPoe <- glmmTMB(vaz.evenness_noPoe ~ patch + (1|block), # no difference
                                 data = network_vaznull)
 summary(m.evenness.vaz_noPoe)
+
+m.evenness.vaz_noPoe_Apis <- glmmTMB(vaz.evenness_noPoe_Apis ~ patch + (1|block), # no difference
+                                data = network_vaznull)
+summary(m.evenness.vaz_noPoe_Apis)
+
+
+
 
 
 #### pollinator: links per species ####
@@ -163,6 +192,57 @@ m.pol.links_noPoe <- glmmTMB(pol.links_noPoe ~ patch + (1|block), # lower in unc
                              data = network_vaznull)
 summary(m.pol.links_noPoe)
 
+m.pol.links_noPoe_Apis <- glmmTMB(pol.links_noPoe_Apis ~ patch + (1|block), # lower in unconnected patches
+                             data = network_vaznull)
+summary(m.pol.links_noPoe_Apis)
+
+# plotting
+# links per species pollinator all species
+# model predictions for plotting
+m.pol.links_predict<- ggpredict(m.pol.links, terms = c("patch"), back_transform = T)
+# plotting
+pol.links.pred <- m.pol.links_predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = pol.links, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.pol.links_predict, width = 0, linewidth = 2.5) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Links per pollinator species"))) +
+  theme_classic(base_size = 20) +
+  ylim(1.2, 1.75) +
+  theme(legend.position = "none") 
+
+# links per species pollinator excluding Apis and Poe
+# model predictions for plotting
+m.pol.links_noPoe_Apis_predict<- ggpredict(m.pol.links_noPoe_Apis, terms = c("patch"), back_transform = T)
+# plotting
+pol.links_noPoe_Apis.pred <- m.pol.links_noPoe_Apis_predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = pol.links_noPoe_Apis, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.pol.links_noPoe_Apis_predict, width = 0, linewidth = 2.5) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Links per pollinator species (exclusing 2 dominant pollinators)"))) +
+  theme_classic(base_size = 20) +
+  ylim(1.2, 1.75) +
+  theme(legend.position = "none") 
+
+pol.links_all_plot <- cowplot::plot_grid(pol.links.pred, pol.links_noPoe_Apis.pred)
+pol.links_all_plot
+
+
+
+
 
 #### plant: links per species ####
 m.plant.links <- glmmTMB(plant.links ~ patch + (1|block), # lower in unconnected patches
@@ -176,6 +256,12 @@ summary(m.plant.links_noApis)
 m.plant.links_noPoe <- glmmTMB(plant.links_noPoe ~ patch + (1|block), # lower in unconnected patches
                                data = network_vaznull)
 summary(m.plant.links_noPoe)
+
+m.plant.links_noPoe_Apis <- glmmTMB(plant.links_noPoe_Apis ~ patch + (1|block), # lower in unconnected patches
+                               data = network_vaznull)
+summary(m.plant.links_noPoe_Apis)
+
+
 
 
 
