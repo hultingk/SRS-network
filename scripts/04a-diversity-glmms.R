@@ -20,41 +20,13 @@ m.abundance <- glmmTMB(abundance ~ patch + (1|block), # no difference
                        family = "nbinom2")
 summary(m.abundance)
 
-# abundance no apis
-m.abundance_noApis <- glmmTMB(abundance_noApis ~ patch + (1|block), # significantly lower in unconnected
-                       data = diversity_metrics, 
-                       family = "nbinom2")
-summary(m.abundance_noApis)
-
-# abundance no poe
-m.abundance_noPoe <- glmmTMB(abundance_noPoe ~ patch + (1|block), # no difference
-                              data = diversity_metrics, 
-                              family = "nbinom2")
-summary(m.abundance_noPoe)
-
 # abundance no poe or apis
 m.abundance_noApis_Poe <- glmmTMB(abundance_noApis_Poe ~ patch + (1|block), # significantly lower in unconnected
                              data = diversity_metrics, 
                              family = "nbinom2")
 summary(m.abundance_noApis_Poe)
 
-# # abundance butterflies
-# m.abundance_lep <- glmmTMB(abundance_lep ~ patch + (1|block), # marginally significantly lower in unconnected
-#                         data = diversity_metrics, 
-#                         family = "nbinom2")
-# summary(m.abundance_lep)
-# 
-# # abundance bee
-# m.abundance_bee <- glmmTMB(abundance_bee ~ patch + (1|block), # no difference
-#                            data = diversity_metrics, 
-#                            family = "nbinom2")
-# summary(m.abundance_bee)
-# 
-# # abundance fly
-# m.abundance_fly <- glmmTMB(abundance_fly ~ patch + (1|block), # no difference
-#                            data = diversity_metrics, 
-#                            family = "nbinom2")
-# summary(m.abundance_fly)
+
 
 
 ##### floral diversity #####
@@ -63,36 +35,19 @@ summary(m.abundance_noApis_Poe)
 m.floral_1 <- glmmTMB(floral_1 ~ patch + (1|block), # significantly lower in unconnected
                       data = diversity_metrics)
 summary(m.floral_1)
+-4.486/11.763 * 100 # 38.13653% decrease
 
 # simpsons all species
 m.floral_2 <- glmmTMB(floral_2 ~ patch + (1|block), # significantly lower in unconnected
                       data = diversity_metrics)
 summary(m.floral_2)
 
-# shannon no apis
-m.floral_noApis_1 <- glmmTMB(floral_noApis_1 ~ patch + (1|block), # significantly lower in unconnected
-                      data = diversity_metrics)
-summary(m.floral_noApis_1)
-
-# simpsons no apis
-m.floral_noApis_2 <- glmmTMB(floral_noApis_2 ~ patch + (1|block), # significantly lower in unconnected
-                      data = diversity_metrics)
-summary(m.floral_noApis_2)
-
-# shannon no poe
-m.floral_noPoe_1 <- glmmTMB(floral_noPoe_1 ~ patch + (1|block), # no difference
-                             data = diversity_metrics)
-summary(m.floral_noPoe_1)
-
-# simpsons no poe
-m.floral_noPoe_2 <- glmmTMB(floral_noPoe_2 ~ patch + (1|block), # no difference
-                             data = diversity_metrics)
-summary(m.floral_noPoe_2)
 
 # shannon no poe and apis
 m.floral_noPoe_Apis_1 <- glmmTMB(floral_noPoe_Apis_1 ~ patch + (1|block), # no difference
                             data = diversity_metrics)
 summary(m.floral_noPoe_Apis_1)
+-1.400/10.106 * 100 # 13.85316% decrease, but not significant
 
 # simpsons no poe and apis
 m.floral_noPoe_Apis_2 <- glmmTMB(floral_noPoe_Apis_2 ~ patch + (1|block), # no difference
@@ -103,50 +58,57 @@ summary(m.floral_noPoe_Apis_2)
 ##### floral diversity plotting: shannon all species and shannon no Apis or Poe ####
 # Shannon all species
 # model predictions for plotting
-m.floral_1.df <- diversity_metrics %>%
-  dplyr::select(c("block", "patch", "floral_1"))
-m.floral_1.df$floral_1_predict <- predict(m.floral_1, re.form = NA)
-m.floral_1.df$patch <- factor(m.floral_1.df$patch, levels = c("B", "W"))
+m.floral_1.df <- ggpredict(m.floral_1, terms = c("patch"), back_transform = TRUE)
 # plotting
 floral_1.pred <- m.floral_1.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = floral_1, group = block), linewidth = 1.5, color = "grey55", alpha = 0.65) +
-  geom_line(aes(x = patch, y = floral_1_predict, group = block), linewidth = 3.5, linetype = 1) +
-  geom_point(aes(x = patch, y = floral_1, color = patch), size = 8, alpha = 0.55) +
+  geom_jitter(aes(x = patch, y = floral_1, color = patch), data = diversity_metrics, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.floral_1.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
-  ylab(expression(paste("Floral diversity (Hill-Shannon)"))) +
+  ylab(expression("Floral diversity (Hill-Shannon)")) +
   theme_classic(base_size = 20) +
-  theme(legend.position = "none") #+
-  #theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  #theme(axis.title = element_text(size = 34)) #+ # axis label size
+  ylim(2, 16.5) +
+  theme(legend.position = "none") 
 floral_1.pred
 
 # Shannon excluding Apis and Poe interactions
 # model predictions for plotting
-m.floral_noPoe_Apis_1.df <- diversity_metrics %>%
-  dplyr::select(c("block", "patch", "floral_noPoe_Apis_1"))
-m.floral_noPoe_Apis_1.df$floral_noPoe_Apis_1_predict <- predict(m.floral_noPoe_Apis_1, re.form = NA)
-m.floral_noPoe_Apis_1.df$patch <- factor(m.floral_noPoe_Apis_1.df$patch, levels = c("B", "W"))
+m.floral_noPoe_Apis_1.df <- ggpredict(m.floral_noPoe_Apis_1, terms = c("patch"), back_transform = TRUE)
 # plotting
-floral_noPoe_Apis_1.pred <- m.floral_noPoe_Apis_1.df %>%
+floral_1.pred_noPoe_Apis <- m.floral_noPoe_Apis_1.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = floral_noPoe_Apis_1, group = block), linewidth = 1.5, color = "grey55", alpha = 0.65) +
-  geom_line(aes(x = patch, y = floral_noPoe_Apis_1_predict, group = block), linewidth = 3.5, linetype = 2) +
-  geom_point(aes(x = patch, y = floral_noPoe_Apis_1, color = patch), size = 8, alpha = 0.55) +
+  geom_jitter(aes(x = patch, y = floral_noPoe_Apis_1, color = patch), data = diversity_metrics, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.floral_noPoe_Apis_1.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
-  ylab(expression(atop("Floral diversity (Hill-Shannon)", paste("excluding 2 dominant pollinators")))) +
+  ylab(expression(atop("Floral diversity (Hill-Shannon)", paste("excluding two dominant pollinators")))) +
   theme_classic(base_size = 20) +
-  theme(legend.position = "none") #+
-  #theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  #theme(axis.title = element_text(size = 34)) #+ # axis label size
-floral_noPoe_Apis_1.pred
+  ylim(2, 16.5) +
+  theme(legend.position = "none") 
+floral_1.pred_noPoe_Apis
 
-floral_div_plot <- cowplot::plot_grid(floral_1.pred, floral_noPoe_Apis_1.pred)
+
+# all together
+floral_div_plot <- cowplot::plot_grid(floral_1.pred, floral_1.pred_noPoe_Apis)
 floral_div_plot
+
+# exporting
+# pdf(file = file.path("plots", "floral_div_plot.pdf"), width = 13, height = 6.5)
+# floral_div_plot
+# dev.off()
 
 
 
@@ -156,31 +118,12 @@ floral_div_plot
 m.pollinator_1 <- glmmTMB(pollinator_1 ~ patch + (1|block), # significantly lower in unconnected
                       data = diversity_metrics)
 summary(m.pollinator_1)
+-11.290/27.638 * 100 # 40.84955% decrease
 
 # simpsons all species
 m.pollinator_2 <- glmmTMB(pollinator_2 ~ patch + (1|block), # significantly lower in unconnected
                       data = diversity_metrics)
 summary(m.pollinator_2)
-
-# shannon no apis
-m.pollinator_noApis_1 <- glmmTMB(pollinator_noApis_1 ~ patch + (1|block), # significantly lower in unconnected
-                             data = diversity_metrics)
-summary(m.pollinator_noApis_1)
-
-# simpsons no apis
-m.pollinator_noApis_2 <- glmmTMB(pollinator_noApis_2 ~ patch + (1|block), # significantly lower in unconnected
-                             data = diversity_metrics)
-summary(m.pollinator_noApis_2)
-
-# shannon no poe
-m.pollinator_noPoe_1 <- glmmTMB(pollinator_noPoe_1 ~ patch + (1|block), # significantly lower in unconnected
-                            data = diversity_metrics)
-summary(m.pollinator_noPoe_1)
-
-# simpsons no poe
-m.pollinator_noPoe_2 <- glmmTMB(pollinator_noPoe_2 ~ patch + (1|block), # significantly lower in unconnected
-                            data = diversity_metrics)
-summary(m.pollinator_noPoe_2)
 
 # shannon no poe and apis
 m.pollinator_noPoe_Apis_1 <- glmmTMB(pollinator_noPoe_Apis_1 ~ patch + (1|block), # significantly lower in unconnected
@@ -192,58 +135,65 @@ summary(m.pollinator_noPoe_Apis_1)
 m.pollinator_noPoe_Apis_2 <- glmmTMB(pollinator_noPoe_Apis_2 ~ patch + (1|block), # significantly lower in unconnected
                                  data = diversity_metrics)
 summary(m.pollinator_noPoe_Apis_2)
+-1.5995/18.3849 * 100 # 8.700075% decrease
 
 
 ##### pollinator diversity plotting: shannon all species and shannon no Apis or Poe ####
 # Shannon all species
 # model predictions for plotting
-m.pollinator_1.df <- diversity_metrics %>%
-  dplyr::select(c("block", "patch", "pollinator_1"))
-m.pollinator_1.df$pollinator_1_predict <- predict(m.pollinator_1, re.form = NA)
-m.pollinator_1.df$patch <- factor(m.pollinator_1.df$patch, levels = c("B", "W"))
+# Shannon all species
+# model predictions for plotting
+m.pollinator_1.df <- ggpredict(m.pollinator_1, terms = c("patch"), back_transform = TRUE)
 # plotting
 pollinator_1.pred <- m.pollinator_1.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = pollinator_1, group = block), linewidth = 1.5, color = "grey25", alpha = 0.85) +
-  geom_line(aes(x = patch, y = pollinator_1_predict, group = block), linewidth = 3.5, linetype = 1) +
-  geom_point(aes(x = patch, y = pollinator_1, color = patch), size = 8, alpha = 0.55) +
+  geom_jitter(aes(x = patch, y = pollinator_1, color = patch), data = diversity_metrics, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.pollinator_1.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#DC267F","#FFB000")) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
-  ylab(expression(paste("Pollinator diversity (Hill-Shannon)"))) +
+  ylab(expression("Pollinator diversity (Hill-Shannon)")) +
   theme_classic(base_size = 20) +
-  theme(legend.position = "none") #+
-#theme(axis.text = element_text(size = 30)) + # axis tick mark size
-#theme(axis.title = element_text(size = 34)) #+ # axis label size
+  ylim(10, 35) +
+  theme(legend.position = "none") 
 pollinator_1.pred
 
-# Shannon excluding Apis and Poe interactions
+# shannon excluding 2 dominant pollinators
 # model predictions for plotting
-m.pollinator_noPoe_Apis_1.df <- diversity_metrics %>%
-  dplyr::select(c("block", "patch", "pollinator_noPoe_Apis_1"))
-m.pollinator_noPoe_Apis_1.df$pollinator_noPoe_Apis_1_predict <- predict(m.pollinator_noPoe_Apis_1, re.form = NA)
-m.pollinator_noPoe_Apis_1.df$patch <- factor(m.pollinator_noPoe_Apis_1.df$patch, levels = c("B", "W"))
+m.pollinator_noPoe_Apis_1.df <- ggpredict(m.pollinator_noPoe_Apis_1, terms = c("patch"), back_transform = TRUE)
 # plotting
-pollinator_noPoe_Apis_1.pred <- m.pollinator_noPoe_Apis_1.df %>%
+pollinator_1.pred_noPoe_Apis <- m.pollinator_noPoe_Apis_1.df %>%
   ggplot() +
-  geom_line(aes(x = patch, y = pollinator_noPoe_Apis_1, group = block), linewidth = 1.5, color = "grey25", alpha = 0.85) +
-  geom_line(aes(x = patch, y = pollinator_noPoe_Apis_1_predict, group = block), linewidth = 3.5, linetype = 1) +
-  geom_point(aes(x = patch, y = pollinator_noPoe_Apis_1, color = patch), size = 8, alpha = 0.55) +
+  geom_jitter(aes(x = patch, y = pollinator_noPoe_Apis_1, color = patch), data = diversity_metrics, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.pollinator_noPoe_Apis_1.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#DC267F","#FFB000")) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
-  ylab(expression(atop("Pollinator diversity (Hill-Shannon)", paste("excluding 2 dominant pollinators")))) +
+  ylab(expression(atop("Pollinator diversity (Hill-Shannon)", paste("excluding two dominant pollinators")))) +
   theme_classic(base_size = 20) +
-  theme(legend.position = "none") #+
-#theme(axis.text = element_text(size = 30)) + # axis tick mark size
-#theme(axis.title = element_text(size = 34)) #+ # axis label size
-pollinator_noPoe_Apis_1.pred
+  ylim(10, 35) +
+  theme(legend.position = "none") 
+pollinator_1.pred_noPoe_Apis
 
-pollinator_div_plot <- cowplot::plot_grid(pollinator_1.pred, pollinator_noPoe_Apis_1.pred)
+
+pollinator_div_plot <- cowplot::plot_grid(pollinator_1.pred, pollinator_1.pred_noPoe_Apis)
 pollinator_div_plot
 
 
-
+# exporting
+# pdf(file = file.path("plots", "pollinator_div_plot.pdf"), width = 13, height = 6.5)
+# pollinator_div_plot
+# dev.off()
 
 
 

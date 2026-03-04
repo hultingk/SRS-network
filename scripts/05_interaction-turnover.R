@@ -1,6 +1,8 @@
 # loading libraries
 librarian::shelf(tidyverse, plyr, vegan, bipartite, data.table)
 
+source(here::here(file.path("scripts", "00_functions.R")))
+
 # loading data 
 pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv"))
 
@@ -69,7 +71,7 @@ dissimilarity_plot <- network_dissimilarity %>%
                 width = 0.08, height = 0) +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
                    data = network_dissimilarity.predict, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), data = network_dissimilarity.predict, linewidth = 2, linetype = 1) +
+  #geom_line(aes(x = x, y = predicted, group = group), data = network_dissimilarity.predict, linewidth = 2, linetype = 1) +
   geom_point(aes(x = x, y = predicted, fill = x), data = network_dissimilarity.predict, 
                size = 6, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Species Turnover', 'Interaction Rewiring')) +

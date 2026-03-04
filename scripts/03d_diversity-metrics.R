@@ -75,6 +75,20 @@ abundance_fly <- pollinator %>%
 
 
 #### Flower diversity ####
+# floral richness
+floral_matrix <- pollinator %>%
+  dplyr::count(unique_ID, flower_species) %>% # counting # of each flower species per patch
+  mutate(n = if_else(n == 0, 0, 1)) %>%
+  pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>% # pivoting into wider format for flower species by patch matrix
+  column_to_rownames("unique_ID")
+
+floral_count <- as.data.frame(rowSums(floral_matrix))
+floral_count <- floral_count %>%
+  rownames_to_column("unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>%
+  dplyr::rename(floral_rich = `rowSums(floral_matrix)`)
+
+
 # Hill numbers #
 floral_inext <- pollinator %>%
   dplyr::count(unique_ID, flower_species) %>% # counting # of each flower species per patch

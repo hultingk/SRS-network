@@ -128,11 +128,12 @@ m.links_predict <- ggpredict(m.links, terms = c("patch"), back_transform = T)
 # plotting
 m.links_predict_plot <- m.links_predict %>%
   ggplot() +
-  geom_jitter(aes(x = patch, y = links.per.sp, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+  geom_jitter(aes(x = patch, y = links.per.sp, color = patch), data = network_vaznull, size = 6, alpha = 0.55,
               width = 0.08, height = 0) +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
                 data = m.links_predict, width = 0, linewidth = 2.5) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
   scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
@@ -143,51 +144,32 @@ m.links_predict_plot <- m.links_predict %>%
 m.links_predict_plot
 
 
+# links per species plotting - no apis or poe
 # model predictions for plotting
-m.links.df <- network_vaznull %>%
-  dplyr::select(c("block", "patch", "links.per.sp"))
-m.links.df$links.pred <- predict(m.links, re.form = NA)
-m.links.df$patch <- factor(m.links.df$patch, levels = c("B", "W"))
+m.links_predict_noPoe_Apis <- ggpredict(m.links_noPoe_Apis, terms = c("patch"), back_transform = T)
 # plotting
-links.pred <- m.links.df %>%
+m.links_predict_plot_noPoe_Apis <- m.links_predict_noPoe_Apis %>%
   ggplot() +
-  geom_line(aes(x = patch, y = links.per.sp, group = block), linewidth = 2.5, color = "gray40", alpha = 0.5) +
-  geom_line(aes(x = patch, y = links.pred, group = block), linewidth = 5, linetype = 1) +
-  geom_point(aes(x = patch, y = links.per.sp, color = patch), size = 11, alpha = 0.8) +
+  geom_jitter(aes(x = patch, y = links.per.sp_noPoe_Apis, color = patch), data = network_vaznull, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.links_predict, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("Links per species"))) +
-  theme_classic() +
-  ylim(1.2, 1.8) +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-links.pred
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(atop("Links per species", paste("excluding two dominant pollinators")))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.links_predict_plot_noPoe_Apis
 
 
-# links per species plotting - exclusing 2 dominant species
-# model predictions for plotting
-m.links.df_noPoe_Apis <- network_vaznull %>%
-  dplyr::select(c("block", "patch", "links.per.sp_noPoe_Apis"))
-m.links.df_noPoe_Apis$links.pred_noPoe_Apis <- predict(m.links_noPoe_Apis, re.form = NA)
-m.links.df_noPoe_Apis$patch <- factor(m.links.df_noPoe_Apis$patch, levels = c("B", "W"))
-# plotting
-links.pred_noPoe_Apis <- m.links.df_noPoe_Apis%>%
-  ggplot() +
-  geom_line(aes(x = patch, y = links.per.sp_noPoe_Apis, group = block), linewidth = 2.5, color = "gray40", alpha = 0.5) +
-  geom_line(aes(x = patch, y = links.pred_noPoe_Apis, group = block), linewidth = 5, linetype = 1) +
-  geom_point(aes(x = patch, y = links.per.sp_noPoe_Apis, color = patch), size = 11, alpha = 0.8) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch Type") +
-  ylab(expression(paste("Links per species"))) +
-  theme_classic() +
-  ylim(1.2, 1.8) +
-  theme(legend.position = "none") +
-  theme(axis.text = element_text(size = 30)) + # axis tick mark size
-  theme(axis.title = element_text(size = 34)) #+ # axis label size
-links.pred_noPoe_Apis
+# all together
+links_predict_plot <- cowplot::plot_grid()
+
+
 
 
 # #### pollinator: mean links ####
