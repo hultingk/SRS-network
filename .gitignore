@@ -61,3 +61,4 @@ rsconnect/
 *DS_Store
 *.rds
 *.RData
+*.html

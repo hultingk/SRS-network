@@ -4,14 +4,14 @@
 # -------------------------------------- #
 
 # loading libraries
-librarian::shelf(tidyverse, iNEXT, bipartite)
+librarian::shelf(tidyverse, iNEXT, bipartite, kableExtra)
 
 # loading data 
 pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plant-pollinator.csv"))
 
-# excluding non-identified pollinators for now
-# sc_pollinator <- pollinator %>%
-#   filter(!pollinator_species %in% c(" ", "")) 
+# # excluding dominant pollinators
+# pollinator <- pollinator %>%
+#   filter(!pollinator_species %in% c("Poecilognathus sulphureus", "Apis mellifera"))
 
 # getting plant-pollinator data into correct format for sampling completeness estimation
 sc_pollinator <- pollinator %>%
@@ -28,6 +28,27 @@ out <- iNEXT(sc_nosite_pollinator, q=c(1), datatype="abundance", endpoint=NULL, 
 
 # mean sampling completeness across all patches
 mean(out[["DataInfo"]][["SC"]])
+sc.table <- out[["DataInfo"]]
+sc.table <- sc.table %>%
+  dplyr::select("Assemblage", "n", "SC") %>%
+  separate(Assemblage, into = c("Block", "Patch")) %>%
+  dplyr::rename(`Sampling Coverage` = SC, `Number of Observations` = n) %>%
+  mutate(Patch = if_else(Patch == "B", "Connected", "Unconnected"))
+
+# table of sampling completeness
+sc.table <- sc.table %>%
+  kbl(digits = 3) %>%
+  kable_classic(full_width = T) %>%
+  kable_styling(html_font = "Times New Roman",
+                font_size = 16) %>%
+  row_spec(0, extra_css = "border-bottom: 5px double;") %>%
+  row_spec(1:nrow(sc.table), extra_css = "border-bottom: 1px solid;")
+sc.table
+
+# exporting
+#save_kable(sc.table, file = file.path("tables", "sc.table.html"))
+
+
 
 # visualizing sampling completeness
 ggiNEXT(out, type=1, facet.var="Order.q") # Sample-size-based R/E curve

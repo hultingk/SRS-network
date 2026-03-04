@@ -5,6 +5,7 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 # load data
 network_vaznull <- read.csv(file = file.path("data", "L4_metrics", "network_vaznull.csv"))
 modularity <- read.csv(file = file.path("data", "L4_metrics", "modularity.csv"))
+extinction <- read.csv(file = file.path("data", "L4_metrics", "extinction_metric.csv"))
 
 #### connectance ####
 # no vaznull metric for connectance
@@ -12,17 +13,10 @@ modularity <- read.csv(file = file.path("data", "L4_metrics", "modularity.csv"))
 m.connect <- glmmTMB(connectance ~ patch + (1|block),
                      data = network_vaznull)
 summary(m.connect)
-m.connect_noApis <- glmmTMB(connectance_noApis ~ patch + (1|block),
-                            data = network_vaznull)
-summary(m.connect_noApis)
-m.connect_noPoe <- glmmTMB(connectance_noPoe ~ patch + (1|block),
-                           data = network_vaznull)
-summary(m.connect_noPoe)
+
 m.connect_noPoe_Apis <- glmmTMB(connectance_noPoe_Apis ~ patch + (1|block),
                            data = network_vaznull)
 summary(m.connect_noPoe_Apis)
-
-
 
 
 
@@ -32,12 +26,7 @@ summary(m.connect_noPoe_Apis)
 m.weightconnect <- glmmTMB(weightconnectance ~ patch + (1|block),
                            data = network_vaznull)
 summary(m.weightconnect)
-m.weightconnect_noApis <- glmmTMB(weightconnectance_noApis ~ patch + (1|block),
-                                  data = network_vaznull)
-summary(m.weightconnect_noApis)
-m.weightconnect_noPoe <- glmmTMB(weightconnectance_noPoe ~ patch + (1|block),
-                                 data = network_vaznull)
-summary(m.weightconnect_noPoe)
+
 m.weightconnect_noPoe_Apis <- glmmTMB(weightconnectance_noPoe_Apis ~ patch + (1|block),
                                  data = network_vaznull)
 summary(m.weightconnect_noPoe_Apis)
@@ -49,13 +38,6 @@ m.nestedness.vaz <- glmmTMB(vaz.NODF ~ patch + (1|block), # significantly lower 
                             data = network_vaznull)
 summary(m.nestedness.vaz)
 
-m.nestedness.vaz_noApis <- glmmTMB(vaz.NODF_noApis ~ patch + (1|block), # no difference
-                                   data = network_vaznull)
-summary(m.nestedness.vaz_noApis)
-
-m.nestedness.vaz_noPoe <- glmmTMB(vaz.NODF_noPoe ~ patch + (1|block), # no difference
-                                  data = network_vaznull)
-summary(m.nestedness.vaz_noPoe)
 m.nestedness.vaz_noPoe_Apis <- glmmTMB(vaz.NODF_noPoe_Apis ~ patch + (1|block), # no difference
                                   data = network_vaznull)
 summary(m.nestedness.vaz_noPoe_Apis)
@@ -92,14 +74,6 @@ summary(m.nestedness.vaz_noPoe_Apis)
 m.h2.vaz <- glmmTMB(vaz.h2 ~ patch + (1|block), # significantly lower in connected patches 
                     data = network_vaznull)
 summary(m.h2.vaz)
-
-m.h2.vaz_noApis <- glmmTMB(vaz.h2_noApis ~ patch + (1|block), # no difference
-                           data = network_vaznull)
-summary(m.h2.vaz_noApis)
-
-m.h2.vaz_noPoe <- glmmTMB(vaz.h2_noPoe ~ patch + (1|block), # no difference
-                          data = network_vaznull)
-summary(m.h2.vaz_noPoe)
 
 m.h2.vaz_noPoe_Apis <- glmmTMB(vaz.h2_noPoe_Apis ~ patch + (1|block), # no difference
                           data = network_vaznull)
@@ -139,151 +113,192 @@ summary(m.h2.vaz_noPoe_Apis)
 
 
 
-#### interaction diversity ####
-m.shannon.vaz <- glmmTMB(vaz.shannon ~ patch + (1|block), # no difference
-                         data = network_vaznull)
-summary(m.shannon.vaz)
-
-m.shannon.vaz_noApis <- glmmTMB(vaz.shannon_noApis ~ patch + (1|block), # no difference
-                                data = network_vaznull)
-summary(m.shannon.vaz_noApis)
-
-m.shannon.vaz_noPoe <- glmmTMB(vaz.shannon_noPoe ~ patch + (1|block), # no difference
-                               data = network_vaznull)
-summary(m.shannon.vaz_noPoe)
-
-m.shannon.vaz_noPoe_Apis <- glmmTMB(vaz.shannon_noPoe_Apis ~ patch + (1|block), # no difference
-                               data = network_vaznull)
-summary(m.shannon.vaz_noPoe_Apis)
 
 
+### links per species ###
+m.links <- glmmTMB(links.per.sp ~ patch + (1|block), 
+                   data = network_vaznull)
+summary(m.links)
 
-#### interaction evenness ####
-m.evenness.vaz <- glmmTMB(vaz.evenness ~ patch + (1|block), # no difference
-                          data = network_vaznull)
-summary(m.evenness.vaz)
+m.links_noPoe_Apis <- glmmTMB(links.per.sp_noPoe_Apis ~ patch + (1|block), 
+                   data = network_vaznull)
+summary(m.links_noPoe_Apis)
 
-m.evenness.vaz_noApis <- glmmTMB(vaz.evenness_noApis ~ patch + (1|block), # no difference
-                                 data = network_vaznull)
-summary(m.evenness.vaz_noApis)
-
-m.evenness.vaz_noPoe <- glmmTMB(vaz.evenness_noPoe ~ patch + (1|block), # no difference
-                                data = network_vaznull)
-summary(m.evenness.vaz_noPoe)
-
-m.evenness.vaz_noPoe_Apis <- glmmTMB(vaz.evenness_noPoe_Apis ~ patch + (1|block), # no difference
-                                data = network_vaznull)
-summary(m.evenness.vaz_noPoe_Apis)
-
-
-
-
-
-#### pollinator: links per species ####
-m.pol.links <- glmmTMB(pol.links ~ patch + (1|block), # lower in unconnected patches
-                       data = network_vaznull)
-summary(m.pol.links)
-
-m.pol.links_noApis <- glmmTMB(pol.links_noApis ~ patch + (1|block), # lower in unconnected patches
-                              data = network_vaznull)
-summary(m.pol.links_noApis)
-
-m.pol.links_noPoe <- glmmTMB(pol.links_noPoe ~ patch + (1|block), # lower in unconnected patches
-                             data = network_vaznull)
-summary(m.pol.links_noPoe)
-
-m.pol.links_noPoe_Apis <- glmmTMB(pol.links_noPoe_Apis ~ patch + (1|block), # lower in unconnected patches
-                             data = network_vaznull)
-summary(m.pol.links_noPoe_Apis)
-
-# plotting
-# links per species pollinator all species
+# links per species plotting - all species
 # model predictions for plotting
-m.pol.links_predict<- ggpredict(m.pol.links, terms = c("patch"), back_transform = T)
+m.links_predict <- ggpredict(m.links, terms = c("patch"), back_transform = T)
 # plotting
-pol.links.pred <- m.pol.links_predict %>%
+m.links_predict_plot <- m.links_predict %>%
   ggplot() +
-  geom_jitter(aes(x = patch, y = pol.links, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+  geom_jitter(aes(x = patch, y = links.per.sp, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
               width = 0.08, height = 0) +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.pol.links_predict, width = 0, linewidth = 2.5) +
+                data = m.links_predict, width = 0, linewidth = 2.5) +
   geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
   scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
   xlab("Patch type") +
-  ylab(expression(paste("Links per pollinator species"))) +
+  ylab(expression(paste("Links per species"))) +
   theme_classic(base_size = 20) +
-  ylim(1.2, 1.75) +
   theme(legend.position = "none") 
+m.links_predict_plot
 
-# links per species pollinator excluding Apis and Poe
+
 # model predictions for plotting
-m.pol.links_noPoe_Apis_predict<- ggpredict(m.pol.links_noPoe_Apis, terms = c("patch"), back_transform = T)
+m.links.df <- network_vaznull %>%
+  dplyr::select(c("block", "patch", "links.per.sp"))
+m.links.df$links.pred <- predict(m.links, re.form = NA)
+m.links.df$patch <- factor(m.links.df$patch, levels = c("B", "W"))
 # plotting
-pol.links_noPoe_Apis.pred <- m.pol.links_noPoe_Apis_predict %>%
+links.pred <- m.links.df %>%
   ggplot() +
-  geom_jitter(aes(x = patch, y = pol.links_noPoe_Apis, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.pol.links_noPoe_Apis_predict, width = 0, linewidth = 2.5) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  geom_line(aes(x = patch, y = links.per.sp, group = block), linewidth = 2.5, color = "gray40", alpha = 0.5) +
+  geom_line(aes(x = patch, y = links.pred, group = block), linewidth = 5, linetype = 1) +
+  geom_point(aes(x = patch, y = links.per.sp, color = patch), size = 11, alpha = 0.8) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch type") +
-  ylab(expression(paste("Links per pollinator species (exclusing 2 dominant pollinators)"))) +
-  theme_classic(base_size = 20) +
-  ylim(1.2, 1.75) +
-  theme(legend.position = "none") 
-
-pol.links_all_plot <- cowplot::plot_grid(pol.links.pred, pol.links_noPoe_Apis.pred)
-pol.links_all_plot
-
+  xlab("Patch Type") +
+  ylab(expression(paste("Links per species"))) +
+  theme_classic() +
+  ylim(1.2, 1.8) +
+  theme(legend.position = "none") +
+  theme(axis.text = element_text(size = 30)) + # axis tick mark size
+  theme(axis.title = element_text(size = 34)) #+ # axis label size
+links.pred
 
 
-
-
-#### plant: links per species ####
-m.plant.links <- glmmTMB(plant.links ~ patch + (1|block), # lower in unconnected patches
-                         data = network_vaznull)
-summary(m.plant.links)
-
-m.plant.links_noApis <- glmmTMB(plant.links_noApis ~ patch + (1|block), # lower in unconnected patches
-                                data = network_vaznull)
-summary(m.plant.links_noApis)
-
-m.plant.links_noPoe <- glmmTMB(plant.links_noPoe ~ patch + (1|block), # lower in unconnected patches
-                               data = network_vaznull)
-summary(m.plant.links_noPoe)
-
-m.plant.links_noPoe_Apis <- glmmTMB(plant.links_noPoe_Apis ~ patch + (1|block), # lower in unconnected patches
-                               data = network_vaznull)
-summary(m.plant.links_noPoe_Apis)
-
-
-# plotting
-# links per species plant all species
+# links per species plotting - exclusing 2 dominant species
 # model predictions for plotting
-m.plant.links_predict<- ggpredict(m.plant.links, terms = c("patch"), back_transform = T)
+m.links.df_noPoe_Apis <- network_vaznull %>%
+  dplyr::select(c("block", "patch", "links.per.sp_noPoe_Apis"))
+m.links.df_noPoe_Apis$links.pred_noPoe_Apis <- predict(m.links_noPoe_Apis, re.form = NA)
+m.links.df_noPoe_Apis$patch <- factor(m.links.df_noPoe_Apis$patch, levels = c("B", "W"))
 # plotting
-plant.links.pred <- m.plant.links_predict %>%
+links.pred_noPoe_Apis <- m.links.df_noPoe_Apis%>%
   ggplot() +
-  geom_jitter(aes(x = patch, y = plant.links, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.plant.links_predict, width = 0, linewidth = 2.5) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  geom_line(aes(x = patch, y = links.per.sp_noPoe_Apis, group = block), linewidth = 2.5, color = "gray40", alpha = 0.5) +
+  geom_line(aes(x = patch, y = links.pred_noPoe_Apis, group = block), linewidth = 5, linetype = 1) +
+  geom_point(aes(x = patch, y = links.per.sp_noPoe_Apis, color = patch), size = 11, alpha = 0.8) +
   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch type") +
-  ylab(expression(paste("Links per plant species"))) +
-  theme_classic(base_size = 20) +
-  ylim(1.2, 1.75) +
-  theme(legend.position = "none") 
-plant.links.pred
+  xlab("Patch Type") +
+  ylab(expression(paste("Links per species"))) +
+  theme_classic() +
+  ylim(1.2, 1.8) +
+  theme(legend.position = "none") +
+  theme(axis.text = element_text(size = 30)) + # axis tick mark size
+  theme(axis.title = element_text(size = 34)) #+ # axis label size
+links.pred_noPoe_Apis
 
+
+# #### pollinator: mean links ####
+# m.pol.links <- glmmTMB(pol.links ~ patch + (1|block), # lower in unconnected patches
+#                        data = network_vaznull)
+# summary(m.pol.links)
+# 
+# m.pol.links_noPoe_Apis <- glmmTMB(pol.links_noPoe_Apis ~ patch + (1|block), 
+#                              data = network_vaznull)
+# summary(m.pol.links_noPoe_Apis)
+# 
+# # # plotting
+# # # links per species pollinator all species
+# # # model predictions for plotting
+# # m.pol.links_predict<- ggpredict(m.pol.links, terms = c("patch"), back_transform = T)
+# # # plotting
+# # pol.links.pred <- m.pol.links_predict %>%
+# #   ggplot() +
+# #   geom_jitter(aes(x = patch, y = pol.links, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+# #               width = 0.08, height = 0) +
+# #   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+# #                 data = m.pol.links_predict, width = 0, linewidth = 2.5) +
+# #   geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+# #   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+# #   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+# #   scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+# #   xlab("Patch type") +
+# #   ylab(expression(paste("Links per pollinator species"))) +
+# #   theme_classic(base_size = 20) +
+# #   ylim(1.2, 1.75) +
+# #   theme(legend.position = "none") 
+# # 
+# # # links per species pollinator excluding Apis and Poe
+# # # model predictions for plotting
+# # m.pol.links_noPoe_Apis_predict<- ggpredict(m.pol.links_noPoe_Apis, terms = c("patch"), back_transform = T)
+# # # plotting
+# # pol.links_noPoe_Apis.pred <- m.pol.links_noPoe_Apis_predict %>%
+# #   ggplot() +
+# #   geom_jitter(aes(x = patch, y = pol.links_noPoe_Apis, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+# #               width = 0.08, height = 0) +
+# #   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+# #                 data = m.pol.links_noPoe_Apis_predict, width = 0, linewidth = 2.5) +
+# #   geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+# #   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+# #   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+# #   scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+# #   xlab("Patch type") +
+# #   ylab(expression(paste("Links per pollinator species (exclusing 2 dominant pollinators)"))) +
+# #   theme_classic(base_size = 20) +
+# #   ylim(1.2, 1.75) +
+# #   theme(legend.position = "none") 
+# # 
+# # pol.links_all_plot <- cowplot::plot_grid(pol.links.pred, pol.links_noPoe_Apis.pred)
+# # pol.links_all_plot
+# 
+# 
+# 
+# 
+# 
+# #### plant: links per species ####
+# m.plant.links <- glmmTMB(plant.links ~ patch + (1|block), # lower in unconnected patches
+#                          data = network_vaznull)
+# summary(m.plant.links)
+# 
+# m.plant.links_noPoe_Apis <- glmmTMB(plant.links_noPoe_Apis ~ patch + (1|block), # higher in unconnected patches
+#                                data = network_vaznull)
+# summary(m.plant.links_noPoe_Apis)
+# 
+# 
+# # plotting
+# # links per species plant all species
+# # model predictions for plotting
+# m.plant.links_predict<- ggpredict(m.plant.links, terms = c("patch"), back_transform = T)
+# # plotting
+# plant.links.pred <- m.plant.links_predict %>%
+#   ggplot() +
+#   geom_jitter(aes(x = patch, y = plant.links, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+#               width = 0.08, height = 0) +
+#   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+#                 data = m.plant.links_predict, width = 0, linewidth = 2.5) +
+#   geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+#   scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+#   xlab("Patch type") +
+#   ylab(expression(paste("Mean number of links (z-score)"))) +
+#   theme_classic(base_size = 20) +
+#   theme(legend.position = "none") 
+# plant.links.pred
+# 
+# # links per plant species excluding dominant pollinators
+# # model predictions for plotting
+# m.plant.links_predict_noPoe_Apis <- ggpredict(m.plant.links_noPoe_Apis, terms = c("patch"), back_transform = T)
+# # plotting
+# plant.links.pred_noPoe_Apis <- m.plant.links_predict_noPoe_Apis %>%
+#   ggplot() +
+#   geom_jitter(aes(x = patch, y = plant.links_noPoe_Apis, color = patch), data = network_vaznull, size = 5, alpha = 0.55,
+#               width = 0.08, height = 0) +
+#   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+#                 data = m.plant.links_predict_noPoe_Apis, width = 0, linewidth = 2.5) +
+#   geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+#   scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+#   xlab("Patch type") +
+#   ylab(expression(paste("Links per plant species (z-score) excluding 2 dominant pollinators"))) +
+#   theme_classic(base_size = 20) +
+#   theme(legend.position = "none") 
+# plant.links.pred_noPoe_Apis
 
 
 
@@ -299,3 +314,86 @@ summary(m.module_noApis)
 m.module_noPoe <- glmmTMB(vaz.module_noPoe ~ patch + (1|block),
                           data = modularity)
 summary(m.module_noPoe)
+
+
+
+
+#### robustness to extinction - Lower level ####
+m.extinct.LL <- glmmTMB(extinct.robustness.LL ~ patch + (1|block),
+                     data = extinction)
+summary(m.extinct.LL)
+
+m.extinct.LL_noPoe_Apis <- glmmTMB(extinct.robustness.LL_noPoe_Apis ~ patch + (1|block),
+                     data = extinction)
+summary(m.extinct.LL_noPoe_Apis)
+
+# all species - plotting robustness to secondary extinction - robustness to plant extinctions 
+# model predictions for plotting
+m.extinct.LL.predict <- ggpredict(m.extinct.LL, terms = c("patch"), back_transform = T)
+# plotting
+m.extinct.LL_plot <- m.extinct.LL.predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = extinct.robustness.LL, color = patch), data = extinction, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.extinct.LL.predict, width = 0, linewidth = 2.5) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Robustness to plant extinctions (z-score)"))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.extinct.LL_plot
+
+# excluding 2 dominant pollinators - plotting robustness to secondary extinction - robustness to plant extinctions 
+# model predictions for plotting
+m.extinct.LL.predict_noPoe_Apis <- ggpredict(m.extinct.LL_noPoe_Apis, terms = c("patch"), back_transform = T)
+# plotting
+m.extinct.LL_plot_noPoe_Apis <- m.extinct.LL.predict_noPoe_Apis %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = extinct.robustness.LL_noPoe_Apis, color = patch), data = extinction, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.extinct.LL.predict_noPoe_Apis, width = 0, linewidth = 2.5) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Robustness to plant extinctions excluding 2 dominant pollinators (z-score)"))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.extinct.LL_plot_noPoe_Apis
+
+
+#### robustness to extinction - higher level ####
+m.extinct.HL <- glmmTMB(extinct.robustness.HL ~ patch + (1|block),
+                        data = extinction)
+summary(m.extinct.HL)
+
+m.extinct.HL_noPoe_Apis <- glmmTMB(extinct.robustness.HL_noPoe_Apis ~ patch + (1|block),
+                                   data = extinction)
+summary(m.extinct.HL_noPoe_Apis)
+
+
+# all species - plotting robustness to secondary extinction - robustness to pollinator extinctions 
+# model predictions for plotting
+m.extinct.HL.predict <- ggpredict(m.extinct.HL, terms = c("patch"), back_transform = T)
+# plotting
+m.extinct.HL_plot <- m.extinct.HL.predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = extinct.robustness.HL, color = patch), data = extinction, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.extinct.HL.predict, width = 0, linewidth = 2.5) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Robustness to plant extinctions (z-score)"))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.extinct.HL_plot

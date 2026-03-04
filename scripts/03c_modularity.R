@@ -1,6 +1,8 @@
 # loading libraries
 librarian::shelf(tidyverse, plyr, vegan, bipartite, parallel, data.table)
 
+set.seed(100)
+
 # loading functions
 source(here::here(file.path("scripts", "00_functions.R")))
 
@@ -107,10 +109,45 @@ vaz.module_noPoe <- vaz.module_noPoe %>%
   dplyr::rename(vaz.module_noPoe = `modularity Q`)
 
 
+
+#### NO Poecilognathus sulphureus OR Apis ####
+pollinator_split_noPoe_Apis <- pollinator %>%
+  dplyr::filter(!pollinator_species %in% c("Poecilognathus sulphureus", "Apis mellifera")) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split()
+
+# getting each network into correct format
+webs_noPoe_Apis <- pollinator_split_noPoe_Apis %>%
+  lapply(prepare_matrix)
+
+# adding patch names to each network
+names(webs_noPoe_Apis) <- webs.names
+
+# modularity 
+net.metrics.modularity_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'modularity', level = "both") 
+# null model modularity 
+vaz.module_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "modularity", level = "both") 
+#save(vaz.module_noPoe_Apis, file = file.path("data", "L3_modularity","vaz.module_noPoe_Apis.RData"))
+# z score
+vaz.module.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.modularity_noPoe_Apis,
+                                         nullval = vaz.module_noPoe_Apis, metric = "modularity Q")
+# dataframe
+vaz.module_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.module.zscore_noPoe_Apis)) 
+vaz.module_noPoe_Apis <- vaz.module_noPoe_Apis %>%
+  rownames_to_column(var = "unique_ID") %>%
+  separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+  dplyr::rename(vaz.module_noPoe_Apis = `modularity Q`)
+
+
+
+
+
 # all together
 modularity <- vaz.module.df %>%
   left_join(vaz.module_noApis, by = c("block", "patch")) %>%
-  left_join(vaz.module_noPoe, by = c("block", "patch"))
+  left_join(vaz.module_noPoe, by = c("block", "patch")) %>%
+  left_join(vaz.module_noPoe_Apis, by = c("block", "patch"))
 
 # exporting
 write.csv(modularity, file = file.path("data", "L4_metrics", "modularity.csv"))

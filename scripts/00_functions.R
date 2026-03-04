@@ -14,13 +14,13 @@ prepare_matrix <- function(df) {
 
 ####### NULL DISTRIBUTION FUNCTIONS #######
 # null distributions
-net.null.networklevel = function(nulls, metric, level, web.names, cores = (detectCores() - 2)){
+net.null.networklevel = function(nulls, fun, metric, level, web.names, cores = (detectCores() - 2)){
   net.null.metric <- mclapply(
     nulls,
     function(webs) {
       do.call(
         rbind,
-        lapply(webs, networklevel, index = metric, level = level)
+        lapply(webs, fun, index = metric, level = level)
       )
     },
     mc.cores = cores)
@@ -45,11 +45,11 @@ net.null.computeModule <- function(nulls){
 
 
 # null distribution for extinction 
-net.null.extinct <- function(nulls){
+net.null.extinct <- function(nulls, participant, method){
   net.null.robust.metric  <- list()
   
   for (i in 1:length(nulls)) {
-    net.null.extinct.metric <- lapply(nulls[[i]], second.extinct, participant = "lower")
+    net.null.extinct.metric <- lapply(nulls[[i]], second.extinct, participant = participant, method = method)
     net.null.robust.metric[[i]] = do.call('rbind', 
                                           lapply(net.null.extinct.metric, robustness))
     }
