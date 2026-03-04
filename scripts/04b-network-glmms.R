@@ -4,8 +4,6 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 
 # load data
 network_vaznull <- read.csv(file = file.path("data", "L4_metrics", "network_vaznull.csv"))
-modularity <- read.csv(file = file.path("data", "L4_metrics", "modularity.csv"))
-extinction <- read.csv(file = file.path("data", "L4_metrics", "extinction_metric.csv"))
 
 #### connectance ####
 # no vaznull metric for connectance
@@ -302,98 +300,5 @@ links.pred_noPoe_Apis
 
 
 
-#### modularity ####
-m.module <- glmmTMB(vaz.module ~ patch + (1|block),
-                    data = modularity)
-summary(m.module)
-
-m.module_noApis <- glmmTMB(vaz.module_noApis ~ patch + (1|block),
-                           data = modularity)
-summary(m.module_noApis)
-
-m.module_noPoe <- glmmTMB(vaz.module_noPoe ~ patch + (1|block),
-                          data = modularity)
-summary(m.module_noPoe)
 
 
-
-
-#### robustness to extinction - Lower level ####
-m.extinct.LL <- glmmTMB(extinct.robustness.LL ~ patch + (1|block),
-                     data = extinction)
-summary(m.extinct.LL)
-
-m.extinct.LL_noPoe_Apis <- glmmTMB(extinct.robustness.LL_noPoe_Apis ~ patch + (1|block),
-                     data = extinction)
-summary(m.extinct.LL_noPoe_Apis)
-
-# all species - plotting robustness to secondary extinction - robustness to plant extinctions 
-# model predictions for plotting
-m.extinct.LL.predict <- ggpredict(m.extinct.LL, terms = c("patch"), back_transform = T)
-# plotting
-m.extinct.LL_plot <- m.extinct.LL.predict %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = extinct.robustness.LL, color = patch), data = extinction, size = 5, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.extinct.LL.predict, width = 0, linewidth = 2.5) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch type") +
-  ylab(expression(paste("Robustness to plant extinctions (z-score)"))) +
-  theme_classic(base_size = 20) +
-  theme(legend.position = "none") 
-m.extinct.LL_plot
-
-# excluding 2 dominant pollinators - plotting robustness to secondary extinction - robustness to plant extinctions 
-# model predictions for plotting
-m.extinct.LL.predict_noPoe_Apis <- ggpredict(m.extinct.LL_noPoe_Apis, terms = c("patch"), back_transform = T)
-# plotting
-m.extinct.LL_plot_noPoe_Apis <- m.extinct.LL.predict_noPoe_Apis %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = extinct.robustness.LL_noPoe_Apis, color = patch), data = extinction, size = 5, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.extinct.LL.predict_noPoe_Apis, width = 0, linewidth = 2.5) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch type") +
-  ylab(expression(paste("Robustness to plant extinctions excluding 2 dominant pollinators (z-score)"))) +
-  theme_classic(base_size = 20) +
-  theme(legend.position = "none") 
-m.extinct.LL_plot_noPoe_Apis
-
-
-#### robustness to extinction - higher level ####
-m.extinct.HL <- glmmTMB(extinct.robustness.HL ~ patch + (1|block),
-                        data = extinction)
-summary(m.extinct.HL)
-
-m.extinct.HL_noPoe_Apis <- glmmTMB(extinct.robustness.HL_noPoe_Apis ~ patch + (1|block),
-                                   data = extinction)
-summary(m.extinct.HL_noPoe_Apis)
-
-
-# all species - plotting robustness to secondary extinction - robustness to pollinator extinctions 
-# model predictions for plotting
-m.extinct.HL.predict <- ggpredict(m.extinct.HL, terms = c("patch"), back_transform = T)
-# plotting
-m.extinct.HL_plot <- m.extinct.HL.predict %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = extinct.robustness.HL, color = patch), data = extinction, size = 5, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.extinct.HL.predict, width = 0, linewidth = 2.5) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 6, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
-  xlab("Patch type") +
-  ylab(expression(paste("Robustness to plant extinctions (z-score)"))) +
-  theme_classic(base_size = 20) +
-  theme(legend.position = "none") 
-m.extinct.HL_plot

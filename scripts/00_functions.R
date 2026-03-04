@@ -32,16 +32,16 @@ net.null.networklevel = function(nulls, fun, metric, level, web.names, cores = (
 
 
 
-# null distribution for modularity
-net.null.computeModule <- function(nulls){
-  net.null.metric <- list()
-  for (i in 1:length(nulls)) {
-    net.null.metric[[i]] = do.call('rbind', 
-                                   lapply(nulls[[i]], computeModules, method = "Beckett"))
-  }
-  names(net.null.metric) <- webs.names
-  return(net.null.metric)
-}
+# # null distribution for modularity
+# net.null.computeModule <- function(nulls){
+#   net.null.metric <- list()
+#   for (i in 1:length(nulls)) {
+#     net.null.metric[[i]] = do.call('rbind', 
+#                                    lapply(nulls[[i]], computeModules, method = "Beckett"))
+#   }
+#   names(net.null.metric) <- webs.names
+#   return(net.null.metric)
+# }
 
 
 # null distribution for extinction 

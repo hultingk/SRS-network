@@ -127,8 +127,8 @@ names(webs_noPoe_Apis) <- webs.names
 # modularity 
 net.metrics.modularity_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'modularity', level = "both") 
 # null model modularity 
-vaz.module_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, metric = "modularity", level = "both") 
-#save(vaz.module_noPoe_Apis, file = file.path("data", "L3_modularity","vaz.module_noPoe_Apis.RData"))
+vaz.module_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = networklevel, metric = "modularity", level = "both") 
+save(vaz.module_noPoe_Apis, file = file.path("data", "L3_modularity","vaz.module_noPoe_Apis.RData"))
 # z score
 vaz.module.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.modularity_noPoe_Apis,
                                          nullval = vaz.module_noPoe_Apis, metric = "modularity Q")
@@ -151,6 +151,26 @@ modularity <- vaz.module.df %>%
 
 # exporting
 write.csv(modularity, file = file.path("data", "L4_metrics", "modularity.csv"))
+
+
+
+
+#### modularity models ####
+# reading in
+modularity <- read.csv(file = file.path("data", "L4_metrics", "modularity.csv")) 
+
+# all species
+m.module <- glmmTMB(vaz.module ~ patch + (1|block),
+                    data = modularity)
+summary(m.module)
+
+m.module_noApis <- glmmTMB(vaz.module_noApis ~ patch + (1|block),
+                           data = modularity)
+summary(m.module_noApis)
+
+m.module_noPoe <- glmmTMB(vaz.module_noPoe ~ patch + (1|block),
+                          data = modularity)
+summary(m.module_noPoe)
 
 
 
