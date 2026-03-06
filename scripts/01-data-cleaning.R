@@ -4,7 +4,7 @@
 # -------------------------------------- #
 
 # loading libraries
-librarian::shelf(tidyverse)
+librarian::shelf(tidyverse, kableExtra)
 
 
 # loading data 
@@ -91,6 +91,23 @@ pollinator <- pollinator %>%
     flower_species %in% c("Helianthus hirsutus") ~ "Helianthus sp.",
     .default = flower_species
   ))
+
+
+
+##### table of pollinator species ####
+pollinator_table <- pollinator %>%
+  dplyr::count(order, family, genus, species) %>%
+  mutate(Notes = " ") %>%
+  kbl() %>%
+  kable_classic(full_width = T) %>%
+  kable_styling(html_font = "Times New Roman",
+                font_size = 16) %>%
+  row_spec(0, extra_css = "border-bottom: 5px double;") %>%
+  row_spec(1:121, extra_css = "border-bottom: 1px solid;")
+pollinator_table
+
+# exporting
+save_kable(pollinator_table, file = file.path("tables", "pollinator_table.html"))
 
 
 # --------------------------- #
