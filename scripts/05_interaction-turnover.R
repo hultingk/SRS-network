@@ -1,5 +1,5 @@
 # loading libraries
-librarian::shelf(tidyverse, plyr, vegan, bipartite, data.table)
+librarian::shelf(tidyverse, plyr, vegan, bipartite, data.table, betapart)
 
 source(here::here(file.path("scripts", "00_functions.R")))
 
@@ -91,7 +91,45 @@ dissimilarity_plot
 # dev.off()
 
 
+#### turnover in plant species ####
+floral_matrix <- pollinator %>%
+  dplyr::count(unique_ID, flower_species) %>%
+  dplyr::mutate(n = if_else(n == 0, 0, 1)) %>%
+  pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
+  column_to_rownames("unique_ID")
+
+floral_turnover <- beta.pair(floral_matrix, index.family = "sorensen")
+floral_turnover_df <- as.data.frame(as.table(as.matrix(floral_turnover[["beta.sor"]])))
+floral_turnover_df <- floral_turnover_df %>%
+  filter(!(Var1 == Var2)) %>% # removing observations comparing patch to itself
+  separate(Var1, into = c("block1", "patch1")) %>%
+  separate(Var2, into = c("block2", "patch2")) %>%
+  filter(block1 == block2) %>%
+  dplyr::rename(floral_turnover = Freq, block = block1) %>%
+  dplyr::select(block, floral_turnover)
+floral_turnover_df <- floral_turnover_df[!duplicated(floral_turnover_df$floral_turnover), ]
+
+#### turnover in pollinator species ####
+pollinator_matrix <- pollinator %>%
+  dplyr::count(unique_ID, pollinator_species) %>%
+  dplyr::mutate(n = if_else(n == 0, 0, 1)) %>%
+  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
+  column_to_rownames("unique_ID")
+
+pollinator_turnover <- beta.pair(pollinator_matrix, index.family = "sorensen")
+pollinator_turnover_df <- as.data.frame(as.table(as.matrix(pollinator_turnover[["beta.sor"]])))
+pollinator_turnover_df <- pollinator_turnover_df %>%
+  filter(!(Var1 == Var2)) %>% # removing observations comparing patch to itself
+  separate(Var1, into = c("block1", "patch1")) %>%
+  separate(Var2, into = c("block2", "patch2")) %>%
+  filter(block1 == block2) %>%
+  dplyr::rename(pollinator_turnover = Freq, block = block1) %>%
+  dplyr::select(block, pollinator_turnover)
+pollinator_turnover_df <- pollinator_turnover_df[!duplicated(pollinator_turnover_df$pollinator_turnover), ]
 
 
+## all together
+species_turnover <- floral_turnover_df %>%
+  left_join(pollinator_turnover_df, by = "block")
 
 

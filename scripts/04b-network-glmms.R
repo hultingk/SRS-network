@@ -5,29 +5,29 @@ librarian::shelf(tidyverse, glmmTMB, DHARMa, performance, ggeffects, ggpubr)
 # load data
 network_vaznull <- read.csv(file = file.path("data", "L4_metrics", "network_vaznull.csv"))
 
-#### connectance ####
-# no vaznull metric for connectance
-# unconnected patches have higher connectance, even excluding Apis and Poe
-m.connect <- glmmTMB(connectance ~ patch + (1|block),
-                     data = network_vaznull)
-summary(m.connect)
-
-m.connect_noPoe_Apis <- glmmTMB(connectance_noPoe_Apis ~ patch + (1|block),
-                           data = network_vaznull)
-summary(m.connect_noPoe_Apis)
-
-
-
-#### weighted connectance ####
-# no vaznull metric for weighted connectance
-# no difference in weighted connectance including or excluding apis and poe, except when both are excluded
-m.weightconnect <- glmmTMB(weightconnectance ~ patch + (1|block),
-                           data = network_vaznull)
-summary(m.weightconnect)
-
-m.weightconnect_noPoe_Apis <- glmmTMB(weightconnectance_noPoe_Apis ~ patch + (1|block),
-                                 data = network_vaznull)
-summary(m.weightconnect_noPoe_Apis)
+# #### connectance ####
+# # no vaznull metric for connectance
+# # unconnected patches have higher connectance, even excluding Apis and Poe
+# m.connect <- glmmTMB(connectance ~ patch + (1|block),
+#                      data = network_vaznull)
+# summary(m.connect)
+# 
+# m.connect_noPoe_Apis <- glmmTMB(connectance_noPoe_Apis ~ patch + (1|block),
+#                            data = network_vaznull)
+# summary(m.connect_noPoe_Apis)
+# 
+# 
+# 
+# #### weighted connectance ####
+# # no vaznull metric for weighted connectance
+# # no difference in weighted connectance including or excluding apis and poe, except when both are excluded
+# m.weightconnect <- glmmTMB(weightconnectance ~ patch + (1|block),
+#                            data = network_vaznull)
+# summary(m.weightconnect)
+# 
+# m.weightconnect_noPoe_Apis <- glmmTMB(weightconnectance_noPoe_Apis ~ patch + (1|block),
+#                                  data = network_vaznull)
+# summary(m.weightconnect_noPoe_Apis)
 
 
 
@@ -40,30 +40,54 @@ m.nestedness.vaz_noPoe_Apis <- glmmTMB(vaz.NODF_noPoe_Apis ~ patch + (1|block), 
                                   data = network_vaznull)
 summary(m.nestedness.vaz_noPoe_Apis)
 
-# # plotting NO APIS
-# # model predictions for plotting
-# m.nestedness.noApis.df <- network_metrics %>%
-#   dplyr::select(c("block", "patch", "NODF_noApis"))
-# m.nestedness.noApis.df$nestedness_pred <- predict(m.nestedness.noApis, re.form = NA)
-# m.nestedness.noApis.df$patch <- factor(m.nestedness.noApis.df$patch, levels = c("B", "W"))
-# # plotting
-# nestedness.pred <- m.nestedness.noApis.df %>%
-#   ggplot() +
-#   geom_line(aes(x = patch, y = NODF_noApis, group = block), linewidth = 2.5, color = "grey25", alpha = 0.85) +
-#   geom_line(aes(x = patch, y = nestedness_pred, group = block), linewidth = 5.5, linetype = 3) +
-#   geom_point(aes(x = patch, y = NODF_noApis, color = patch), size = 11, alpha = 0.95) + 
-#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-#   scale_color_manual(values=c("#506D8F","#E2A03C")) +
-#   xlab("Patch Type") +
-#   ylab(expression(paste("NODF (z-score)"))) +
-#   theme_classic() +
-#   theme(legend.position = "none") +
-#   theme(axis.text = element_text(size = 30)) + # axis tick mark size
-#   theme(axis.title = element_text(size = 34)) #+ # axis label size
-# nestedness.pred
+# plotting
+# model predictions for plotting - all species
+m.nest_predict <- ggpredict(m.nestedness.vaz, terms = c("patch"), back_transform = T)
+# plotting
+m.nest_predict_plot <- m.nest_predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = vaz.NODF, color = patch), data = network_vaznull, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.nest_predict, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("NODF (z-score)"))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.nest_predict_plot
 
-# pdf(file = file.path("plots", "nestedness_noApis.pdf"), width = 8, height = 10)
-# nestedness.pred
+# excluding 2 dominant
+# model predictions for plotting 
+m.nest_predict_noPoe_Apis <- ggpredict(m.nestedness.vaz_noPoe_Apis, terms = c("patch"), back_transform = T)
+# plotting
+m.nest_predict_plot_noPoe_Apis <- m.nest_predict_noPoe_Apis %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = vaz.NODF_noPoe_Apis, color = patch), data = network_vaznull, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.nest_predict_noPoe_Apis, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(atop("NODF (z-score)", paste("excluding two dominant pollinators")))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.nest_predict_plot_noPoe_Apis
+
+# all together
+nest.plot <- cowplot::plot_grid(m.nest_predict_plot, m.nest_predict_plot_noPoe_Apis, rel_widths = c(1, 1.1))
+nest.plot
+
+# pdf(file = file.path("plots", "nest.plot.pdf"), width = 13, height = 6.5)
+# nest.plot
 # dev.off()
 
 
@@ -78,35 +102,57 @@ m.h2.vaz_noPoe_Apis <- glmmTMB(vaz.h2_noPoe_Apis ~ patch + (1|block), # no diffe
 summary(m.h2.vaz_noPoe_Apis)
 
 
-# 
-# (2.1497/5.4302)*100 # 39.58786 less nested
-# # plotting
-# # model predictions for plotting
-# m.h2.noApis.df <- network_metrics %>%
-#   dplyr::select(c("block", "patch", "h2_noApis"))
-# m.h2.noApis.df$h2.pred <- predict(m.h2.noApis, re.form = NA)
-# m.h2.noApis.df$patch <- factor(m.h2.noApis.df$patch, levels = c("B", "W"))
-# # plotting
-# h2.pred <- m.h2.noApis.df %>%
-#   ggplot() +
-#   geom_line(aes(x = patch, y = h2_noApis, group = block), linewidth = 2.5, color = "lightslategrey", alpha = 0.5) +
-#   geom_line(aes(x = patch, y = h2.pred, group = block), linewidth = 5, linetype = 1) +
-#   geom_point(aes(x = patch, y = h2_noApis, color = patch), size = 11, alpha = 0.8) + 
-#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-#   scale_color_manual(values=c("#506D8F","#E2A03C")) +
-#   xlab("Patch Type") +
-#   ylab(expression(paste("H2' (z-score)"))) +
-#   theme_classic() +
-#   ylim(c(2, 17)) +
-#   theme(legend.position = "none") +
-#   theme(axis.text = element_text(size = 30)) + # axis tick mark size
-#   theme(axis.title = element_text(size = 34)) #+ # axis label size
-# h2.pred
+# model predictions for plotting - all species
+m.h2_predict <- ggpredict(m.h2.vaz, terms = c("patch"), back_transform = T)
+# plotting
+m.h2_predict_plot <- m.h2_predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = vaz.h2, color = patch), data = network_vaznull, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.h2_predict, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("H2' (z-score)"))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.h2_predict_plot
 
-# 
-# pdf(file = file.path("plots", "h2_noApis.pdf"), width = 8, height = 10)
-# h2.pred
+
+# excluding 2 dominant
+# model predictions for plotting 
+m.h2_predict_noPoe_Apis <- ggpredict(m.h2.vaz_noPoe_Apis, terms = c("patch"), back_transform = T)
+# plotting
+m.h2_predict_plot_noPoe_Apis <- m.h2_predict_noPoe_Apis %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = vaz.h2_noPoe_Apis, color = patch), data = network_vaznull, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.h2_predict_noPoe_Apis, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(atop("H2' (z-score)", paste("excluding two dominant pollinators")))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.h2_predict_plot_noPoe_Apis
+
+# all together
+h2.plot <- cowplot::plot_grid(m.h2_predict_plot, m.h2_predict_plot_noPoe_Apis, rel_widths = c(1, 1.1))
+h2.plot
+
+# pdf(file = file.path("plots", "h2.plot.pdf"), width = 13, height = 6.5)
+# h2.plot
 # dev.off()
+
+
 
 
 
@@ -140,6 +186,7 @@ m.links_predict_plot <- m.links_predict %>%
   xlab("Patch type") +
   ylab(expression(paste("Links per species"))) +
   theme_classic(base_size = 20) +
+  ylim(1.2, 1.7) +
   theme(legend.position = "none") 
 m.links_predict_plot
 
@@ -162,13 +209,18 @@ m.links_predict_plot_noPoe_Apis <- m.links_predict_noPoe_Apis %>%
   xlab("Patch type") +
   ylab(expression(atop("Links per species", paste("excluding two dominant pollinators")))) +
   theme_classic(base_size = 20) +
+  ylim(1.2, 1.7) +
   theme(legend.position = "none") 
 m.links_predict_plot_noPoe_Apis
 
 
 # all together
-links_predict_plot <- cowplot::plot_grid()
+links_predict_plot <- cowplot::plot_grid(m.links_predict_plot, m.links_predict_plot_noPoe_Apis, rel_widths = c(1, 1.1))
+links_predict_plot
 
+# pdf(file = file.path("plots", "links_predict_plot.pdf"), width = 13, height = 6.5)
+# links_predict_plot
+# dev.off()
 
 
 

@@ -164,14 +164,56 @@ m.module <- glmmTMB(vaz.module ~ patch + (1|block),
                     data = modularity)
 summary(m.module)
 
-m.module_noApis <- glmmTMB(vaz.module_noApis ~ patch + (1|block),
-                           data = modularity)
-summary(m.module_noApis)
-
-m.module_noPoe <- glmmTMB(vaz.module_noPoe ~ patch + (1|block),
+m.module_noPoe_Apis <- glmmTMB(vaz.module_noPoe_Apis ~ patch + (1|block),
                           data = modularity)
-summary(m.module_noPoe)
+summary(m.module_noPoe_Apis)
+
+# model predictions for plotting - all species
+m.module_predict <- ggpredict(m.module, terms = c("patch"), back_transform = T)
+# plotting
+m.module_predict_plot <- m.module_predict %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = vaz.module, color = patch), data = modularity, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.module_predict, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(paste("Modularity (z-score)"))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.module_predict_plot
 
 
+# model predictions for plotting - all species
+m.module_predict_noPoe_Apis <- ggpredict(m.module_noPoe_Apis, terms = c("patch"), back_transform = T)
+# plotting
+m.module_predict_plot_noPoe_Apis <- m.module_predict_noPoe_Apis %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = vaz.module_noPoe_Apis, color = patch), data = modularity, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.module_predict_noPoe_Apis, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  xlab("Patch type") +
+  ylab(expression(atop("Modularity (z-score)", paste("excluding two dominant pollinators")))) +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "none") 
+m.module_predict_plot_noPoe_Apis
 
 
+# all together
+module.plot <- cowplot::plot_grid(m.module_predict_plot, m.module_predict_plot_noPoe_Apis, rel_widths = c(1, 1.1))
+module.plot
+
+# pdf(file = file.path("plots", "module.plot.pdf"), width = 13, height = 6.5)
+# module.plot
+# dev.off()
