@@ -48,19 +48,25 @@ net.metrics.nest <- lapply(webs, networklevel, index = 'NODF')
 net.metrics.h2 <- lapply(webs, networklevel, index = 'H2') 
 # Calculate average links per species for all plant-pollinator sites
 net.metrics.links <- lapply(webs, networklevel, index = 'links per species') 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.pol.links <- lapply(webs, grouplevel, index = 'mean number of links', level = "higher") 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.plant.links <- lapply(webs, grouplevel, index = 'mean number of links', level = "lower") 
+# Calculate linkage density for all plant-pollinator sites
+net.metrics.density <- lapply(webs, networklevel, index = 'linkage density') 
+# Calculate web asymmetry for all plant-pollinator sites
+net.metrics.asymmetry <- lapply(webs, networklevel, index = 'web asymmetry') 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.pol.links <- lapply(webs, grouplevel, index = 'mean number of links', level = "higher") 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.plant.links <- lapply(webs, grouplevel, index = 'mean number of links', level = "lower") 
 
 
 
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
 vaz.nest <- net.null.networklevel(nulls = net.nulls.vaz, fun = networklevel, metric = "NODF", level = "both", web.names = web.names)
 vaz.h2 <- net.null.networklevel(nulls = net.nulls.vaz, fun = networklevel, metric = "H2", level = "both", web.names = web.names)
+vaz.density <- net.null.networklevel(nulls = net.nulls.vaz, fun = networklevel, metric = "linkage density", level = "both", web.names = web.names)
+#vaz.asymmetry <- net.null.networklevel(nulls = net.nulls.vaz, fun = networklevel, metric = "web asymmetry", level = "both", web.names = web.names)
 # vaz.links <- net.null.networklevel(nulls = net.nulls.vaz, fun = networklevel, metric = "links per species", level = "both", web.names = web.names)  # can't use -- NAN
-vaz.pol.links <- net.null.networklevel(nulls = net.nulls.vaz, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
-vaz.plant.links <- net.null.networklevel(nulls = net.nulls.vaz, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
+# vaz.pol.links <- net.null.networklevel(nulls = net.nulls.vaz, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
+# vaz.plant.links <- net.null.networklevel(nulls = net.nulls.vaz, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
 
 
 # getting z score 
@@ -68,10 +74,14 @@ vaz.nest.zscore <- zscore_metric(obsval = net.metrics.nest,
                                  nullval = vaz.nest, metric = "NODF")
 vaz.h2.zscore <- zscore_metric(obsval = net.metrics.h2,
                                nullval = vaz.h2, metric = "H2")
-vaz.pol.links.zscore <- zscore_metric(obsval = net.metrics.pol.links,
-                                  nullval = vaz.pol.links, metric = "mean.number.of.links.HL") 
-vaz.plant.links.zscore <- zscore_metric(obsval = net.metrics.plant.links,
-                                      nullval = vaz.plant.links, metric = "mean.number.of.links.LL") 
+vaz.density.zscore <- zscore_metric(obsval = net.metrics.density,
+                                    nullval = vaz.density, metric = "linkage density")
+# vaz.asymmetry.zscore <- zscore_metric(obsval = net.metrics.asymmetry,
+#                                     nullval = vaz.asymmetry, metric = "web asymmetry")
+# vaz.pol.links.zscore <- zscore_metric(obsval = net.metrics.pol.links,
+#                                   nullval = vaz.pol.links, metric = "mean.number.of.links.HL") 
+# vaz.plant.links.zscore <- zscore_metric(obsval = net.metrics.plant.links,
+#                                       nullval = vaz.plant.links, metric = "mean.number.of.links.LL") 
 
 
 
@@ -108,17 +118,29 @@ links.per.sp <- links.per.sp %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
   dplyr::rename(links.per.sp = `links per species`)
 
-vaz.pol.links <- as.data.frame(do.call('rbind', vaz.pol.links.zscore)) 
-vaz.pol.links <- vaz.pol.links %>%
+vaz.density <- as.data.frame(do.call('rbind', vaz.density.zscore)) 
+vaz.density <- vaz.density %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(pol.links = mean.number.of.links.HL)
+  dplyr::rename(vaz.density = `linkage density`)
 
-vaz.plant.links <- as.data.frame(do.call('rbind', vaz.plant.links.zscore)) 
-vaz.plant.links <- vaz.plant.links %>%
+web.asymmetry <- as.data.frame(do.call('rbind', net.metrics.asymmetry)) 
+web.asymmetry <- web.asymmetry %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(plant.links = mean.number.of.links.LL)
+  dplyr::rename(web.asymmetry = `web asymmetry`)
+
+# vaz.pol.links <- as.data.frame(do.call('rbind', vaz.pol.links.zscore)) 
+# vaz.pol.links <- vaz.pol.links %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(pol.links = mean.number.of.links.HL)
+# 
+# vaz.plant.links <- as.data.frame(do.call('rbind', vaz.plant.links.zscore)) 
+# vaz.plant.links <- vaz.plant.links %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(plant.links = mean.number.of.links.LL)
 
 
 
@@ -147,18 +169,24 @@ net.metrics.nest_noApis <- lapply(webs_noApis, networklevel, index = 'NODF')
 net.metrics.h2_noApis <- lapply(webs_noApis, networklevel, index = 'H2') 
 # Calculate average links per species for all plant-pollinator sites
 net.metrics.links_noApis <- lapply(webs_noApis, networklevel, index = 'links per species') 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.pol.links_noApis <- lapply(webs_noApis, grouplevel, index = 'mean number of links', level = "higher") 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.plant.links_noApis <- lapply(webs_noApis, grouplevel, index = 'mean number of links', level = "lower") 
+# Calculate linkage density for all plant-pollinator sites
+net.metrics.density_noApis <- lapply(webs_noApis, networklevel, index = 'linkage density') 
+# Calculate web asymmetry for all plant-pollinator sites
+net.metrics.asymmetry_noApis <- lapply(webs_noApis, networklevel, index = 'web asymmetry') 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.pol.links_noApis <- lapply(webs_noApis, grouplevel, index = 'mean number of links', level = "higher") 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.plant.links_noApis <- lapply(webs_noApis, grouplevel, index = 'mean number of links', level = "lower") 
 
 
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
 vaz.nest_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = networklevel, metric = "NODF", level = "both")
 vaz.h2_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = networklevel, metric = "H2", level = "both")
+vaz.density_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = networklevel, metric = "linkage density", level = "both", web.names = web.names)
+#vaz.asymmetry_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = networklevel, metric = "web asymmetry", level = "both", web.names = web.names)
 # vaz.links_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = networklevel, fun = networklevel, metric = "links per species", level = "both", web.names = web.names)  # can't use -- NAN
-vaz.pol.links_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
-vaz.plant.links_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
+# vaz.pol.links_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
+# vaz.plant.links_noApis <- net.null.networklevel(nulls = net.nulls.vaz_noApis, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
 
 
 # getting z score 
@@ -166,10 +194,14 @@ vaz.nest.zscore_noApis <- zscore_metric(obsval = net.metrics.nest_noApis,
                                  nullval = vaz.nest_noApis, metric = "NODF")
 vaz.h2.zscore_noApis <- zscore_metric(obsval = net.metrics.h2_noApis,
                                nullval = vaz.h2_noApis, metric = "H2")
-vaz.pol.links.zscore_noApis <- zscore_metric(obsval = net.metrics.pol.links_noApis,
-                                      nullval = vaz.pol.links_noApis, metric = "mean.number.of.links.HL") 
-vaz.plant.links.zscore_noApis <- zscore_metric(obsval = net.metrics.plant.links_noApis,
-                                        nullval = vaz.plant.links_noApis, metric = "mean.number.of.links.LL") 
+vaz.density.zscore_noApis <- zscore_metric(obsval = net.metrics.density_noApis,
+                                    nullval = vaz.density_noApis, metric = "linkage density")
+#vaz.asymmetry.zscore_noApis <- zscore_metric(obsval = net.metrics.asymmetry_noApis,
+#                                      nullval = vaz.asymmetry_noApis, metric = "web asymmetry")
+# vaz.pol.links.zscore_noApis <- zscore_metric(obsval = net.metrics.pol.links_noApis,
+#                                       nullval = vaz.pol.links_noApis, metric = "mean.number.of.links.HL") 
+# vaz.plant.links.zscore_noApis <- zscore_metric(obsval = net.metrics.plant.links_noApis,
+#                                         nullval = vaz.plant.links_noApis, metric = "mean.number.of.links.LL") 
 
 
 
@@ -205,17 +237,29 @@ links.per.sp_noApis <- links.per.sp_noApis %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
   dplyr::rename(links.per.sp_noApis = `links per species`)
 
-vaz.pol.links_noApis <- as.data.frame(do.call('rbind', vaz.pol.links.zscore_noApis)) 
-vaz.pol.links_noApis <- vaz.pol.links_noApis %>%
+vaz.density_noApis <- as.data.frame(do.call('rbind', vaz.density.zscore_noApis)) 
+vaz.density_noApis <- vaz.density_noApis %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(pol.links_noApis = mean.number.of.links.HL)
+  dplyr::rename(vaz.density_noApis = `linkage density`)
 
-vaz.plant.links_noApis <- as.data.frame(do.call('rbind', vaz.plant.links.zscore_noApis)) 
-vaz.plant.links_noApis <- vaz.plant.links_noApis %>%
+web.asymmetry_noApis <- as.data.frame(do.call('rbind', net.metrics.asymmetry_noApis)) 
+web.asymmetry_noApis <- web.asymmetry_noApis %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(plant.links_noApis = mean.number.of.links.LL)
+  dplyr::rename(web.asymmetry_noApis = `web asymmetry`)
+
+# vaz.pol.links_noApis <- as.data.frame(do.call('rbind', vaz.pol.links.zscore_noApis)) 
+# vaz.pol.links_noApis <- vaz.pol.links_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(pol.links_noApis = mean.number.of.links.HL)
+# 
+# vaz.plant.links_noApis <- as.data.frame(do.call('rbind', vaz.plant.links.zscore_noApis)) 
+# vaz.plant.links_noApis <- vaz.plant.links_noApis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(plant.links_noApis = mean.number.of.links.LL)
 
 
 
@@ -244,10 +288,14 @@ net.metrics.nest_noPoe <- lapply(webs_noPoe, networklevel, index = 'NODF')
 net.metrics.h2_noPoe <- lapply(webs_noPoe, networklevel, index = 'H2') 
 # Calculate average links per species for all plant-pollinator sites
 net.metrics.links_noPoe <- lapply(webs_noPoe, networklevel, index = 'links per species') 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.pol.links_noPoe <- lapply(webs_noPoe, grouplevel, index = 'mean number of links', level = "higher") 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.plant.links_noPoe <- lapply(webs_noPoe, grouplevel, index = 'mean number of links', level = "lower") 
+# Calculate linkage density for all plant-pollinator sites
+net.metrics.density_noPoe <- lapply(webs_noPoe, networklevel, index = 'linkage density') 
+# Calculate web asymmetry for all plant-pollinator sites
+net.metrics.asymmetry_noPoe <- lapply(webs_noPoe, networklevel, index = 'web asymmetry') 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.pol.links_noPoe <- lapply(webs_noPoe, grouplevel, index = 'mean number of links', level = "higher") 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.plant.links_noPoe <- lapply(webs_noPoe, grouplevel, index = 'mean number of links', level = "lower") 
 
 
 
@@ -256,9 +304,10 @@ net.metrics.plant.links_noPoe <- lapply(webs_noPoe, grouplevel, index = 'mean nu
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
 vaz.nest_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = networklevel, metric = "NODF", level = "both")
 vaz.h2_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = networklevel, metric = "H2", level = "both")
+vaz.density_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = networklevel, metric = "linkage density", level = "both", web.names = web.names)
 # vaz.links_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = networklevel, fun = networklevel, metric = "links per species", level = "both", web.names = web.names)  # can't use -- NAN
-vaz.pol.links_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
-vaz.plant.links_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
+# vaz.pol.links_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
+# vaz.plant.links_noPoe <- net.null.networklevel(nulls = net.nulls.vaz_noPoe, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
 
 
 # getting z score 
@@ -266,10 +315,12 @@ vaz.nest.zscore_noPoe <- zscore_metric(obsval = net.metrics.nest_noPoe,
                                         nullval = vaz.nest_noPoe, metric = "NODF")
 vaz.h2.zscore_noPoe <- zscore_metric(obsval = net.metrics.h2_noPoe,
                                       nullval = vaz.h2_noPoe, metric = "H2")
-vaz.pol.links.zscore_noPoe <- zscore_metric(obsval = net.metrics.pol.links_noPoe,
-                                             nullval = vaz.pol.links_noPoe, metric = "mean.number.of.links.HL") 
-vaz.plant.links.zscore_noPoe <- zscore_metric(obsval = net.metrics.plant.links_noPoe,
-                                               nullval = vaz.plant.links_noPoe, metric = "mean.number.of.links.LL") 
+vaz.density.zscore_noPoe <- zscore_metric(obsval = net.metrics.density_noPoe,
+                                           nullval = vaz.density_noPoe, metric = "linkage density")
+# vaz.pol.links.zscore_noPoe <- zscore_metric(obsval = net.metrics.pol.links_noPoe,
+#                                              nullval = vaz.pol.links_noPoe, metric = "mean.number.of.links.HL") 
+# vaz.plant.links.zscore_noPoe <- zscore_metric(obsval = net.metrics.plant.links_noPoe,
+#                                                nullval = vaz.plant.links_noPoe, metric = "mean.number.of.links.LL") 
 
 
 
@@ -305,17 +356,30 @@ links.per.sp_noPoe <- links.per.sp_noPoe %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
   dplyr::rename(links.per.sp_noPoe = `links per species`)
 
-vaz.pol.links_noPoe <- as.data.frame(do.call('rbind', vaz.pol.links.zscore_noPoe)) 
-vaz.pol.links_noPoe <- vaz.pol.links_noPoe %>%
+vaz.density_noPoe <- as.data.frame(do.call('rbind', vaz.density.zscore_noPoe)) 
+vaz.density_noPoe <- vaz.density_noPoe %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(pol.links_noPoe = mean.number.of.links.HL)
+  dplyr::rename(vaz.density_noPoe = `linkage density`)
 
-vaz.plant.links_noPoe <- as.data.frame(do.call('rbind', vaz.plant.links.zscore_noPoe)) 
-vaz.plant.links_noPoe <- vaz.plant.links_noPoe %>%
+web.asymmetry_noPoe <- as.data.frame(do.call('rbind', net.metrics.asymmetry_noPoe)) 
+web.asymmetry_noPoe <- web.asymmetry_noPoe %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(plant.links_noPoe = mean.number.of.links.LL)
+  dplyr::rename(web.asymmetry_noPoe = `web asymmetry`)
+
+
+# vaz.pol.links_noPoe <- as.data.frame(do.call('rbind', vaz.pol.links.zscore_noPoe)) 
+# vaz.pol.links_noPoe <- vaz.pol.links_noPoe %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(pol.links_noPoe = mean.number.of.links.HL)
+# 
+# vaz.plant.links_noPoe <- as.data.frame(do.call('rbind', vaz.plant.links.zscore_noPoe)) 
+# vaz.plant.links_noPoe <- vaz.plant.links_noPoe %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(plant.links_noPoe = mean.number.of.links.LL)
 
 
 
@@ -344,10 +408,14 @@ net.metrics.nest_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'NO
 net.metrics.h2_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'H2') 
 # Calculate average links per species for all plant-pollinator sites
 net.metrics.links_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'links per species') 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.pol.links_noPoe_Apis <- lapply(webs_noPoe_Apis, grouplevel, index = 'mean number of links', level = "higher") 
-# Calculate mean links per species for pollinators for all plant-pollinator sites
-net.metrics.plant.links_noPoe_Apis <- lapply(webs_noPoe_Apis, grouplevel, index = 'mean number of links', level = "lower") 
+# Calculate linkage density for all plant-pollinator sites
+net.metrics.density_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'linkage density') 
+# Calculate web asymmetry for all plant-pollinator sites
+net.metrics.asymmetry_noPoe_Apis <- lapply(webs_noPoe_Apis, networklevel, index = 'web asymmetry') 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.pol.links_noPoe_Apis <- lapply(webs_noPoe_Apis, grouplevel, index = 'mean number of links', level = "higher") 
+# # Calculate mean links per species for pollinators for all plant-pollinator sites
+# net.metrics.plant.links_noPoe_Apis <- lapply(webs_noPoe_Apis, grouplevel, index = 'mean number of links', level = "lower") 
 
 
 
@@ -358,9 +426,10 @@ net.metrics.plant.links_noPoe_Apis <- lapply(webs_noPoe_Apis, grouplevel, index 
 # getting vaznull null for each metric - not for connectance or weighted connectance bc connectance is maintained in vaznull
 vaz.nest_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = networklevel, metric = "NODF", level = "both")
 vaz.h2_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = networklevel, metric = "H2", level = "both")
+vaz.density_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = networklevel, metric = "linkage density", level = "both", web.names = web.names)
 # vaz.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = networklevel, metric = "links per species", level = "both", web.names = web.names)  # can't use -- NAN
-vaz.pol.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
-vaz.plant.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
+# vaz.pol.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = grouplevel, metric = "mean number of links", level = "higher", web.names = web.names)
+# vaz.plant.links_noPoe_Apis <- net.null.networklevel(nulls = net.nulls.vaz_noPoe_Apis, fun = grouplevel, metric = "mean number of links", level = "lower", web.names = web.names)
 
 
 # getting z score 
@@ -368,10 +437,12 @@ vaz.nest.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.nest_noPoe_Apis
                                        nullval = vaz.nest_noPoe_Apis, metric = "NODF")
 vaz.h2.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.h2_noPoe_Apis,
                                      nullval = vaz.h2_noPoe_Apis, metric = "H2")
-vaz.pol.links.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.pol.links_noPoe_Apis,
-                                            nullval = vaz.pol.links_noPoe_Apis, metric = "mean.number.of.links.HL") 
-vaz.plant.links.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.plant.links_noPoe_Apis,
-                                              nullval = vaz.plant.links_noPoe_Apis, metric = "mean.number.of.links.LL") 
+vaz.density.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.density_noPoe_Apis,
+                                          nullval = vaz.density_noPoe_Apis, metric = "linkage density")
+# vaz.pol.links.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.pol.links_noPoe_Apis,
+#                                             nullval = vaz.pol.links_noPoe_Apis, metric = "mean.number.of.links.HL") 
+# vaz.plant.links.zscore_noPoe_Apis <- zscore_metric(obsval = net.metrics.plant.links_noPoe_Apis,
+#                                               nullval = vaz.plant.links_noPoe_Apis, metric = "mean.number.of.links.LL") 
 
 
 
@@ -406,17 +477,29 @@ links.per.sp_noPoe_Apis <- links.per.sp_noPoe_Apis %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
   dplyr::rename(links.per.sp_noPoe_Apis = `links per species`)
 
-vaz.pol.links_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.pol.links.zscore_noPoe_Apis)) 
-vaz.pol.links_noPoe_Apis <- vaz.pol.links_noPoe_Apis %>%
+vaz.density_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.density.zscore_noPoe_Apis)) 
+vaz.density_noPoe_Apis <- vaz.density_noPoe_Apis %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(pol.links_noPoe_Apis = mean.number.of.links.HL)
+  dplyr::rename(vaz.density_noPoe_Apis = `linkage density`)
 
-vaz.plant.links_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.plant.links.zscore_noPoe_Apis)) 
-vaz.plant.links_noPoe_Apis <- vaz.plant.links_noPoe_Apis %>%
+web.asymmetry_noPoe_Apis <- as.data.frame(do.call('rbind', net.metrics.asymmetry_noPoe_Apis)) 
+web.asymmetry_noPoe_Apis <- web.asymmetry_noPoe_Apis %>%
   rownames_to_column(var = "unique_ID") %>%
   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
-  dplyr::rename(plant.links_noPoe_Apis = mean.number.of.links.LL)
+  dplyr::rename(web.asymmetry_noPoe_Apis = `web asymmetry`)
+
+# vaz.pol.links_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.pol.links.zscore_noPoe_Apis)) 
+# vaz.pol.links_noPoe_Apis <- vaz.pol.links_noPoe_Apis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(pol.links_noPoe_Apis = mean.number.of.links.HL)
+# 
+# vaz.plant.links_noPoe_Apis <- as.data.frame(do.call('rbind', vaz.plant.links.zscore_noPoe_Apis)) 
+# vaz.plant.links_noPoe_Apis <- vaz.plant.links_noPoe_Apis %>%
+#   rownames_to_column(var = "unique_ID") %>%
+#   separate(unique_ID, into = c("block", "patch")) %>% # seperating unique ID into columns
+#   dplyr::rename(plant.links_noPoe_Apis = mean.number.of.links.LL)
 
 
 
@@ -430,8 +513,10 @@ network_vaznull <- net.connect %>%
   left_join(vaz.nestedness, by = c("block", "patch")) %>%
   left_join(vaz.h2, by = c("block", "patch")) %>%
   left_join(links.per.sp, by = c("block", "patch")) %>%
-  left_join(vaz.pol.links, by = c("block", "patch")) %>%
-  left_join(vaz.plant.links, by = c("block", "patch")) 
+  left_join(vaz.density, by = c("block", "patch")) %>%
+  left_join(web.asymmetry, by = c("block", "patch"))
+  # left_join(vaz.pol.links, by = c("block", "patch")) %>%
+  # left_join(vaz.plant.links, by = c("block", "patch")) 
 
 # no apis
 network_vaznull <- network_vaznull %>%
@@ -440,8 +525,10 @@ network_vaznull <- network_vaznull %>%
   left_join(vaz.nestedness_noApis, by = c("block", "patch")) %>%
   left_join(vaz.h2_noApis, by = c("block", "patch")) %>%
   left_join(links.per.sp_noApis, by = c("block", "patch")) %>%
-  left_join(vaz.pol.links_noApis, by = c("block", "patch")) %>%
-  left_join(vaz.plant.links_noApis, by = c("block", "patch"))
+  left_join(vaz.density_noApis, by = c("block", "patch")) %>%
+  left_join(web.asymmetry_noApis, by = c("block", "patch"))
+  # left_join(vaz.pol.links_noApis, by = c("block", "patch")) %>%
+  # left_join(vaz.plant.links_noApis, by = c("block", "patch"))
 
 # no poe
 network_vaznull <- network_vaznull %>%
@@ -450,8 +537,10 @@ network_vaznull <- network_vaznull %>%
   left_join(vaz.nestedness_noPoe, by = c("block", "patch")) %>%
   left_join(vaz.h2_noPoe, by = c("block", "patch")) %>%
   left_join(links.per.sp_noPoe, by = c("block", "patch")) %>%
-  left_join(vaz.pol.links_noPoe, by = c("block", "patch")) %>%
-  left_join(vaz.plant.links_noPoe, by = c("block", "patch")) 
+  left_join(vaz.density_noPoe, by = c("block", "patch")) %>%
+  left_join(web.asymmetry_noPoe, by = c("block", "patch"))
+  # left_join(vaz.pol.links_noPoe, by = c("block", "patch")) %>%
+  # left_join(vaz.plant.links_noPoe, by = c("block", "patch")) 
 
 # no poe or apis
 network_vaznull <- network_vaznull %>%
@@ -460,8 +549,10 @@ network_vaznull <- network_vaznull %>%
   left_join(vaz.nestedness_noPoe_Apis, by = c("block", "patch")) %>%
   left_join(vaz.h2_noPoe_Apis, by = c("block", "patch")) %>%
   left_join(links.per.sp_noPoe_Apis, by = c("block", "patch")) %>%
-  left_join(vaz.pol.links_noPoe_Apis, by = c("block", "patch")) %>%
-  left_join(vaz.plant.links_noPoe_Apis, by = c("block", "patch"))
+  left_join(vaz.density_noPoe_Apis, by = c("block", "patch")) %>%
+  left_join(web.asymmetry_noPoe_Apis, by = c("block", "patch"))
+  # left_join(vaz.pol.links_noPoe_Apis, by = c("block", "patch")) %>%
+  # left_join(vaz.plant.links_noPoe_Apis, by = c("block", "patch"))
 
 
 

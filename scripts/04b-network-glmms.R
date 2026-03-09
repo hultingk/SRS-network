@@ -224,6 +224,29 @@ links_predict_plot
 
 
 
+#### linkage density ####
+m.density <- glmmTMB(vaz.density ~ patch + (1|block), 
+                   data = network_vaznull)
+summary(m.density)
+
+m.density_noPoe_Apis <- glmmTMB(vaz.density_noPoe_Apis ~ patch + (1|block), 
+                              data = network_vaznull)
+summary(m.density_noPoe_Apis)
+
+
+#### web asymmetry ####
+m.asymmetry <- glmmTMB(web.asymmetry ~ patch + (1|block), 
+                     data = network_vaznull)
+summary(m.asymmetry)
+
+m.asymmetry_noPoe_Apis <- glmmTMB(web.asymmetry_noPoe_Apis ~ patch + (1|block), 
+                                data = network_vaznull)
+summary(m.asymmetry_noPoe_Apis)
+
+
+
+
+
 # #### pollinator: mean links ####
 # m.pol.links <- glmmTMB(pol.links ~ patch + (1|block), # lower in unconnected patches
 #                        data = network_vaznull)

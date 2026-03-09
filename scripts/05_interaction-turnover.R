@@ -75,8 +75,8 @@ dissimilarity_plot <- network_dissimilarity %>%
   geom_point(aes(x = x, y = predicted, fill = x), data = network_dissimilarity.predict, 
                size = 6, colour="black", pch=21, stroke = 2) +
   scale_x_discrete(labels = c('Species Turnover', 'Interaction Rewiring')) +
-  scale_color_manual(values=c("#F5097C","#F7B3D4")) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4")) +
+  scale_color_manual(values=c("#1E55E4","#B4C7F9")) +
+  scale_fill_manual(values=c("#1E55E4","#B4C7F9")) +
   #scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
   # scale_x_discrete(labels = c(expression("Species turnover"), expression("Interaction rewiring"))) +
   theme_classic(base_size = 20) +

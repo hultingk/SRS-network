@@ -57,5 +57,17 @@ ggiNEXT(out, type=3, facet.var="Order.q") # Coverage-based R/E curve
 
 
 sampling_plot <- ggiNEXT(out, type=2, facet.var="Order.q") # Sample completeness curve
-sampling_plot <- sampling_plot + theme_classic()
+sampling_plot <- sampling_plot + theme_minimal(base_size = 16)
 sampling_plot
+
+r_e_curve <- ggiNEXT(out, type=1, facet.var="Order.q") # Sample-size-based R/E curve
+r_e_curve <- r_e_curve + theme_minimal(base_size = 16) + ylab("Interaction diversity") + theme(legend.position = "none")
+
+total_coverage_plot <- cowplot::plot_grid(r_e_curve, sampling_plot, cols = 1)
+total_coverage_plot
+
+# 
+# pdf(file = file.path("plots", "total_coverage_plot.pdf"), width = 7, height = 11)
+# total_coverage_plot
+# dev.off()
+
