@@ -1,5 +1,5 @@
 #remotes::install_github("valentinitnelav/bootstrapnet")
-librarian::shelf(bootstrapnet, tidyverse, plyr, vegan, bipartite, data.table, glmmTMB, ggeffects, DHARMa)
+librarian::shelf(bootstrapnet, tidyverse, plyr, vegan, bipartite, data.table)
 set.seed(100)
 
 # loading functions
@@ -30,6 +30,8 @@ webs.names <- c("10.B","10.W","52.B","52.W", "53N.B", "53N.W",
 names(webs) <- webs.names
 
 webs.matrix <- lapply(webs, as.matrix)
+
+nd_webs <- lapply(webs, ND, normalised = T)
 
 #### bootstrapped H2 ####
 # lst_h2 <- webs.matrix %>%
@@ -76,7 +78,7 @@ nodf_boot <- nodf_boot %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
   separate(web, into = c("block", "patch")) %>%
   dplyr::rename(nodf = mean) %>%
-  dplyr::select(block, patch, spl_size, nodf)
+  dplyr::select(block, patch, nodf)
 
 
 
@@ -102,7 +104,7 @@ links_boot <- links_boot %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
   separate(web, into = c("block", "patch")) %>%
   dplyr::rename(links_per_sp = mean) %>%
-  dplyr::select(block, patch, spl_size, links_per_sp)
+  dplyr::select(block, patch, links_per_sp)
 
 
 #links_boot <- lst_links[["links per species"]][["lines_df"]]
@@ -172,13 +174,82 @@ HL_niche_boot <- HL_niche_boot %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
   separate(web, into = c("block", "patch")) %>%
   dplyr::rename(HL_niche = mean) %>%
-  dplyr::select(block, patch, spl_size, HL_niche)
+  dplyr::select(block, patch, HL_niche)
 
 LL_niche_boot <- LL_niche_boot %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
   separate(web, into = c("block", "patch")) %>%
   dplyr::rename(LL_niche = mean) %>%
-  dplyr::select(block, patch, spl_size, LL_niche)
+  dplyr::select(block, patch, LL_niche)
+
+
+##### web asymmetry ####
+lst_asymmetry <- webs.matrix %>%
+  lapply(web_matrix_to_df) %>%
+  boot_networklevel(col_lower = "lower", # column name for plants
+                    col_higher = "higher", # column name for insects
+                    index = "web asymmetry",
+                    level = "both", 
+                    start = 90,
+                    step = 1,
+                    n_boot = 1000,
+                    n_cpu = 4,
+                    weighted = F)
+#saveRDS(lst_asymmetry, file = file.path("data", "L2_boot_metrics", "asymmetry.RData"))
+#lst_asymmetry <- readRDS(file = file.path("data", "L2_boot_metrics", "asymmetry.RData"))
+asymmetry_boot <- lst_asymmetry[["web asymmetry"]][["stats_df"]]
+asymmetry_boot <- asymmetry_boot %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(asymmetry = mean) %>%
+  dplyr::select(block, patch, asymmetry)
+
+
+##### connectance ####
+lst_connectance <- webs.matrix %>%
+  lapply(web_matrix_to_df) %>%
+  boot_networklevel(col_lower = "lower", # column name for plants
+                    col_higher = "higher", # column name for insects
+                    index = "connectance",
+                    level = "both", 
+                    start = 90,
+                    step = 1,
+                    n_boot = 1000,
+                    n_cpu = 4,
+                    weighted = F)
+#saveRDS(lst_connectance, file = file.path("data", "L2_boot_metrics", "connectance.RData"))
+#lst_connectance <- readRDS(file = file.path("data", "L2_boot_metrics", "connectance.RData"))
+
+connectance_boot <- lst_connectance[["connectance"]][["stats_df"]]
+connectance_boot <- connectance_boot %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(connectance = mean) %>%
+  dplyr::select(block, patch, connectance)
+
+
+##### linkage density ####
+lst_density <- webs.matrix %>%
+  lapply(web_matrix_to_df) %>%
+  boot_networklevel(col_lower = "lower", # column name for plants
+                    col_higher = "higher", # column name for insects
+                    index = "linkage density",
+                    level = "both", 
+                    start = 90,
+                    step = 1,
+                    n_boot = 1000,
+                    n_cpu = 4,
+                    weighted = F)
+#saveRDS(lst_density, file = file.path("data", "L2_boot_metrics", "density.RData"))
+#lst_density <- readRDS(file = file.path("data", "L2_boot_metrics", "density.RData"))
+density_boot <- lst_density[["linkage density"]][["stats_df"]]
+density_boot <- density_boot %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(linkage_density = mean) %>%
+  dplyr::select(block, patch, linkage_density)
+
+
 
 
 
@@ -308,7 +379,11 @@ LL_robustness_boot1 <- LL_robustness_boot1 %>%
 
 #### All together ####
 network_metrics_boot <- nodf_boot %>%
-  left_join()
+  left_join(links_boot, by = c("block", "patch")) %>%
+  left_join(HL_niche_boot, by = c("block", "patch")) %>%
+  left_join(LL_niche_boot, by = c("block", "patch")) %>%
+  left_join(asymmetry_boot, by = c("block", "patch")) %?%
+  left_join(connectance_boot, by = c("block", "patch"))
 
 
-
+write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
