@@ -22,8 +22,11 @@ pollinator <- pollinator %>%
 # grouping some sets of species 
 pollinator <- pollinator %>%
   mutate(pollinator_species = dplyr::case_when(
-    pollinator_species %in% c("Erynnis horatius", "Erynnis zarucco") ~ "Erynnis sp.", # grouping Erynnis species 
+    pollinator_species %in% c("Erynnis horatius", "Erynnis zarucco", "Erynnis sp.") ~ "Erynnis spp.", # grouping Erynnis species 
+    pollinator_species %in% c("Satyrium calanus", "Satyrium titus") ~ "Satyrium spp.", # grouping the hairstreaks
     pollinator_species %in% c("Melissodes communis", "Melissodes sp.") ~ "Melissodes sp.01",
+    pollinator_species %in% c("Epimelissodes atripes", "Epimelissodes obliqua") ~ "Epimelissodes spp.",
+    pollinator_species %in% c("Tachinidae sp.01", "Tachinidae sp.02") ~ "Tachinidae spp.",
     .default = pollinator_species
   )) %>%
   filter(!pollinator_species %in% c("Lasioglossum sp.", "Skipper sp.", "Lasioglossum batya")) # not confident on my ID of Lasioglossum batya
@@ -70,7 +73,9 @@ pollinator <- pollinator %>%
 pollinator <- pollinator %>%
   filter(!family %in% c("Acalyptrate"))
 
-
+pollinator %>%
+  dplyr::count(pollinator_species, patch) %>%
+  View()
 # --------------------------- #
 #### flower species cleaning ####
 # --------------------------- #
@@ -103,7 +108,7 @@ pollinator_table <- pollinator %>%
   kable_styling(html_font = "Times New Roman",
                 font_size = 16) %>%
   row_spec(0, extra_css = "border-bottom: 5px double;") %>%
-  row_spec(1:121, extra_css = "border-bottom: 1px solid;")
+  row_spec(1:118, extra_css = "border-bottom: 1px solid;")
 pollinator_table
 
 # exporting

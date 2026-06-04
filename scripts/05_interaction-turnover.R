@@ -74,19 +74,25 @@ dissimilarity_plot <- network_dissimilarity %>%
   #geom_line(aes(x = x, y = predicted, group = group), data = network_dissimilarity.predict, linewidth = 2, linetype = 1) +
   geom_point(aes(x = x, y = predicted, fill = x), data = network_dissimilarity.predict, 
                size = 6, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Species Turnover', 'Interaction Rewiring')) +
-  scale_color_manual(values=c("#1E55E4","#B4C7F9")) +
-  scale_fill_manual(values=c("#1E55E4","#B4C7F9")) +
+  scale_x_discrete(labels = c(expression(atop("Species", paste("Turnover"))), expression(atop("Interaction", paste("Rewiring"))))) +
+  scale_color_manual(values=c("#C2697FFF","#E68E54FF")) +
+  scale_fill_manual(values=c("#C2697FFF","#E68E54FF")) +
   #scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
   # scale_x_discrete(labels = c(expression("Species turnover"), expression("Interaction rewiring"))) +
-  theme_classic(base_size = 20) +
-  xlab("Dissimilarity component") +
-  theme(legend.position = "none") +
-  ylab(expression(paste("Dissimilarity between patch pairs"))) 
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        axis.text = element_text(size = 22),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA))  +
+  xlab(NULL) +
+  theme(legend.position = "none") + 
+  ylab(expression(atop("Dissimilarity between", paste("patch pairs"))))
 dissimilarity_plot
 
 # exporting
-# pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 6, height = 5.5)
+# pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 6.5, height = 5.5)
 # dissimilarity_plot
 # dev.off()
 

@@ -12,6 +12,37 @@ m_links <- glmmTMB(links_per_sp ~ patch + (1|block),
                    data = network_metrics_boot)
 summary(m_links)
 
+# plotting links per species
+m.links.df <- ggpredict(m_links, terms = c("patch"), back_transform = TRUE)
+# plotting
+links.pred <- m.links.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = links_per_sp, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.links.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 28) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
+  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
+  xlab("Patch type") +
+  ylab(expression("Links per species")) +
+  theme(legend.position = "none") 
+links.pred
+
+
+
+
+
 # pollinator niche overlap
 m_HL_niche <- glmmTMB(HL_niche ~ patch + (1|block),
                       data = network_metrics_boot)
@@ -36,6 +67,45 @@ summary(m_connectance)
 m_density <- glmmTMB(linkage_density ~ patch + (1|block),
                          data = network_metrics_boot)
 summary(m_density)
+
+# plotting linkage density
+m.linkage.df <- ggpredict(m_density, terms = c("patch"), back_transform = TRUE)
+# plotting
+linkage.pred <- m.linkage.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = linkage_density, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.linkage.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 28) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
+  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
+  xlab("Patch type") +
+  ylab(expression("Linkage density")) +
+  theme(legend.position = "none") 
+linkage.pred
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

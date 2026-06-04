@@ -90,15 +90,24 @@ summary(m.floral_abund)
 floral_patch$sampling_round <- factor(floral_patch$sampling_round, levels = c("June", "July", "August", "September"))
 floral_abund.plot <- floral_patch %>%
   ggplot() + 
-  geom_boxplot(aes(sampling_round, fl_abund_log, fill = patch)) +
-  theme_classic(base_size = 16) +
-  scale_fill_manual(values=c("#F5097C","#F7B3D4"), labels = c("Connected", "Unconnected"), name = "Patch Type") +
+  geom_boxplot(aes(sampling_round, fl_abund_log, fill = patch), alpha = 0.85) +
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        axis.text = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 22),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  scale_fill_manual(values=c("#1E395FFF","#87ACC1"), labels = c("Connected", "Unconnected"), name = "Patch Type") +
   xlab("Month") +
   ylab("Log floral abundance")
 floral_abund.plot
 
 
 # exporting
-# pdf(file = file.path("plots", "floral_abundance.pdf"), width = 6, height = 4)
-# floral_abund.plot
-# dev.off()
+pdf(file = file.path("plots", "floral_abundance.pdf"), width = 9, height = 5.5)
+floral_abund.plot
+dev.off()

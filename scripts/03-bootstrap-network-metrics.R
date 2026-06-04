@@ -31,7 +31,7 @@ names(webs) <- webs.names
 
 webs.matrix <- lapply(webs, as.matrix)
 
-nd_webs <- lapply(webs, ND, normalised = T)
+#nd_webs <- lapply(webs, ND, normalised = T)
 
 #### bootstrapped H2 ####
 # lst_h2 <- webs.matrix %>%
@@ -382,8 +382,9 @@ network_metrics_boot <- nodf_boot %>%
   left_join(links_boot, by = c("block", "patch")) %>%
   left_join(HL_niche_boot, by = c("block", "patch")) %>%
   left_join(LL_niche_boot, by = c("block", "patch")) %>%
-  left_join(asymmetry_boot, by = c("block", "patch")) %?%
-  left_join(connectance_boot, by = c("block", "patch"))
+  left_join(asymmetry_boot, by = c("block", "patch")) %>%
+  left_join(connectance_boot, by = c("block", "patch")) %>%
+  left_join(density_boot, by = c("block", "patch"))
 
 
-write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
+#write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
