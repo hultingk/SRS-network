@@ -65,7 +65,7 @@ lst_nodf <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
+                    n_boot = 200,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_nodf, file = file.path("data", "L2_boot_metrics", "nodf.RData"))
@@ -91,11 +91,11 @@ lst_links <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
+                    n_boot = 200,
                     n_cpu = 4,
                     weighted = F)
-#saveRDS(lst_links, file = file.path("data", "L2_boot_metrics", "links.RData"))
-#lst_links <- readRDS(file = file.path("data", "L2_boot_metrics", "links.RData"))
+# saveRDS(lst_links, file = file.path("data", "L2_boot_metrics", "links.RData"))
+# lst_links <- readRDS(file = file.path("data", "L2_boot_metrics", "links.RData"))
 
 
 links_boot <- lst_links[["links per species"]][["stats_df"]]
@@ -160,11 +160,11 @@ lst_niche <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
+                    n_boot = 200,
                     n_cpu = 4,
                     weighted = F)
-#saveRDS(lst_niche, file = file.path("data", "L2_boot_metrics", "niche.RData"))
-#lst_niche <- readRDS(file = file.path("data", "L2_boot_metrics", "niche.RData"))
+# saveRDS(lst_niche, file = file.path("data", "L2_boot_metrics", "niche.RData"))
+# lst_niche <- readRDS(file = file.path("data", "L2_boot_metrics", "niche.RData"))
 
 gg_networklevel(lst_niche)
 HL_niche_boot <- lst_niche[["niche.overlap.HL"]][["stats_df"]]
@@ -192,11 +192,13 @@ lst_asymmetry <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
+                    n_boot = 200,
                     n_cpu = 4,
                     weighted = F)
-#saveRDS(lst_asymmetry, file = file.path("data", "L2_boot_metrics", "asymmetry.RData"))
-#lst_asymmetry <- readRDS(file = file.path("data", "L2_boot_metrics", "asymmetry.RData"))
+
+# saveRDS(lst_asymmetry, file = file.path("data", "L2_boot_metrics", "asymmetry.RData"))
+# lst_asymmetry <- readRDS(file = file.path("data", "L2_boot_metrics", "asymmetry.RData"))
+
 asymmetry_boot <- lst_asymmetry[["web asymmetry"]][["stats_df"]]
 asymmetry_boot <- asymmetry_boot %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
@@ -214,11 +216,11 @@ lst_connectance <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
+                    n_boot = 200,
                     n_cpu = 4,
                     weighted = F)
-#saveRDS(lst_connectance, file = file.path("data", "L2_boot_metrics", "connectance.RData"))
-#lst_connectance <- readRDS(file = file.path("data", "L2_boot_metrics", "connectance.RData"))
+# saveRDS(lst_connectance, file = file.path("data", "L2_boot_metrics", "connectance.RData"))
+# lst_connectance <- readRDS(file = file.path("data", "L2_boot_metrics", "connectance.RData"))
 
 connectance_boot <- lst_connectance[["connectance"]][["stats_df"]]
 connectance_boot <- connectance_boot %>%
@@ -237,11 +239,13 @@ lst_density <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
+                    n_boot = 200,
                     n_cpu = 4,
                     weighted = F)
-#saveRDS(lst_density, file = file.path("data", "L2_boot_metrics", "density.RData"))
-#lst_density <- readRDS(file = file.path("data", "L2_boot_metrics", "density.RData"))
+
+# saveRDS(lst_density, file = file.path("data", "L2_boot_metrics", "density.RData"))
+# lst_density <- readRDS(file = file.path("data", "L2_boot_metrics", "density.RData"))
+
 density_boot <- lst_density[["linkage density"]][["stats_df"]]
 density_boot <- density_boot %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
@@ -273,11 +277,11 @@ lst_robustness1 <- webs.matrix1 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
-#saveRDS(lst_robustness1, file = file.path("data", "L2_boot_metrics", "robustness1.RData"))
-#lst_robustness1 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness1.RData"))
+# saveRDS(lst_robustness1, file = file.path("data", "L2_boot_metrics", "robustness1.RData"))
+# lst_robustness1 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness1.RData"))
 
 
 lst_robustness2 <- webs.matrix2 %>%
@@ -288,7 +292,7 @@ lst_robustness2 <- webs.matrix2 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_robustness2, file = file.path("data", "L2_boot_metrics", "robustness2.RData"))
@@ -301,7 +305,7 @@ lst_robustness3 <- webs.matrix3 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_robustness3, file = file.path("data", "L2_boot_metrics", "robustness3.RData"))
@@ -314,7 +318,7 @@ lst_robustness4 <- webs.matrix4 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_robustness4, file = file.path("data", "L2_boot_metrics", "robustness4.RData"))
@@ -327,7 +331,7 @@ lst_robustness5 <- webs.matrix5 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_robustness5, file = file.path("data", "L2_boot_metrics", "robustness5.RData"))
@@ -340,7 +344,7 @@ lst_robustness6 <- webs.matrix6 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_robustness6, file = file.path("data", "L2_boot_metrics", "robustness6.RData"))
@@ -353,7 +357,7 @@ lst_robustness7 <- webs.matrix7 %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 100,
+                    n_boot = 50,
                     n_cpu = 4,
                     weighted = F)
 #saveRDS(lst_robustness7, file = file.path("data", "L2_boot_metrics", "robustness7.RData"))
@@ -362,17 +366,125 @@ lst_robustness7 <- webs.matrix7 %>%
 
 
 gg_networklevel(lst_robustness1)
+# 1st
 HL_robustness_boot1 <- lst_robustness1[["robustness.HL"]][["stats_df"]]
 LL_robustness_boot1 <- lst_robustness1[["robustness.LL"]][["stats_df"]]
 
 HL_robustness_boot1 <- HL_robustness_boot1 %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
-  separate(web, into = c("block", "patch"))
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
 
 LL_robustness_boot1 <- LL_robustness_boot1 %>%
   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
-  separate(web, into = c("block", "patch"))
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
 
+# 2nd
+HL_robustness_boot2 <- lst_robustness2[["robustness.HL"]][["stats_df"]]
+LL_robustness_boot2 <- lst_robustness2[["robustness.LL"]][["stats_df"]]
+
+HL_robustness_boot2 <- HL_robustness_boot2 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
+
+LL_robustness_boot2 <- LL_robustness_boot2 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
+
+# 3rd
+HL_robustness_boot3 <- lst_robustness3[["robustness.HL"]][["stats_df"]]
+LL_robustness_boot3 <- lst_robustness3[["robustness.LL"]][["stats_df"]]
+
+HL_robustness_boot3 <- HL_robustness_boot3 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
+
+LL_robustness_boot3 <- LL_robustness_boot3 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
+
+# 4th
+HL_robustness_boot4 <- lst_robustness4[["robustness.HL"]][["stats_df"]]
+LL_robustness_boot4 <- lst_robustness4[["robustness.LL"]][["stats_df"]]
+
+HL_robustness_boot4 <- HL_robustness_boot4 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
+
+LL_robustness_boot4 <- LL_robustness_boot4 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
+
+# 5th
+HL_robustness_boot5 <- lst_robustness5[["robustness.HL"]][["stats_df"]]
+LL_robustness_boot5 <- lst_robustness5[["robustness.LL"]][["stats_df"]]
+
+HL_robustness_boot5 <- HL_robustness_boot5 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
+
+LL_robustness_boot5 <- LL_robustness_boot5 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
+
+# 6th
+HL_robustness_boot6 <- lst_robustness6[["robustness.HL"]][["stats_df"]]
+LL_robustness_boot6 <- lst_robustness6[["robustness.LL"]][["stats_df"]]
+
+HL_robustness_boot6 <- HL_robustness_boot6 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
+
+LL_robustness_boot6 <- LL_robustness_boot6 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
+
+
+# 7th
+HL_robustness_boot7 <- lst_robustness7[["robustness.HL"]][["stats_df"]]
+LL_robustness_boot7 <- lst_robustness7[["robustness.LL"]][["stats_df"]]
+
+HL_robustness_boot7 <- HL_robustness_boot7 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(HL_robustness = mean) %>%
+  dplyr::select(block, patch, HL_robustness)
+
+LL_robustness_boot7 <- LL_robustness_boot7 %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(LL_robustness = mean) %>%
+  dplyr::select(block, patch, LL_robustness)
+
+# all robustness
+HL_robustness_boot <- rbind(HL_robustness_boot1, HL_robustness_boot2, HL_robustness_boot3, 
+                            HL_robustness_boot4, HL_robustness_boot5, HL_robustness_boot6, HL_robustness_boot7)
+  
+LL_robustness_boot <- rbind(LL_robustness_boot1, LL_robustness_boot2, LL_robustness_boot3, 
+                            LL_robustness_boot4, LL_robustness_boot5, LL_robustness_boot6, LL_robustness_boot7)
 
 
 
@@ -384,7 +496,9 @@ network_metrics_boot <- nodf_boot %>%
   left_join(LL_niche_boot, by = c("block", "patch")) %>%
   left_join(asymmetry_boot, by = c("block", "patch")) %>%
   left_join(connectance_boot, by = c("block", "patch")) %>%
-  left_join(density_boot, by = c("block", "patch"))
+  left_join(density_boot, by = c("block", "patch")) %>%
+  left_join(HL_robustness_boot, by = c("block", "patch")) %>%
+  left_join(LL_robustness_boot, by = c("block", "patch"))
 
 
 #write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))

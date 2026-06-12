@@ -39,7 +39,9 @@ links.pred <- m.links.df %>%
   theme(legend.position = "none") 
 links.pred
 
-
+pdf(file = file.path("plots", "links.pred.pdf"), width = 7, height = 6.5)
+links.pred
+dev.off()
 
 
 
@@ -95,17 +97,53 @@ linkage.pred <- m.linkage.df %>%
   theme(legend.position = "none") 
 linkage.pred
 
+# pdf(file = file.path("plots", "linkage.pred.pdf"), width = 7, height = 6.5)
+# linkage.pred
+# dev.off()
 
 
 
+# HL robustness 
+m_HL_robustness <- glmmTMB(HL_robustness ~ patch + (1|block),
+                     data = network_metrics_boot)
+summary(m_HL_robustness)
 
+# LL robustness 
+m_LL_robustness <- glmmTMB(LL_robustness ~ patch + (1|block),
+                           data = network_metrics_boot)
+summary(m_LL_robustness)
 
+# plotting robustness to plant extinctions
+# plotting LL_robustness
+m.LL_robustness.df <- ggpredict(m_LL_robustness, terms = c("patch"), back_transform = TRUE)
+# plotting
+LL_robustness.pred <- m.LL_robustness.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = LL_robustness, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.LL_robustness.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
+  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
+  xlab("Patch type") +
+  ylab(expression("Robustness to plant extinction")) +
+  theme(legend.position = "none") 
+LL_robustness.pred
 
-
-
-
-
-
+# pdf(file = file.path("plots", "LL_robustness.pred.pdf"), width = 7, height = 6.5)
+# LL_robustness.pred
+# dev.off()
 
 
 
