@@ -34,26 +34,54 @@ webs.matrix <- lapply(webs, as.matrix)
 #nd_webs <- lapply(webs, ND, normalised = T)
 
 #### bootstrapped H2 ####
-# lst_h2 <- webs.matrix %>%
+lst_h2 <- webs.matrix %>%
+  lapply(web_matrix_to_df) %>%
+  boot_networklevel(col_lower = "lower", # column name for plants
+                    col_higher = "higher", # column name for insects
+                    index = "H2",
+                    level = "both",
+                    start = 90,
+                    step = 1,
+                    n_boot = 200,
+                    n_cpu = 4,
+                    weighted = F)
+# saveRDS(lst_h2, file = file.path("data", "L2_boot_metrics", "h2.RData"))
+# lst_h2 <- readRDS(file = file.path("data", "L2_boot_metrics", "h2.RData"))
+
+# gg_networklevel(lst_h2)
+h2_boot <- lst_h2[["H2"]][["stats_df"]]
+
+h2_boot <- h2_boot %>%
+  filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
+  separate(web, into = c("block", "patch")) %>%
+  dplyr::rename(h2 = mean) %>%
+  dplyr::select(block, patch, h2)
+
+# 
+# #### bootstrapped shannon diversity ####
+# lst_shannon <- webs.matrix %>%
 #   lapply(web_matrix_to_df) %>%
 #   boot_networklevel(col_lower = "lower", # column name for plants
 #                     col_higher = "higher", # column name for insects
-#                     index = "H2",
-#                     level = "both", 
+#                     index = "Shannon diversity",
+#                     level = "both",
 #                     start = 90,
 #                     step = 1,
-#                     n_boot = 50,
-#                     n_cpu = 4)
+#                     n_boot = 200,
+#                     n_cpu = 4,
+#                     weighted = F)
+# # saveRDS(lst_shannon, file = file.path("data", "L2_boot_metrics", "shannon.RData"))
+# # lst_shannon <- readRDS(file = file.path("data", "L2_boot_metrics", "shannon.RData"))
 # 
-# gg_networklevel(lst_h2)
-# h2_boot <- lst_h2[["H2"]][["stats_df"]]
-# h2_boot %>%
-#   dplyr::count(spl_size) %>%
-#   arrange(desc(n)) # 160 interactions is smallest web
+# # gg_networklevel(lst_shannon)
+# shannon_boot <- lst_shannon[["Shannon diversity"]][["stats_df"]]
 # 
-# h2_boot <- h2_boot %>%
+# shannon_boot <- shannon_boot %>%
 #   filter(spl_size == 158) %>% # subsetting at 158 interactions to compare networks
-#   separate(web, into = c("block", "patch"))
+#   separate(web, into = c("block", "patch")) %>%
+#   dplyr::rename(shannon = mean) %>%
+#   dplyr::select(block, patch, shannon)
+
 
 
 #### bootstrapped NODF ####
@@ -95,7 +123,7 @@ lst_links <- webs.matrix %>%
                     n_cpu = 4,
                     weighted = F)
 # saveRDS(lst_links, file = file.path("data", "L2_boot_metrics", "links.RData"))
-# lst_links <- readRDS(file = file.path("data", "L2_boot_metrics", "links.RData"))
+#lst_links <- readRDS(file = file.path("data", "L2_boot_metrics", "links.RData"))
 
 
 links_boot <- lst_links[["links per species"]][["stats_df"]]
@@ -363,6 +391,13 @@ lst_robustness7 <- webs.matrix7 %>%
 #saveRDS(lst_robustness7, file = file.path("data", "L2_boot_metrics", "robustness7.RData"))
 
 
+# lst_robustness1 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness1.RData"))
+# lst_robustness2 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness2.RData"))
+# lst_robustness3 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness3.RData"))
+# lst_robustness4 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness4.RData"))
+# lst_robustness5 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness5.RData"))
+# lst_robustness6 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness6.RData"))
+# lst_robustness7 <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness7.RData"))
 
 
 gg_networklevel(lst_robustness1)
@@ -491,6 +526,8 @@ LL_robustness_boot <- rbind(LL_robustness_boot1, LL_robustness_boot2, LL_robustn
 
 #### All together ####
 network_metrics_boot <- nodf_boot %>%
+  left_join(h2_boot, by = c("block", "patch")) %>%
+  #left_join(shannon_boot, by = c("block", "patch")) %>%
   left_join(links_boot, by = c("block", "patch")) %>%
   left_join(HL_niche_boot, by = c("block", "patch")) %>%
   left_join(LL_niche_boot, by = c("block", "patch")) %>%
@@ -501,4 +538,4 @@ network_metrics_boot <- nodf_boot %>%
   left_join(LL_robustness_boot, by = c("block", "patch"))
 
 
-#write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
+3write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))

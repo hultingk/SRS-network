@@ -332,7 +332,6 @@ pollinator_noPoe_Apis_est <- pollinator_noPoe_Apis_est %>% # wrangling into form
   dplyr::rename(unique_ID = Assemblage, pollinator_noPoe_Apis_0 = `0`, pollinator_noPoe_Apis_1 = `1`, pollinator_noPoe_Apis_2 = `2`)
 
 
-
 # # Leps- Hill numbers #
 # lep_inext <- pollinator %>%
 #   filter(order %in% c("Lepidoptera")) %>%
@@ -388,7 +387,85 @@ pollinator_noPoe_Apis_est <- pollinator_noPoe_Apis_est %>% # wrangling into form
 #   pivot_wider(names_from = Order.q, values_from = qD) %>%
 #   dplyr::rename(unique_ID = Assemblage, fly_0 = `0`, fly_1 = `1`, fly_2 = `2`)
 
-
+# # #### interaction richness ####
+# interaction_count <- pollinator %>%
+#   mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>%
+#   dplyr::count(unique_ID, interaction) %>% # counting # of each flower species per patch
+#   mutate(occurance = 1) %>%
+#   dplyr::select(-n) %>%
+#   pivot_wider(names_from = interaction, values_from = occurance, values_fill = 0) %>%
+#   column_to_rownames("unique_ID")
+# 
+# interaction_rich <- rowSums(interaction_count)
+# interaction_patch <- pollinator %>%
+#   dplyr::count(unique_ID) %>%
+#   separate(unique_ID, into = c("block", "patch"))
+# 
+# m <- glmmTMB(n ~ patch + (1|block),
+#              data = interaction_patch, 
+#              family = nbinom2)
+# summary(m)
+# 
+# 
+# # Hill numbers #
+# interaction_inext <- pollinator %>%
+#   filter(!pollinator_species %in% c("Poecilognathus sulphureus", "Apis mellifera")) %>%
+#   mutate(interaction = paste(pollinator_species, flower_species, sep = "-")) %>%
+#   dplyr::count(unique_ID, interaction) %>% # counting # of each flower species per patch
+#   pivot_wider(names_from = unique_ID, values_from = n, values_fill = 0) %>% # pivoting into wider format for flower species by patch matrix
+#   column_to_rownames("interaction")
+# 
+# interaction_hill <- iNEXT(interaction_inext, q = c(0,1,2), datatype = "abundance") # hill numbers
+# interaction_est <- interaction_hill$iNextEst[["coverage_based"]] # getting coveraged based estimates
+# interaction_target_cov <- interaction_est %>% # figuring out what is the lowest max sampling coverage - will use estimates from that coverage for all patches
+#   filter(Method == "Observed") %>%
+#   group_by(Assemblage) %>%
+#   summarise(max_cov = max(SC)) %>%
+#   summarise(min(max_cov)) %>%
+#   pull()
+# 
+# interaction_est <- interaction_est %>% # getting estimates as close to the target sampling coverage as possible
+#   group_by(Assemblage, Order.q) %>%
+#   slice_min(abs(SC - interaction_target_cov), n = 1) %>%
+#   ungroup()
+# 
+# interaction_est <- interaction_est %>% # wrangling into format
+#   separate(Assemblage, into = c("block", "patch"), remove = FALSE) %>%
+#   mutate(Order.q = as.factor(Order.q)) %>%
+#   select(Assemblage, block, patch, Order.q, qD) %>%
+#   pivot_wider(names_from = Order.q, values_from = qD) %>%
+#   dplyr::rename(unique_ID = Assemblage, interaction_0 = `0`, interaction_1 = `1`, interaction_2 = `2`)
+# 
+# m <- glmmTMB(interaction_0 ~ patch + (1|block), # significantly lower in unconnected
+#                       data = interaction_est)
+# summary(m)
+# 
+# m.interaction_0.df <- ggpredict(m, terms = c("patch"), back_transform = TRUE)
+# # plotting
+# interaction_0.pred <- m.interaction_0.df %>%
+#   ggplot() +
+#   geom_jitter(aes(x = patch, y = interaction_0, color = patch), data = interaction_est, size = 6, alpha = 0.55,
+#               width = 0.08, height = 0) +
+#   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+#                 data = m.interaction_0.df, width = 0, linewidth = 2.5) +
+#   geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+#   geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   theme_classic(base_size = 28) +
+#   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+#         # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+#         panel.grid.minor = element_blank(),
+#         axis.ticks = element_line(color = "black", linewidth = 0.7),
+#         strip.text.x = element_text(hjust = -0.05),
+#         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+#         plot.background = element_rect(fill = "transparent", color = NA)) +
+#   scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
+#   scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
+#   xlab("Patch type") +
+#   ylab(expression("Interaction richness (q = 0)")) +
+#   theme(legend.position = "none") 
+# interaction_0.pred
+# 
 
 
 

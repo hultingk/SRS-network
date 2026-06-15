@@ -180,7 +180,7 @@ summary(m.pollinator_2)
 
 # 
 # # shannon no poe and apis
-m.pollinator_noPoe_Apis_0 <- glmmTMB(pollinator_noPoe_Apis_0 ~ patch + (1|block), # significantly lower in unconnected
+m.pollinator_noPoe_Apis_0 <- glmmTMB(pollinator_noPoe_Apis_0 ~ patch + (1|block), 
                                      data = diversity_metrics)
 summary(m.pollinator_noPoe_Apis_0)
 7.710/56.753 * 100
@@ -230,7 +230,37 @@ pdf(file = file.path("plots", "pollinator_0.pred.pdf"), width = 7, height = 6)
 pollinator_0.pred
 dev.off()
 
+# species richness no APis/Poe
+# model predictions for plotting
+m.pollinator_noPoe_Apis_0_df <- ggpredict(m.pollinator_noPoe_Apis_0, terms = c("patch"), back_transform = TRUE)
+# plotting
+m.pollinator_noPoe_Apis_0.pred <- m.pollinator_noPoe_Apis_0_df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = pollinator_noPoe_Apis_0, color = patch), data = diversity_metrics, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.pollinator_noPoe_Apis_0_df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 28) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
+  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
+  xlab("Patch type") +
+  ylab(expression("Pollinator richness (q = 0)")) +
+  theme(legend.position = "none") 
+m.pollinator_noPoe_Apis_0.pred
 
+pdf(file = file.path("plots", "m.pollinator_noPoe_Apis_0.pred.pdf"), width = 7, height = 6)
+m.pollinator_noPoe_Apis_0.pred
+dev.off()
 
 
 # Shannon all species
