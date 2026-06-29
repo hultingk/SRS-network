@@ -2,6 +2,46 @@ librarian::shelf(glmmTMB, DHARMa, tidyverse, performance, ggeffects)
 
 network_metrics_boot <- read.csv(file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
 
+
+# H2
+m_h2 <- glmmTMB(h2 ~ patch + (1|block),
+                data = network_metrics_boot)
+summary(m_h2)
+
+# plotting h2 per species
+m.h2.df <- ggpredict(m_h2, terms = c("patch"), back_transform = TRUE)
+# plotting
+h2.pred <- m.h2.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = h2, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.h2.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 28) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
+  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
+  xlab("Patch type") +
+  ylab(expression("Network specialization (H2')")) +
+  theme(legend.position = "none") 
+h2.pred
+
+# pdf(file = file.path("plots", "h2.pred.pdf"), width = 7, height = 6.5)
+# h2.pred
+# dev.off()
+
+
+
+
 # nestedness
 m_nodf <- glmmTMB(nodf ~ patch + (1|block),
                   data = network_metrics_boot)
@@ -39,41 +79,7 @@ nodf.pred
 # nodf.pred
 # dev.off()
 
-# H2
-m_h2 <- glmmTMB(h2 ~ patch + (1|block),
-                  data = network_metrics_boot)
-summary(m_h2)
 
-# plotting h2 per species
-m.h2.df <- ggpredict(m_h2, terms = c("patch"), back_transform = TRUE)
-# plotting
-h2.pred <- m.h2.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = h2, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.h2.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 28) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
-  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
-  xlab("Patch type") +
-  ylab(expression("Network specialization (H2')")) +
-  theme(legend.position = "none") 
-h2.pred
-
-pdf(file = file.path("plots", "h2.pred.pdf"), width = 7, height = 6.5)
-h2.pred
-dev.off()
 
 
 
@@ -125,82 +131,7 @@ m_LL_niche <- glmmTMB(LL_niche ~ patch + (1|block),
                       data = network_metrics_boot)
 summary(m_LL_niche)
 
-# web asymmetry
-m_asymmetry <- glmmTMB(asymmetry ~ patch + (1|block),
-                      data = network_metrics_boot)
-summary(m_asymmetry)
 
-# connectance
-m_connectance <- glmmTMB(connectance ~ patch + (1|block),
-                       data = network_metrics_boot)
-summary(m_connectance)
-
-# plotting connectance
-m_connectance.df <- ggpredict(m_connectance, terms = c("patch"), back_transform = TRUE)
-# plotting
-connectance.pred <- m_connectance.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = connectance, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m_connectance.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 28) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
-  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
-  xlab("Patch type") +
-  ylab(expression("Connectance")) +
-  theme(legend.position = "none") 
-connectance.pred
-
-
-
-
-
-# linkage density
-m_density <- glmmTMB(linkage_density ~ patch + (1|block),
-                         data = network_metrics_boot)
-summary(m_density)
-
-# plotting linkage density
-m.linkage.df <- ggpredict(m_density, terms = c("patch"), back_transform = TRUE)
-# plotting
-linkage.pred <- m.linkage.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = linkage_density, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.linkage.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 28) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#1E395FFF","#5B859EFF")) +
-  scale_fill_manual(values=c("#1E395FFF","#5B859EFF")) +
-  xlab("Patch type") +
-  ylab(expression("Linkage density")) +
-  theme(legend.position = "none") 
-linkage.pred
-
-# pdf(file = file.path("plots", "linkage.pred.pdf"), width = 7, height = 6.5)
-# linkage.pred
-# dev.off()
 
 
 
