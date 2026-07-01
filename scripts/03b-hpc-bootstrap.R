@@ -1,9 +1,9 @@
-install.packages("tidyverse")
-remotes::install_github("valentinitnelav/bootstrapnet")
+#install.packages("tidyverse")
+#remotes::install_github("valentinitnelav/bootstrapnet")
 librarian::shelf(bootstrapnet, tidyverse)
 
 # load webs
-web.matrix <- readRDS(file = file.path("web.matrix.RData"))
+webs.matrix <- readRDS(file = file.path("data", "L2_boot_metrics", "webs.matrix.RData"))
 
 # H2'
 lst_h2 <- webs.matrix %>%
@@ -14,8 +14,8 @@ lst_h2 <- webs.matrix %>%
                     level = "both",
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
-                    n_cpu = 4,
+                    n_boot = 500,
+                    n_cpu = 16,
                     weighted = F)
 saveRDS(lst_h2, file = file.path("h2.RData"))
 
@@ -28,8 +28,8 @@ lst_nodf <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
-                    n_cpu = 4,
+                    n_boot = 500,
+                    n_cpu = 16,
                     weighted = F)
 saveRDS(lst_nodf, file = file.path("nodf.RData"))
 
@@ -42,8 +42,8 @@ lst_links <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
-                    n_cpu = 4,
+                    n_boot = 500,
+                    n_cpu = 16,
                     weighted = F)
 saveRDS(lst_links, file = file.path("links.RData"))
 
@@ -57,8 +57,8 @@ lst_niche <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
-                    n_cpu = 4,
+                    n_boot = 500,
+                    n_cpu = 16,
                     weighted = F)
 saveRDS(lst_niche, file = file.path("niche.RData"))
 
@@ -72,8 +72,8 @@ lst_robustness <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
-                    n_cpu = 4,
+                    n_boot = 500,
+                    n_cpu = 16,
                     weighted = F)
 saveRDS(lst_robustness, file = file.path("robustness.RData"))
 
@@ -87,8 +87,11 @@ lst_shannon <- webs.matrix %>%
                     level = "both", 
                     start = 90,
                     step = 1,
-                    n_boot = 1000,
-                    n_cpu = 4,
+                    n_boot = 500,
+                    n_cpu = 16,
                     weighted = F)
 saveRDS(lst_shannon, file = file.path("shannon.RData"))
+
+
+
 

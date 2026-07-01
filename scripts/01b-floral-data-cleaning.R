@@ -101,13 +101,13 @@ floral_abund.plot <- floral_patch %>%
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA),
         legend.background = element_rect(fill = "transparent", color = NA)) +
-  scale_fill_manual(values=c("#1E395FFF","#87ACC1"), labels = c("Connected", "Unconnected"), name = "Patch Type") +
+  scale_fill_manual(values=c("#5B859EFF","#DCB254"), labels = c("Connected", "Unconnected"), name = "Patch Type") +
   xlab("Month") +
   ylab("Log floral abundance")
 floral_abund.plot
 
 
 # exporting
-pdf(file = file.path("plots", "floral_abundance.pdf"), width = 9, height = 5.5)
-floral_abund.plot
-dev.off()
+# pdf(file = file.path("plots", "floral_abundance.pdf"), width = 9, height = 5.5)
+# floral_abund.plot
+# dev.off()

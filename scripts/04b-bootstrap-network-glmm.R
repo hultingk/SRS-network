@@ -311,7 +311,7 @@ shannon.pred <- m.shannon.df %>%
   scale_color_manual(values=c("#5B859EFF","#DCB254")) +
   scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
   xlab("Patch type") +
-  ylab(expression("Shannon diversity of interactions")) +
+  ylab(expression(atop("Shannon diversity", paste("of interactions")))) +
   theme(legend.position = "none") 
 shannon.pred
 
@@ -320,14 +320,92 @@ shannon.pred
 # dev.off()
 
 
+##### d' higher level ####
+m.d_higher <- glmmTMB(mean_d_higher ~ patch + (1|block),
+                      data = network_metrics_boot)
+summary(m.d_higher)
+
+# plotting
+m.d_higher.df <- ggpredict(m.d_higher, terms = c("patch"), back_transform = TRUE)
+# plotting
+d_higher.pred <- m.d_higher.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = mean_d_higher, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.d_higher.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
+  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
+  xlab("Patch type") +
+  ylab(expression("Pollinator d'")) +
+  theme(legend.position = "none") 
+d_higher.pred
+
+# pdf(file = file.path("plots", "network-plots", "d_higher.pred.pdf"), width = 7, height = 6)
+# d_higher.pred
+# dev.off()
+
+
+#### d' lower level ####
+m.d_lower <- glmmTMB(mean_d_lower ~ patch + (1|block),
+                     data = network_metrics_boot)
+summary(m.d_lower)
+
+# plotting
+m.d_lower.df <- ggpredict(m.d_lower, terms = c("patch"), back_transform = TRUE)
+# plotting
+d_lower.pred <- m.d_lower.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = mean_d_lower, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.d_lower.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
+  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
+  #scale_y_continuous(limits = c(0.45, 0.75), labels = label_number(accuracy = 0.1)) +
+  xlab("Patch type") +
+  #ylab(expression("Plant d'")) +
+  ylab(expression(atop(" ", paste("Plant d'")))) +
+  theme(legend.position = "none") 
+d_lower.pred
+
+# pdf(file = file.path("plots", "network-plots", "d_lower.pred.pdf"), width = 7, height = 6)
+# d_lower.pred
+# dev.off()
+
+
+
 # all together
-network_plot <- cowplot::plot_grid(shannon.pred, h2_pred, nodf.pred,
-                                     labels = c("A)", "B)", "C)", "D)"), label_size = 26, label_x = 0.19, label_y = 0.95)
+network_plot <- cowplot::plot_grid(shannon.pred, nodf.pred, d_lower.pred, d_higher.pred,
+                                     labels = c("A)", "B)", "C)", "D)"), rel_widths = c(1.07, 1),
+                                   label_size = 26, label_x = c(0.24, 0.19, 0.23, 0.19), label_y = 0.95)
 network_plot
 
-pdf(file = file.path("plots", "network-plots", "network_plot.pdf"), width = 13, height = 11)
-network_plot
-dev.off()
+# pdf(file = file.path("plots", "network-plots", "network_plot.pdf"), width = 13, height = 11)
+# network_plot
+# dev.off()
 
 
 
