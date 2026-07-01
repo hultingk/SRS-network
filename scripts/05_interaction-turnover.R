@@ -9,77 +9,300 @@ pollinator <- read.csv(file = file.path("data", "L1_wrangled", "cleaned-SRS-plan
 # creating unique ID
 pollinator <- pollinator %>%
   mutate(unique_ID = paste(block, patch, sep = ".")) %>%
-  dplyr::select(c("unique_ID", "order", "family", "pollinator_species", "flower_species")) 
+  dplyr::select(c("unique_ID", "sampling_round", "order", "family", "pollinator_species", "flower_species")) 
+
+# # building networks
+# pollinator_counts <- pollinator %>%
+#   dplyr::count(unique_ID, sampling_round, pollinator_species, flower_species) 
+
+# subsetting interatively adding a sampling round
+round1 <- pollinator %>%
+  filter(sampling_round == 1) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
+
+round1_2 <- pollinator %>%
+  filter(sampling_round %in% c(1, 2)) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
+
+round1_3 <- pollinator %>%
+  filter(sampling_round %in% c(1, 2, 3)) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
+
+round1_4 <- pollinator %>%
+  filter(sampling_round %in% c(1, 2, 3, 4)) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
+
+round1_5 <- pollinator %>%
+  filter(sampling_round %in% c(1, 2, 3, 4, 5)) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
+
+round1_6 <- pollinator %>%
+  filter(sampling_round %in% c(1, 2, 3, 4, 5, 6)) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
+
+round1_7 <- pollinator %>%
+  filter(sampling_round %in% c(1, 2, 3, 4, 5, 6, 7)) %>%
+  dplyr::count(unique_ID, pollinator_species, flower_species) 
 
 
-#### network analysis: WITH ALL SPECIES ###
-pollinator_split <- pollinator %>%
-  dplyr::count(unique_ID, pollinator_species, flower_species) %>%
+# splitting by patch
+round1_split <- round1 %>%
   dplyr::group_by(unique_ID) %>%
   group_split() 
-
-# getting each network into correct format
-webs <- pollinator_split %>%
-  lapply(prepare_matrix)
+round1_2_split <- round1_2 %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split() 
+round1_3_split <- round1_3 %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split() 
+round1_4_split <- round1_4 %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split() 
+round1_5_split <- round1_5 %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split()
+round1_6_split <- round1_6 %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split()
+round1_7_split <- round1_7 %>%
+  dplyr::group_by(unique_ID) %>%
+  group_split()
 
 # adding patch names to each network
 webs.names <- c("10.B","10.W","52.B","52.W", "53N.B", "53N.W",
                 "53S.B", "53S.W", "54S.B", "54S.W", "57.B", "57.W", "8.B", "8.W")
-names(webs) <- webs.names
 
-#### interaction rewiring and turnover ####
-network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(webs[[1]]), "10.W" = as.matrix(webs[[2]]),
-                                                         "52.B" = as.matrix(webs[[3]]), "52.W" = as.matrix(webs[[4]]),
-                                                         "53N.B" = as.matrix(webs[[5]]), "53N.W" = as.matrix(webs[[6]]),
-                                                         "53S.B" = as.matrix(webs[[7]]), "53S.W" = as.matrix(webs[[8]]),
-                                                         "54S.B" = as.matrix(webs[[9]]), "54S.W" = as.matrix(webs[[10]]),
-                                                         "57.B" = as.matrix(webs[[11]]), "57.W" = as.matrix(webs[[12]]),
-                                                         "8.B" = as.matrix(webs[[13]]), "8.W" = as.matrix(webs[[14]]))), 
+# getting each network into correct format
+round1_webs <- round1_split %>%
+  lapply(prepare_matrix)
+names(round1_webs) <- webs.names
+
+round1_2_webs <- round1_2_split %>%
+  lapply(prepare_matrix)
+names(round1_2_webs) <- webs.names
+
+round1_3_webs <- round1_3_split %>%
+  lapply(prepare_matrix)
+names(round1_3_webs) <- webs.names
+
+round1_4_webs <- round1_4_split %>%
+  lapply(prepare_matrix)
+names(round1_4_webs) <- webs.names
+
+round1_5_webs <- round1_5_split %>%
+  lapply(prepare_matrix)
+names(round1_5_webs) <- webs.names
+
+round1_6_webs <- round1_6_split %>%
+  lapply(prepare_matrix)
+names(round1_6_webs) <- webs.names
+
+round1_7_webs <- round1_7_split %>%
+  lapply(prepare_matrix)
+names(round1_7_webs) <- webs.names
+
+
+## turnover and rewiring
+round1_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_webs[[1]]), "10.W" = as.matrix(round1_webs[[2]]),
+                                                         "52.B" = as.matrix(round1_webs[[3]]), "52.W" = as.matrix(round1_webs[[4]]),
+                                                         "53N.B" = as.matrix(round1_webs[[5]]), "53N.W" = as.matrix(round1_webs[[6]]),
+                                                         "53S.B" = as.matrix(round1_webs[[7]]), "53S.W" = as.matrix(round1_webs[[8]]),
+                                                         "54S.B" = as.matrix(round1_webs[[9]]), "54S.W" = as.matrix(round1_webs[[10]]),
+                                                         "57.B" = as.matrix(round1_webs[[11]]), "57.W" = as.matrix(round1_webs[[12]]),
+                                                         "8.B" = as.matrix(round1_webs[[13]]), "8.W" = as.matrix(round1_webs[[14]]))), 
                                          index = "sorensen", partitioning="commondenom")
-
-# reformatting
-network_dissimilarity <- network_dissimilarity %>%
+round1_network_dissimilarity <- round1_network_dissimilarity %>%
   mutate(block_pair = paste(i, j, sep = "-")) %>%
   mutate(real_pairs = case_when(
     block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
                       "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
     .default = "random"
   )) %>%
-  #filter(block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
-  #                        "54S.B-54S.W", "57.B-57.W", "8.B-8.W")) %>%
-  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity")
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 1)
 
-# factor levels
+
+round1_2_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_2_webs[[1]]), "10.W" = as.matrix(round1_2_webs[[2]]),
+                                                                "52.B" = as.matrix(round1_2_webs[[3]]), "52.W" = as.matrix(round1_2_webs[[4]]),
+                                                                "53N.B" = as.matrix(round1_2_webs[[5]]), "53N.W" = as.matrix(round1_2_webs[[6]]),
+                                                                "53S.B" = as.matrix(round1_2_webs[[7]]), "53S.W" = as.matrix(round1_2_webs[[8]]),
+                                                                "54S.B" = as.matrix(round1_2_webs[[9]]), "54S.W" = as.matrix(round1_2_webs[[10]]),
+                                                                "57.B" = as.matrix(round1_2_webs[[11]]), "57.W" = as.matrix(round1_2_webs[[12]]),
+                                                                "8.B" = as.matrix(round1_2_webs[[13]]), "8.W" = as.matrix(round1_2_webs[[14]]))), 
+                                                index = "sorensen", partitioning="commondenom")
+round1_2_network_dissimilarity <- round1_2_network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 2)
+
+round1_3_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_3_webs[[1]]), "10.W" = as.matrix(round1_3_webs[[2]]),
+                                                                  "52.B" = as.matrix(round1_3_webs[[3]]), "52.W" = as.matrix(round1_3_webs[[4]]),
+                                                                  "53N.B" = as.matrix(round1_3_webs[[5]]), "53N.W" = as.matrix(round1_3_webs[[6]]),
+                                                                  "53S.B" = as.matrix(round1_3_webs[[7]]), "53S.W" = as.matrix(round1_3_webs[[8]]),
+                                                                  "54S.B" = as.matrix(round1_3_webs[[9]]), "54S.W" = as.matrix(round1_3_webs[[10]]),
+                                                                  "57.B" = as.matrix(round1_3_webs[[11]]), "57.W" = as.matrix(round1_3_webs[[12]]),
+                                                                  "8.B" = as.matrix(round1_3_webs[[13]]), "8.W" = as.matrix(round1_3_webs[[14]]))), 
+                                                  index = "sorensen", partitioning="commondenom")
+round1_3_network_dissimilarity <- round1_3_network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 3)
+
+
+
+round1_4_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_4_webs[[1]]), "10.W" = as.matrix(round1_4_webs[[2]]),
+                                                                  "52.B" = as.matrix(round1_4_webs[[3]]), "52.W" = as.matrix(round1_4_webs[[4]]),
+                                                                  "53N.B" = as.matrix(round1_4_webs[[5]]), "53N.W" = as.matrix(round1_4_webs[[6]]),
+                                                                  "53S.B" = as.matrix(round1_4_webs[[7]]), "53S.W" = as.matrix(round1_4_webs[[8]]),
+                                                                  "54S.B" = as.matrix(round1_4_webs[[9]]), "54S.W" = as.matrix(round1_4_webs[[10]]),
+                                                                  "57.B" = as.matrix(round1_4_webs[[11]]), "57.W" = as.matrix(round1_4_webs[[12]]),
+                                                                  "8.B" = as.matrix(round1_4_webs[[13]]), "8.W" = as.matrix(round1_4_webs[[14]]))), 
+                                                  index = "sorensen", partitioning="commondenom")
+round1_4_network_dissimilarity <- round1_4_network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 4)
+
+
+
+round1_5_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_5_webs[[1]]), "10.W" = as.matrix(round1_5_webs[[2]]),
+                                                                  "52.B" = as.matrix(round1_5_webs[[3]]), "52.W" = as.matrix(round1_5_webs[[4]]),
+                                                                  "53N.B" = as.matrix(round1_5_webs[[5]]), "53N.W" = as.matrix(round1_5_webs[[6]]),
+                                                                  "53S.B" = as.matrix(round1_5_webs[[7]]), "53S.W" = as.matrix(round1_5_webs[[8]]),
+                                                                  "54S.B" = as.matrix(round1_5_webs[[9]]), "54S.W" = as.matrix(round1_5_webs[[10]]),
+                                                                  "57.B" = as.matrix(round1_5_webs[[11]]), "57.W" = as.matrix(round1_5_webs[[12]]),
+                                                                  "8.B" = as.matrix(round1_5_webs[[13]]), "8.W" = as.matrix(round1_5_webs[[14]]))), 
+                                                  index = "sorensen", partitioning="commondenom")
+round1_5_network_dissimilarity <- round1_5_network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 5)
+
+round1_6_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_6_webs[[1]]), "10.W" = as.matrix(round1_6_webs[[2]]),
+                                                                  "52.B" = as.matrix(round1_6_webs[[3]]), "52.W" = as.matrix(round1_6_webs[[4]]),
+                                                                  "53N.B" = as.matrix(round1_6_webs[[5]]), "53N.W" = as.matrix(round1_6_webs[[6]]),
+                                                                  "53S.B" = as.matrix(round1_6_webs[[7]]), "53S.W" = as.matrix(round1_6_webs[[8]]),
+                                                                  "54S.B" = as.matrix(round1_6_webs[[9]]), "54S.W" = as.matrix(round1_6_webs[[10]]),
+                                                                  "57.B" = as.matrix(round1_6_webs[[11]]), "57.W" = as.matrix(round1_6_webs[[12]]),
+                                                                  "8.B" = as.matrix(round1_6_webs[[13]]), "8.W" = as.matrix(round1_6_webs[[14]]))), 
+                                                  index = "sorensen", partitioning="commondenom")
+round1_6_network_dissimilarity <- round1_6_network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 6)
+
+round1_7_network_dissimilarity <- betalinkr_multi(webs2array(list("10.B" = as.matrix(round1_7_webs[[1]]), "10.W" = as.matrix(round1_7_webs[[2]]),
+                                                                  "52.B" = as.matrix(round1_7_webs[[3]]), "52.W" = as.matrix(round1_7_webs[[4]]),
+                                                                  "53N.B" = as.matrix(round1_7_webs[[5]]), "53N.W" = as.matrix(round1_7_webs[[6]]),
+                                                                  "53S.B" = as.matrix(round1_7_webs[[7]]), "53S.W" = as.matrix(round1_7_webs[[8]]),
+                                                                  "54S.B" = as.matrix(round1_7_webs[[9]]), "54S.W" = as.matrix(round1_7_webs[[10]]),
+                                                                  "57.B" = as.matrix(round1_7_webs[[11]]), "57.W" = as.matrix(round1_7_webs[[12]]),
+                                                                  "8.B" = as.matrix(round1_7_webs[[13]]), "8.W" = as.matrix(round1_7_webs[[14]]))), 
+                                                  index = "sorensen", partitioning="commondenom")
+round1_7_network_dissimilarity <- round1_7_network_dissimilarity %>%
+  mutate(block_pair = paste(i, j, sep = "-")) %>%
+  mutate(real_pairs = case_when(
+    block_pair %in% c("10.B-10.W", "52.B-52.W", "53N.B-53N.W", "53S.B-53S.W",
+                      "54S.B-54S.W", "57.B-57.W", "8.B-8.W") ~ "real", 
+    .default = "random"
+  )) %>%
+  filter(real_pairs == "real") %>%
+  pivot_longer(cols = S:ST, names_to = "type", values_to = "dissimilarity") %>%
+  mutate(max_sampling_round = 7)
+
+
+## all together
+network_dissimilarity <- rbind(round1_network_dissimilarity, round1_2_network_dissimilarity,
+                               round1_3_network_dissimilarity, round1_4_network_dissimilarity,
+                               round1_5_network_dissimilarity, round1_6_network_dissimilarity,
+                               round1_7_network_dissimilarity)
 network_dissimilarity$type <- factor(network_dissimilarity$type, levels=c("S", "WN", "ST", "OS"))
 
+# plotting over sampling round additions
+dissimilarity_rounds <- network_dissimilarity %>%
+  filter(type != "S") %>%
+  ggplot() +
+  geom_point(aes(max_sampling_round, dissimilarity, color = type), size = 5, alpha = 0.55) +
+  geom_smooth(aes(max_sampling_round, dissimilarity, fill = type, color = type)) +
+  theme_classic(base_size = 22) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        axis.text = element_text(size = 22),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA))  +
+  scale_color_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254"), labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS])), name = "Dissimilarity component") +
+  scale_fill_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254"), labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS])), name = "Dissimilarity component") +
+  xlab("Number of sampling rounds included") +
+  theme(legend.position = "right") + 
+  ylab(expression(atop("Dissimilarity between", paste("patch pairs"))))
+dissimilarity_rounds
+# exporting
+# pdf(file = file.path("plots", "dissimilarity_rounds.pdf"), width = 12.5, height = 5.5)
+# dissimilarity_rounds
+# dev.off()
+
+
+#### all rounds together ####
 # filtering for just interaction rewiring and species turnover, filtering for pairs within a block
-network_dissimilarity <- network_dissimilarity %>%
-  filter(!type %in% c("S", "WN")) %>%
-  filter(real_pairs == "real") 
+round1_7_network_dissimilarity <- round1_7_network_dissimilarity %>%
+  filter(!type %in% c("S"))
 # basic model for plotting
-m.network_dissimilarity <- glmmTMB(dissimilarity ~ type,
-                                   data = network_dissimilarity)
-summary(m.network_dissimilarity)
+m.round1_7_network_dissimilarity <- glmmTMB(dissimilarity ~ type,
+                                   data = round1_7_network_dissimilarity)
+summary(m.round1_7_network_dissimilarity)
 
 # model predictions for plotting
-network_dissimilarity.predict <- ggpredict(m.network_dissimilarity, terms = c("type"), back_transform = TRUE)
+round1_7_network_dissimilarity.predict <- ggpredict(m.round1_7_network_dissimilarity, terms = c("type"), back_transform = TRUE)
+
+round1_7_network_dissimilarity$type <- factor(round1_7_network_dissimilarity$type, levels=c("WN", "ST", "OS"))
+round1_7_network_dissimilarity.predict$x <- factor(round1_7_network_dissimilarity.predict$x, levels=c("WN", "ST", "OS"))
 
 # plotting
-dissimilarity_plot <- network_dissimilarity %>%
+dissimilarity_plot <- round1_7_network_dissimilarity %>%
   ggplot() +
-  geom_jitter(aes(x = type, y = dissimilarity, color = type), data = network_dissimilarity, size = 5, alpha = 0.55,
-                width = 0.08, height = 0) +
+  geom_jitter(aes(x = type, y = dissimilarity, color = type), data = round1_7_network_dissimilarity, size = 5, alpha = 0.55,
+              width = 0.08, height = 0) +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                   data = network_dissimilarity.predict, width = 0, linewidth = 2.5) +
+                data = round1_7_network_dissimilarity.predict, width = 0, linewidth = 2.5) +
   #geom_line(aes(x = x, y = predicted, group = group), data = network_dissimilarity.predict, linewidth = 2, linetype = 1) +
-  geom_point(aes(x = x, y = predicted, fill = x), data = network_dissimilarity.predict, 
-               size = 6, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c(expression(atop("Species", paste("Turnover"))), expression(atop("Interaction", paste("Rewiring"))))) +
-  scale_color_manual(values=c("#C2697FFF","#E68E54FF")) +
-  scale_fill_manual(values=c("#C2697FFF","#E68E54FF")) +
-  #scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
-  # scale_x_discrete(labels = c(expression("Species turnover"), expression("Interaction rewiring"))) +
-  theme_classic(base_size = 26) +
+  geom_point(aes(x = x, y = predicted, fill = x), data = round1_7_network_dissimilarity.predict, 
+             size = 6, colour="black", pch=21, stroke = 2) +
+  scale_color_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254")) +
+  scale_fill_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254")) +
+  scale_x_discrete(labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS]))) +
+  theme_classic(base_size = 22) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         axis.text = element_text(size = 22),
         axis.ticks = element_line(color = "black", linewidth = 0.7),
@@ -91,51 +314,20 @@ dissimilarity_plot <- network_dissimilarity %>%
   ylab(expression(atop("Dissimilarity between", paste("patch pairs"))))
 dissimilarity_plot
 
-# exporting
-# pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 6.5, height = 5.5)
+# # exporting
+# pdf(file = file.path("plots", "dissimilarity_plot.pdf"), width = 6, height = 5)
 # dissimilarity_plot
 # dev.off()
 
 
-#### turnover in plant species ####
-floral_matrix <- pollinator %>%
-  dplyr::count(unique_ID, flower_species) %>%
-  dplyr::mutate(n = if_else(n == 0, 0, 1)) %>%
-  pivot_wider(names_from = flower_species, values_from = n, values_fill = 0) %>%
-  column_to_rownames("unique_ID")
-
-floral_turnover <- beta.pair(floral_matrix, index.family = "sorensen")
-floral_turnover_df <- as.data.frame(as.table(as.matrix(floral_turnover[["beta.sor"]])))
-floral_turnover_df <- floral_turnover_df %>%
-  filter(!(Var1 == Var2)) %>% # removing observations comparing patch to itself
-  separate(Var1, into = c("block1", "patch1")) %>%
-  separate(Var2, into = c("block2", "patch2")) %>%
-  filter(block1 == block2) %>%
-  dplyr::rename(floral_turnover = Freq, block = block1) %>%
-  dplyr::select(block, floral_turnover)
-floral_turnover_df <- floral_turnover_df[!duplicated(floral_turnover_df$floral_turnover), ]
-
-#### turnover in pollinator species ####
-pollinator_matrix <- pollinator %>%
-  dplyr::count(unique_ID, pollinator_species) %>%
-  dplyr::mutate(n = if_else(n == 0, 0, 1)) %>%
-  pivot_wider(names_from = pollinator_species, values_from = n, values_fill = 0) %>%
-  column_to_rownames("unique_ID")
-
-pollinator_turnover <- beta.pair(pollinator_matrix, index.family = "sorensen")
-pollinator_turnover_df <- as.data.frame(as.table(as.matrix(pollinator_turnover[["beta.sor"]])))
-pollinator_turnover_df <- pollinator_turnover_df %>%
-  filter(!(Var1 == Var2)) %>% # removing observations comparing patch to itself
-  separate(Var1, into = c("block1", "patch1")) %>%
-  separate(Var2, into = c("block2", "patch2")) %>%
-  filter(block1 == block2) %>%
-  dplyr::rename(pollinator_turnover = Freq, block = block1) %>%
-  dplyr::select(block, pollinator_turnover)
-pollinator_turnover_df <- pollinator_turnover_df[!duplicated(pollinator_turnover_df$pollinator_turnover), ]
 
 
-## all together
-species_turnover <- floral_turnover_df %>%
-  left_join(pollinator_turnover_df, by = "block")
+
+
+
+
+
+
+
 
 

@@ -4,8 +4,8 @@ lst_h2 <- readRDS(file = file.path("data", "L2_boot_metrics", "h2.RData"))
 lst_links <- readRDS(file = file.path("data", "L2_boot_metrics", "links.RData"))
 lst_niche <- readRDS(file = file.path("data", "L2_boot_metrics", "niche.RData"))
 lst_nodf <- readRDS(file = file.path("data", "L2_boot_metrics", "nodf.RData"))
-#lst_robustness <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness.RData"))
-#lst_shannon <- readRDS(file = file.path("data", "L2_boot_metrics", "shannon.RData"))
+lst_robustness <- readRDS(file = file.path("data", "L2_boot_metrics", "robustness.RData"))
+lst_shannon <- readRDS(file = file.path("data", "L2_boot_metrics", "shannon.RData"))
 
 ##### H2 ####
 h2_boot <- lst_h2[["H2"]][["stats_df"]]
@@ -81,10 +81,11 @@ network_metrics_boot <- nodf_boot %>%
   left_join(h2_boot, by = c("block", "patch")) %>%
   left_join(links_boot, by = c("block", "patch")) %>%
   left_join(HL_niche_boot, by = c("block", "patch")) %>%
-  left_join(LL_niche_boot, by = c("block", "patch")) #%>%
- # left_join(HL_robustness_boot, by = c("block", "patch")) %>%
- # left_join(LL_robustness_boot, by = c("block", "patch")) %>%
- # left_join(shannon_boot, by = c("block", "patch"))
+  left_join(LL_niche_boot, by = c("block", "patch")) %>%
+  left_join(HL_robustness_boot, by = c("block", "patch")) %>%
+  left_join(LL_robustness_boot, by = c("block", "patch")) %>%
+  left_join(shannon_boot, by = c("block", "patch"))
 
 
 #write.csv(network_metrics_boot, file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
+

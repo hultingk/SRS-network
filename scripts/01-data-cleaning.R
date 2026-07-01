@@ -73,9 +73,6 @@ pollinator <- pollinator %>%
 pollinator <- pollinator %>%
   filter(!family %in% c("Acalyptrate"))
 
-pollinator %>%
-  dplyr::count(pollinator_species, patch) %>%
-  View()
 # --------------------------- #
 #### flower species cleaning ####
 # --------------------------- #
@@ -114,6 +111,20 @@ pollinator_table
 # exporting
 save_kable(pollinator_table, file = file.path("tables", "pollinator_table.html"))
 
+# ##### table of flower species ####
+# floral_table <- pollinator %>%
+#   dplyr::count(order, family, genus, species) %>%
+#   mutate(Notes = " ") %>%
+#   kbl() %>%
+#   kable_classic(full_width = T) %>%
+#   kable_styling(html_font = "Times New Roman",
+#                 font_size = 16) %>%
+#   row_spec(0, extra_css = "border-bottom: 5px double;") %>%
+#   row_spec(1:118, extra_css = "border-bottom: 1px solid;")
+# floral_table
+# 
+# # exporting
+# save_kable(floral_table, file = file.path("tables", "floral_table.html"))
 
 # --------------------------- #
 #### writing cleaned file ####
