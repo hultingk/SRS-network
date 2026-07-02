@@ -1,207 +1,110 @@
-librarian::shelf(glmmTMB, DHARMa, tidyverse, ggeffects)
+# loading libraries
+librarian::shelf(glmmTMB, DHARMa, tidyverse, ggeffects, car, kableExtra)
 
+# loading data
 network_metrics_boot <- read.csv(file = file.path("data", "L2_boot_metrics", "network_metrics_boot.csv"))
 
 
-#### H2 ####
-m_h2 <- glmmTMB(h2 ~ patch + (1|block),
-                data = network_metrics_boot)
-summary(m_h2)
-plot(simulateResiduals(m_h2))
-
-# plotting h2 per species
-m.h2.df <- ggpredict(m_h2, terms = c("patch"), back_transform = TRUE)
-# plotting
-h2.pred <- m.h2.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = h2, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.h2.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 1) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 26) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
-  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
-  xlab("Patch type") +
-  ylab(expression("Network specialization (H2')")) +
-  theme(legend.position = "none") 
-h2.pred
-
-# pdf(file = file.path("plots", "network-plots", "h2.pred.pdf"), width = 7, height = 6)
-# h2.pred
-# dev.off()
-
-
-
-
-#### nestedness ####
+#### models ####
+# nestedness 
 m_nodf <- glmmTMB(nodf ~ patch + (1|block),
                   data = network_metrics_boot)
-summary(m_nodf)
 plot(simulateResiduals(m_nodf))
-
-# nestedness plot
-# plotting nodf per species
-m.nodf.df <- ggpredict(m_nodf, terms = c("patch"), back_transform = TRUE)
-# plotting
-nodf.pred <- m.nodf.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = nodf, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.nodf.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 26) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
-  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
-  xlab("Patch type") +
-  ylab(expression("Nestedness (NODF)")) +
-  theme(legend.position = "none") 
-nodf.pred
-
-# pdf(file = file.path("plots", "network-plots", "nodf.pred.pdf"), width = 7, height = 6)
-# nodf.pred
-# dev.off()
+anova.nodf <- Anova(m_nodf, type = "III")
 
 
-
-
-#### links per species ####
+# links per species 
 m_links <- glmmTMB(links_per_sp ~ patch + (1|block),
                    data = network_metrics_boot)
 summary(m_links)
 plot(simulateResiduals(m_links))
-
-# plotting links per species
-m.links.df <- ggpredict(m_links, terms = c("patch"), back_transform = TRUE)
-# plotting
-links.pred <- m.links.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = links_per_sp, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.links.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 26) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
-  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
-  xlab("Patch type") +
-  ylab(expression("Links per species")) +
-  theme(legend.position = "none") 
-links.pred
-
-# pdf(file = file.path("plots", "network-plots", "links.pred.pdf"), width = 7, height = 6)
-# links.pred
-# dev.off()
+anova.links <- Anova(m_links, type = "III")
 
 
 
-#### pollinator niche overlap ####
-m_HL_niche <- glmmTMB(HL_niche ~ patch + (1|block),
-                      data = network_metrics_boot)
-summary(m_HL_niche)
-plot(simulateResiduals(m_HL_niche))
-
-# plotting links per species
-m.HL_niche.df <- ggpredict(m_HL_niche, terms = c("patch"), back_transform = TRUE)
-# plotting
-HL_niche.pred <- m.HL_niche.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = HL_niche, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.HL_niche.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 26) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
-  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
-  xlab("Patch type") +
-  ylab(expression("Pollinator niche overlap")) +
-  theme(legend.position = "none") 
-HL_niche.pred
-
-# pdf(file = file.path("plots", "network-plots", "HL_niche.pred.pdf"), width = 7, height = 6)
+# pollinator niche overlap
+# m_HL_niche <- glmmTMB(HL_niche ~ patch + (1|block),
+#                       data = network_metrics_boot)
+# summary(m_HL_niche)
+# plot(simulateResiduals(m_HL_niche))
+# anova.HL_niche <- Anova(m_HL_niche, type = "III")
+# 
+# 
+# # plotting links per species
+# m.HL_niche.df <- ggpredict(m_HL_niche, terms = c("patch"), back_transform = TRUE)
+# # plotting
+# HL_niche.pred <- m.HL_niche.df %>%
+#   ggplot() +
+#   geom_jitter(aes(x = patch, y = HL_niche, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+#               width = 0.08, height = 0) +
+#   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+#                 data = m.HL_niche.df, width = 0, linewidth = 2.5) +
+#   geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+#   geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   theme_classic(base_size = 26) +
+#   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+#         # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+#         panel.grid.minor = element_blank(),
+#         axis.ticks = element_line(color = "black", linewidth = 0.7),
+#         strip.text.x = element_text(hjust = -0.05),
+#         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+#         plot.background = element_rect(fill = "transparent", color = NA)) +
+#   scale_color_manual(values=c("#5B859EFF","#DCB254")) +
+#   scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
+#   xlab("Patch type") +
+#   ylab(expression("Pollinator niche overlap")) +
+#   theme(legend.position = "none") 
 # HL_niche.pred
-# dev.off()
-
-
-
-#### plant niche overlap ####
-m_LL_niche <- glmmTMB(LL_niche ~ patch + (1|block),
-                      data = network_metrics_boot)
-summary(m_LL_niche)
-plot(simulateResiduals(m_LL_niche))
-
-# plotting links per species
-m.LL_niche.df <- ggpredict(m_LL_niche, terms = c("patch"), back_transform = TRUE)
-# plotting
-LL_niche.pred <- m.LL_niche.df %>%
-  ggplot() +
-  geom_jitter(aes(x = patch, y = LL_niche, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
-              width = 0.08, height = 0) +
-  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
-                data = m.LL_niche.df, width = 0, linewidth = 2.5) +
-  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
-  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
-  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
-  theme_classic(base_size = 28) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
-  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
-  xlab("Patch type") +
-  ylab(expression("Plant niche overlap")) +
-  theme(legend.position = "none") 
-LL_niche.pred
-
-# pdf(file = file.path("plots", "LL_niche.pred.pdf"), width = 7, height = 6.5)
+# 
+# # pdf(file = file.path("plots", "network-plots", "HL_niche.pred.pdf"), width = 7, height = 6)
+# # HL_niche.pred
+# # dev.off()
+# 
+# 
+# 
+# #### plant niche overlap 
+# m_LL_niche <- glmmTMB(LL_niche ~ patch + (1|block),
+#                       data = network_metrics_boot)
+# summary(m_LL_niche)
+# plot(simulateResiduals(m_LL_niche))
+# anova.LL_niche <- Anova(m_LL_niche, type = "III")
+# 
+# 
+# # plotting links per species
+# m.LL_niche.df <- ggpredict(m_LL_niche, terms = c("patch"), back_transform = TRUE)
+# # plotting
+# LL_niche.pred <- m.LL_niche.df %>%
+#   ggplot() +
+#   geom_jitter(aes(x = patch, y = LL_niche, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+#               width = 0.08, height = 0) +
+#   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+#                 data = m.LL_niche.df, width = 0, linewidth = 2.5) +
+#   geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+#   geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+#   scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+#   theme_classic(base_size = 28) +
+#   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+#         # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+#         panel.grid.minor = element_blank(),
+#         axis.ticks = element_line(color = "black", linewidth = 0.7),
+#         strip.text.x = element_text(hjust = -0.05),
+#         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+#         plot.background = element_rect(fill = "transparent", color = NA)) +
+#   scale_color_manual(values=c("#5B859EFF","#DCB254")) +
+#   scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
+#   xlab("Patch type") +
+#   ylab(expression("Plant niche overlap")) +
+#   theme(legend.position = "none") 
 # LL_niche.pred
-# dev.off()
+# 
+# # pdf(file = file.path("plots", "LL_niche.pred.pdf"), width = 7, height = 6.5)
+# # LL_niche.pred
+# # dev.off()
 
 
 
-# ##### HL robustness ####
+# ##### HL robustness
 # m_HL_robustness <- glmmTMB(HL_robustness ~ patch + (1|block),
 #                      data = network_metrics_boot)
 # summary(m_HL_robustness)
@@ -241,7 +144,7 @@ LL_niche.pred
 # 
 # 
 # 
-# #### LL robustness #####
+# #### LL robustness 
 # m_LL_robustness <- glmmTMB(LL_robustness ~ patch + (1|block),
 #                            data = network_metrics_boot)
 # summary(m_LL_robustness)
@@ -281,11 +184,154 @@ LL_niche.pred
 
 
 
-#### shannon diversity ####
+# shannon diversity 
 m_shannon <- glmmTMB(shannon ~ patch + (1|block),
                      data = network_metrics_boot)
 summary(m_shannon)
 plot(simulateResiduals(m_shannon))
+anova.shannon <- Anova(m_shannon, type = "III")
+
+
+
+# d' higher level 
+m.d_higher <- glmmTMB(mean_d_higher ~ patch + (1|block),
+                      data = network_metrics_boot)
+summary(m.d_higher)
+anova.d_higher <- Anova(m.d_higher, type = "III")
+
+
+# d' lower level 
+m.d_lower <- glmmTMB(mean_d_lower ~ patch + (1|block),
+                     data = network_metrics_boot)
+summary(m.d_lower)
+anova.d_lower <- Anova(m.d_lower, type = "III")
+
+
+
+
+
+##### tables #####
+anova.shannon.df <- as.data.frame(anova.shannon)
+anova.shannon.df <- anova.shannon.df %>%
+  rownames_to_column("model_term") %>%
+  mutate(`Response variable` = "Shannon diversity of interactions")
+
+anova.links.df <- as.data.frame(anova.links)
+anova.links.df <- anova.links.df %>%
+  rownames_to_column("model_term") %>%
+  mutate(`Response variable` = "Links per species")
+
+anova.nodf.df <- as.data.frame(anova.nodf)
+anova.nodf.df <- anova.nodf.df %>%
+  rownames_to_column("model_term") %>%
+  mutate(`Response variable` = "Nestedness (NODF)")
+
+anova.d_lower.df <- as.data.frame(anova.d_lower)
+anova.d_lower.df <- anova.d_lower.df %>%
+  rownames_to_column("model_term") %>%
+  mutate(`Response variable` = "Plant d'")
+
+anova.d_higher.df <- as.data.frame(anova.d_higher)
+anova.d_higher.df <- anova.d_higher.df %>%
+  rownames_to_column("model_term") %>%
+  mutate(`Response variable` = "Pollinator d'")
+
+m.net_anova_all <- rbind(
+  anova.shannon.df, anova.links.df, anova.nodf.df, anova.d_lower.df, anova.d_higher.df
+)
+
+
+rename_variable_anova <- tibble(model_term = c("(Intercept)", "patch"),
+                                Predictor = c("Intercept", "Patch Type"))
+
+m.net_anova_all <- m.net_anova_all %>%
+  left_join(rename_variable_anova, by = "model_term") %>%
+  dplyr::select(`Response variable`, Predictor, Chisq, Df, `Pr(>Chisq)`) %>%
+  dplyr::rename(p.value = `Pr(>Chisq)`, df = Df)
+
+table_net_anova <- m.net_anova_all %>%
+  kbl(digits = 3) %>%
+  kable_classic(full_width = T) %>%
+  kable_styling(html_font = "Times New Roman",
+                font_size = 16) %>%
+  collapse_rows(columns = c(1), target = 1) %>%
+  row_spec(0, extra_css = "border-bottom: 5px double;") %>%
+  row_spec(1:nrow(m.net_anova_all), extra_css = "border-bottom: 1px solid;") %>%
+  row_spec(0:nrow(m.net_anova_all), extra_css = "padding-bottom: 5px;")
+table_net_anova
+
+# exporting
+#save_kable(table_net_anova, file = file.path("tables", "table_net_anova.html"))
+
+
+
+
+
+##### plotting #####
+# nestedness plot
+# plotting nodf per species
+m.nodf.df <- ggpredict(m_nodf, terms = c("patch"), back_transform = TRUE)
+# plotting
+nodf.pred <- m.nodf.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = nodf, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.nodf.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
+  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
+  xlab("Patch type") +
+  ylab(expression("Nestedness (NODF)")) +
+  theme(legend.position = "none") 
+nodf.pred
+
+# pdf(file = file.path("plots", "network-plots", "nodf.pred.pdf"), width = 7, height = 6)
+# nodf.pred
+# dev.off()
+
+
+
+# plotting links per species
+m.links.df <- ggpredict(m_links, terms = c("patch"), back_transform = TRUE)
+# plotting
+links.pred <- m.links.df %>%
+  ggplot() +
+  geom_jitter(aes(x = patch, y = links_per_sp, color = patch), data = network_metrics_boot, size = 6, alpha = 0.55,
+              width = 0.08, height = 0) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = x), color = "black",
+                data = m.links.df, width = 0, linewidth = 2.5) +
+  geom_line(aes(x = x, y = predicted, group = group), linewidth = 2, linetype = 2) +
+  geom_point(aes(x = x, y = predicted, fill = x), size = 8, colour="black", pch=21, stroke = 2) +
+  scale_x_discrete(labels = c('Connected', 'Unconnected')) +
+  theme_classic(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        # panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values=c("#5B859EFF","#DCB254")) +
+  scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
+  xlab("Patch type") +
+  ylab(expression("Links per species")) +
+  theme(legend.position = "none") 
+links.pred
+
+# pdf(file = file.path("plots", "network-plots", "links.pred.pdf"), width = 7, height = 6)
+# links.pred
+# dev.off()
 
 
 # plotting shannon diversity of interactions
@@ -319,12 +365,6 @@ shannon.pred
 # shannon.pred
 # dev.off()
 
-
-##### d' higher level ####
-m.d_higher <- glmmTMB(mean_d_higher ~ patch + (1|block),
-                      data = network_metrics_boot)
-summary(m.d_higher)
-
 # plotting
 m.d_higher.df <- ggpredict(m.d_higher, terms = c("patch"), back_transform = TRUE)
 # plotting
@@ -357,10 +397,6 @@ d_higher.pred
 # dev.off()
 
 
-#### d' lower level ####
-m.d_lower <- glmmTMB(mean_d_lower ~ patch + (1|block),
-                     data = network_metrics_boot)
-summary(m.d_lower)
 
 # plotting
 m.d_lower.df <- ggpredict(m.d_lower, terms = c("patch"), back_transform = TRUE)
@@ -398,14 +434,13 @@ d_lower.pred
 
 
 # all together
-network_plot <- cowplot::plot_grid(shannon.pred, nodf.pred, d_lower.pred, d_higher.pred,
-                                     labels = c("A)", "B)", "C)", "D)"), rel_widths = c(1.07, 1),
-                                   label_size = 26, label_x = c(0.24, 0.19, 0.23, 0.19), label_y = 0.95)
+network_plot <- cowplot::plot_grid(shannon.pred, links.pred, d_lower.pred, d_higher.pred,
+                                   labels = c("A)", "B)", "C)", "D)"), rel_widths = c(1.07, 1),
+                                   label_size = 26, label_x = c(0.25, 0.20, 0.23, 0.19), label_y = 0.95)
 network_plot
 
 # pdf(file = file.path("plots", "network-plots", "network_plot.pdf"), width = 13, height = 11)
 # network_plot
 # dev.off()
-
 
 
