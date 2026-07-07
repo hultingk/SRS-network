@@ -36,7 +36,9 @@ summary(m.floral_1)
 plot(simulateResiduals(m.floral_1))
 anova.floral_1 <- Anova(m.floral_1, type = "III")
 -4.996/12.912 * 100 # 38.69269% decrease
-
+confint(m.floral_1)
+-8.0244889/10.5485844 * 100 # -76.07171% decrease
+-1.967074/15.275605 * 100 # -12.87722% decrease
 
 
 
@@ -51,7 +53,11 @@ summary(m.pollinator_0)
 plot(simulateResiduals(m.pollinator_0))
 anova.pollinator_0 <- Anova(m.pollinator_0, type = "III")
 -9.568/60.931 * 100 # -15.70301 % decrease
-# lower pollinator diversity in unconnected patches no matter what metric
+confint(m.pollinator_0)
+-18.29667127/54.45729703 * 100 # -33.5982 % decrease
+-0.8397631/67.4055508 * 100 # -1.245837 % decrease
+
+
 # shannon all species
 m.pollinator_1 <- glmmTMB(pollinator_1 ~ patch + (1|block), # significantly lower in unconnected
                       data = diversity_metrics)
@@ -59,7 +65,9 @@ summary(m.pollinator_1)
 plot(simulateResiduals(m.pollinator_1))
 anova.pollinator_1 <- Anova(m.pollinator_1, type = "III")
 -13.773/32.729 * 100 # 40.84955% decrease
-
+confint(m.pollinator_1)
+-19.044244/27.671318 * 100 # 68.82305% decrease
+-8.50224/37.78661 * 100 # 22.50067% decrease
 
 
 
