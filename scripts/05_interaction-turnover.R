@@ -253,7 +253,7 @@ network_dissimilarity$type <- factor(network_dissimilarity$type, levels=c("S", "
 dissimilarity_rounds <- network_dissimilarity %>%
   filter(type != "S") %>%
   ggplot() +
-  geom_point(aes(max_sampling_round, dissimilarity, color = type), size = 5, alpha = 0.55) +
+  geom_jitter(aes(max_sampling_round, dissimilarity, color = type), size = 5, alpha = 0.55, width = 0.10, height = 0) +
   geom_smooth(aes(max_sampling_round, dissimilarity, fill = type, color = type)) +
   theme_classic(base_size = 22) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
@@ -262,8 +262,8 @@ dissimilarity_rounds <- network_dissimilarity %>%
         strip.text.x = element_text(hjust = -0.05),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA))  +
-  scale_color_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254"), labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS])), name = "Dissimilarity component") +
-  scale_fill_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254"), labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS])), name = "Dissimilarity component") +
+  scale_color_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254"), labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS])), name = "Component") +
+  scale_fill_manual(values=c("#C2697FFF","#E68E54FF", "#DCB254"), labels = c(expression(beta[WN]), expression(beta[ST]), expression(beta[OS])), name = "Component") +
   xlab("Number of sampling rounds included") +
   theme(legend.position = "right") + 
   ylab(expression(atop("Dissimilarity between", paste("patch pairs"))))
@@ -320,10 +320,15 @@ dissimilarity_plot
 # dev.off()
 
 
+# exporting all together
+si_turnover_plot <- cowplot::plot_grid(dissimilarity_plot, dissimilarity_rounds,
+                                       labels = c("(A)", "(B)"), rel_widths = c(1, 1.5),
+                                       label_size = 26, label_x = c(0.80, 0.57), label_y = 0.95)
+si_turnover_plot
 
-
-
-
+# pdf(file = file.path("plots", "si_turnover_plot.pdf"), width = 13, height = 4.6)
+# si_turnover_plot
+# dev.off()
 
 
 

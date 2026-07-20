@@ -192,7 +192,7 @@ floral_0.pred <- m.floral_0.df %>%
   scale_color_manual(values=c("#5B859EFF","#DCB254")) +
   scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
   xlab("Patch type") +
-  ylab(expression("Floral richness (q = 0)")) +
+  ylab(expression("Plant richness (q = 0)")) +
   theme(legend.position = "none") 
 floral_0.pred
 
@@ -226,7 +226,7 @@ floral_1.pred <- m.floral_1.df %>%
   scale_color_manual(values=c("#5B859EFF","#DCB254")) +
   scale_fill_manual(values=c("#5B859EFF","#DCB254")) +
   xlab("Patch type") +
-  ylab(expression("Floral diversity (q = 1)")) +
+  ylab(expression("Plant diversity (q = 1)")) +
   theme(legend.position = "none") 
 floral_1.pred
 # 
@@ -304,23 +304,19 @@ pollinator_1.pred
 
 
 # all diversity plots together
-diversity_plot <- cowplot::plot_grid(floral_0.pred, pollinator_0.pred,
+diversity_plot <- cowplot::plot_grid(floral_0.pred, pollinator_0.pred,floral_1.pred, pollinator_1.pred, 
                                      labels = c("A)", "B)", "C)", "D)"), label_size = 26, label_x = 0.19, label_y = 0.95)
 diversity_plot
 
-# pdf(file = file.path("plots", "diversity-plots", "diversity_plot.pdf"), width = 13, height = 6)
-# diversity_plot
-# dev.off()
+pdf(file = file.path("plots", "diversity-plots", "diversity_plot.pdf"), width = 13, height = 11)
+diversity_plot
+dev.off()
 
 
 # supplemental plots
-si_diversity_plot <- cowplot::plot_grid(floral_1.pred, pollinator_1.pred, abundance.pred,
-                                        labels = c("A)", "B)", "C)"), label_size = 26, label_x = 0.18, label_y = 0.95)
-si_diversity_plot
-
-# pdf(file = file.path("plots", "diversity-plots", "si_diversity_plot.pdf"), width = 13, height = 11)
-# si_diversity_plot
-# dev.off()
+pdf(file = file.path("plots", "diversity-plots", "si_abundance_plot.pdf"), width = 7, height = 6)
+abundance.pred
+dev.off()
 
 
 
