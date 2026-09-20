@@ -1,5 +1,5 @@
 # loading libraries
-librarian::shelf(tidyverse, plyr, vegan, bipartite, data.table, betapart)
+librarian::shelf(tidyverse, plyr, vegan, bipartite, data.table, betapart, glmmTMB, ggeffects)
 
 source(here::here(file.path("scripts", "00_functions.R")))
 
@@ -278,13 +278,19 @@ dissimilarity_rounds
 # filtering for just interaction rewiring and species turnover, filtering for pairs within a block
 round1_7_network_dissimilarity <- round1_7_network_dissimilarity %>%
   filter(!type %in% c("S"))
-# basic model for plotting
-m.round1_7_network_dissimilarity <- glmmTMB(dissimilarity ~ type,
-                                   data = round1_7_network_dissimilarity)
-summary(m.round1_7_network_dissimilarity)
+
+# filtering just species turnover and iteraction rewiring
+round1_7_network_dissimilarity_filtered <- round1_7_network_dissimilarity %>%
+  filter(!type %in% c("WN")) %>%
+  pivot_wider(names_from = type, values_from = dissimilarity)
+# t test
+m.round1_7_network_dissimilarity <- t.test(round1_7_network_dissimilarity_filtered$OS, round1_7_network_dissimilarity_filtered$ST, paired = TRUE, data = round1_7_network_dissimilarity_filtered)
+m.round1_7_network_dissimilarity
 
 # model predictions for plotting
-round1_7_network_dissimilarity.predict <- ggpredict(m.round1_7_network_dissimilarity, terms = c("type"), back_transform = TRUE)
+m.round1_7_network_dissimilarity_plot <- glmmTMB(dissimilarity ~ type,
+                                            data = round1_7_network_dissimilarity)
+round1_7_network_dissimilarity.predict <- ggpredict(m.round1_7_network_dissimilarity_plot, terms = c("type"), back_transform = TRUE)
 
 round1_7_network_dissimilarity$type <- factor(round1_7_network_dissimilarity$type, levels=c("WN", "ST", "OS"))
 round1_7_network_dissimilarity.predict$x <- factor(round1_7_network_dissimilarity.predict$x, levels=c("WN", "ST", "OS"))
